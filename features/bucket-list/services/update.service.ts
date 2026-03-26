@@ -1,0 +1,36 @@
+import type { BucketList } from "@/types"
+
+export async function updateBucketList({
+  id,
+  title,
+  description,
+  location,
+}: {
+  id: string
+  title: string
+  description: string
+  location?: string
+}) {
+  try {
+    const response = await fetch(`/api/v1/bucket-list/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ title, description, location }),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.message || "Failed to update item")
+    }
+
+    return { success: true }
+  } catch (error) {
+    console.error("Error updating bucket list item:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    }
+  }
+}
