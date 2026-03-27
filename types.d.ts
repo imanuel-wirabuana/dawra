@@ -66,3 +66,17 @@ type SortOption =
   | "incomplete" /** Sort with incomplete items first */
   | "cost-asc" /** Sort by cost in ascending order (lowest first) */
   | "cost-desc" /** Sort by cost in descending order (highest first) */
+
+/**
+ * Represents an itinerary item linking a bucket list item to specific dates
+ */
+type ItineraryItem = {
+  /** Unique identifier for the itinerary item */
+  id: string
+  /** The bucket list item this itinerary entry references */
+  bucketList: BucketList
+  /** Start date and time for this itinerary item */
+  start: string
+  /** End date and time for this itinerary item */
+  end: string
+}

@@ -19,6 +19,7 @@ export default function Navbar({ className }: NavbarProps) {
   const navItems = [
     { href: "/", label: "Home" },
     { href: "/bucket-list", label: "Bucket List" },
+    { href: "/itinerary", label: "Itinerary" },
   ]
 
   return (
@@ -26,7 +27,14 @@ export default function Navbar({ className }: NavbarProps) {
       <div className="mx-auto bg-sidebar py-3 shadow">
         <div className="flex items-center justify-between px-7 lg:px-27">
           <div className="flex items-center">
-            <h1 className="text-2xl font-bold">Dawra</h1>
+            <h1 className="font-brand text-3xl tracking-normal">
+              <span className="bg-linear-to-r from-primary to-primary/60 bg-clip-text text-transparent dark:from-primary dark:to-primary/80">
+                D
+              </span>
+              <span className="text-foreground dark:text-foreground/90">
+                awra
+              </span>
+            </h1>
           </div>
           <div className="flex items-center gap-7">
             {navItems.map((item) => (

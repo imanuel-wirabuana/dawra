@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ArrowUpDown } from "lucide-react"
+import type { LucideIcon } from "lucide-react"
 import {
   Popover,
   PopoverContent,
@@ -14,7 +15,7 @@ import { SortOption } from "@/types"
 interface SortOptionConfig {
   value: SortOption
   label: string
-  icon: any
+  icon: string
 }
 
 const sortOptions: SortOptionConfig[] = [

@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono, Figtree } from "next/font/google"
+import { Geist, Geist_Mono, Figtree, Pacifico } from "next/font/google"
 import type { Metadata } from "next"
 
 import "./globals.css"
@@ -10,6 +10,12 @@ import Providers from "./providers"
 import { TooltipProvider } from "@/components/ui/tooltip"
 
 const figtree = Figtree({ subsets: ["latin"], variable: "--font-sans" })
+
+const pacifico = Pacifico({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-brand",
+})
 
 const fontMono = Geist_Mono({
   subsets: ["latin"],
@@ -34,7 +40,8 @@ export default function RootLayout({
         "antialiased",
         fontMono.variable,
         "font-sans",
-        figtree.variable
+        figtree.variable,
+        pacifico.variable
       )}
     >
       <body>

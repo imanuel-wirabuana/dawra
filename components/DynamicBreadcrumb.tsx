@@ -10,6 +10,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { cn } from "@/lib/utils"
+import Link from "next/link"
 
 interface DynamicBreadcrumbProps {
   className?: string
@@ -52,7 +53,9 @@ export default function DynamicBreadcrumb({
                 {isLast ? (
                   <BreadcrumbPage>{formattedName}</BreadcrumbPage>
                 ) : (
-                  <BreadcrumbLink href={href}>{formattedName}</BreadcrumbLink>
+                  <BreadcrumbLink asChild>
+                    <Link href={href}>{formattedName}</Link>
+                  </BreadcrumbLink>
                 )}
               </BreadcrumbItem>
             </div>

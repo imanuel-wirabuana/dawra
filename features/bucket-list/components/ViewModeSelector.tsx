@@ -12,7 +12,7 @@ import { Grid3X3, List, Grid2X2 } from "lucide-react"
 
 interface ViewModeOption {
   mode: ViewMode
-  icon: any
+  icon: React.ComponentType<{ className?: string }>
   label: string
 }
 
