@@ -2,17 +2,17 @@ import { Button } from "@/components/ui/button"
 import { Check } from "lucide-react"
 import { useToggleBucketList } from "../hooks/useToggleBucketList"
 
-interface ToggleBucketListItemButtonProps {
+interface ToggleBucketListButtonProps {
   itemId: string | undefined
   completed: boolean | undefined
   className?: string
 }
 
-export default function ToggleBucketListItemButton({
+export default function ToggleBucketListButton({
   itemId,
   completed,
   className,
-}: ToggleBucketListItemButtonProps) {
+}: ToggleBucketListButtonProps) {
   const toggleMutation = useToggleBucketList()
 
   const handleToggle = (e: React.MouseEvent) => {
@@ -28,9 +28,9 @@ export default function ToggleBucketListItemButton({
       size="icon"
       onClick={handleToggle}
       disabled={toggleMutation.isPending || !itemId}
-      className={`h-6 w-6 ${completed ? "bg-primary hover:bg-primary/90" : ""} ${className}`}
+      className={`h-4 w-4 rounded-full border-2 border-primary ${completed ? "bg-primary hover:bg-primary/90" : ""} ${className}`}
     >
-      <Check className="h-3 w-3" />
+      {completed && <Check className="h-2 w-2" />}
     </Button>
   )
 }

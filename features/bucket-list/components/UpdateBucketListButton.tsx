@@ -3,15 +3,14 @@ import { Edit2 } from "lucide-react"
 import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import type { BucketList } from "@/types"
+import type { BucketList, Category } from "@/types"
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { useUpdateBucketList } from "../hooks/useUpdateBucketListItem"
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { useUpdateBucketList } from "../hooks/useUpdateBucketList"
+import CategorySelector from "../../category/components/CategorySelector"
 
 interface UpdateBucketListItemButtonProps {
   itemId: string | undefined
@@ -27,6 +26,10 @@ export default function UpdateBucketListItemButton({
   const [title, setTitle] = useState(item.title || "")
   const [description, setDescription] = useState(item.description || "")
   const [location, setLocation] = useState(item.location || "")
+  const [cost, setCost] = useState(item.cost?.toString() || "")
+  const [selectedCategories, setSelectedCategories] = useState<Category[]>(
+    item.categories || []
+  )
   const [open, setOpen] = useState(false)
   const updateMutation = useUpdateBucketList()
 
@@ -38,6 +41,8 @@ export default function UpdateBucketListItemButton({
         title: title.trim(),
         description: description.trim(),
         location: location.trim() || undefined,
+        cost: cost.trim() ? parseFloat(cost.trim()) : undefined,
+        categories: selectedCategories,
       })
       setOpen(false)
     }
@@ -49,13 +54,15 @@ export default function UpdateBucketListItemButton({
       setTitle(item.title || "")
       setDescription(item.description || "")
       setLocation(item.location || "")
+      setCost(item.cost?.toString() || "")
+      setSelectedCategories(item.categories || [])
     }
     setOpen(newOpen)
   }
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
+    <Popover open={open} onOpenChange={handleOpenChange}>
+      <PopoverTrigger asChild>
         <Button
           variant="ghost"
           size="icon"
@@ -65,12 +72,10 @@ export default function UpdateBucketListItemButton({
         >
           <Edit2 className="h-3 w-3" />
         </Button>
-      </DialogTrigger>
-      <DialogContent className="w-80">
-        <DialogHeader>
-          <DialogTitle className="text-sm font-medium">Edit Item</DialogTitle>
-        </DialogHeader>
+      </PopoverTrigger>
+      <PopoverContent className="w-80" align="end">
         <div className="space-y-3">
+          <div className="text-sm font-medium">Edit Item</div>
           <div className="space-y-2">
             <Input
               value={title}
@@ -99,7 +104,25 @@ export default function UpdateBucketListItemButton({
               className="h-8 text-xs"
               disabled={updateMutation.isPending}
             />
+            <Input
+              value={cost}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setCost(e.target.value)
+              }
+              placeholder="Cost in IDR (Optional)"
+              type="number"
+              step="0.01"
+              min="0"
+              className="h-8 text-xs"
+              disabled={updateMutation.isPending}
+            />
+            <CategorySelector
+              selectedCategories={selectedCategories}
+              onCategoriesChange={setSelectedCategories}
+              className="w-full"
+            />
           </div>
+
           <div className="flex justify-end gap-2">
             <Button
               variant="outline"
@@ -123,7 +146,7 @@ export default function UpdateBucketListItemButton({
             </Button>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </PopoverContent>
+    </Popover>
   )
 }

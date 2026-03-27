@@ -1,5 +1,4 @@
 import BucketListGrid from "@/features/bucket-list/components/BucketListGrid"
-import BucketListGridSkeleton from "@/features/bucket-list/components/BucketListGridSkeleton"
 import BucketListForm from "@/features/bucket-list/components/BucketListForm"
 import { Suspense } from "react"
 
@@ -12,7 +11,7 @@ export default function Page() {
           <BucketListForm className="lg:sticky lg:top-17" />
         </div>
         <div className="w-full lg:w-3/4">
-          <Suspense fallback={<BucketListGridSkeleton />}>
+          <Suspense fallback={<p>Loading...</p>}>
             <BucketListGrid />
           </Suspense>
         </div>

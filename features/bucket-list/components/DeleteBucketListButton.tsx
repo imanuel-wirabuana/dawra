@@ -13,15 +13,15 @@ import {
   DialogClose,
 } from "@/components/ui/dialog"
 
-interface DeleteBucketListItemButtonProps {
+interface DeleteBucketListButtonProps {
   itemId: string | undefined
   className?: string
 }
 
-export default function DeleteBucketListItemButton({
+export default function DeleteBucketListButton({
   itemId,
   className,
-}: DeleteBucketListItemButtonProps) {
+}: DeleteBucketListButtonProps) {
   const [open, setOpen] = useState(false)
   const deleteMutation = useDeleteBucketList()
 
@@ -53,10 +53,10 @@ export default function DeleteBucketListItemButton({
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete Item</DialogTitle>
+          <DialogTitle>Delete Bucket List</DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete this bucket list item? This action
-            cannot be undone.
+            Are you sure you want to delete this bucket list? This action cannot
+            be undone.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

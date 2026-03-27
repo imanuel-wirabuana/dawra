@@ -2,14 +2,22 @@
 
 import { useEffect, useState, useRef } from "react"
 import { subscribeToBucketList } from "../services/subscribe.service"
-import type { BucketList } from "@/types"
+import type { BucketList, ViewMode, Category, SortOption } from "@/types"
 import BucketListItem from "./BucketListItem"
 import { cn } from "@/lib/utils"
 import { useBucketSelection } from "../hooks/useBucketSelection"
 import { Button } from "@/components/ui/button"
 import BulkDeleteButton, { BulkDeleteButtonRef } from "./BulkDeleteButton"
-import { X, CheckSquare, ArrowLeft } from "lucide-react"
+import ViewModeSelector from "./ViewModeSelector"
+import CategoryFilterSelector from "../../category/components/CategoryFilterSelector"
+import SortSelector from "./SortSelector"
+import { X, CheckSquare, ArrowLeft, Info } from "lucide-react"
 import { useHotkey } from "@tanstack/react-hotkeys"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 interface BucketListGridProps {
   className?: string
@@ -18,11 +26,52 @@ interface BucketListGridProps {
 export default function BucketListGrid({ className }: BucketListGridProps) {
   const [bucketList, setBucketList] = useState<Partial<BucketList>[]>([])
   const [isSelectionMode, setIsSelectionMode] = useState(false)
+  const [viewMode, setViewMode] = useState<ViewMode>("list")
+  const [filterCategories, setFilterCategories] = useState<Category[]>([])
+  const [sortOption, setSortOption] = useState<SortOption>("created-desc")
   const gridRef = useRef<HTMLDivElement>(null)
   const bulkDeleteRef = useRef<BulkDeleteButtonRef>(null)
 
-  // Extract IDs for selection logic
-  const itemIds = bucketList.map((item) => item.id).filter(Boolean) as string[]
+  // Filter bucket list items based on selected categories
+  const filteredBucketList = bucketList.filter((item) => {
+    if (filterCategories.length === 0) return true
+    if (!item.categories || item.categories.length === 0) return false
+
+    return filterCategories.some((filterCategory) =>
+      item.categories?.some(
+        (itemCategory) => itemCategory.id === filterCategory.id
+      )
+    )
+  })
+
+  // Sort the filtered bucket list
+  const sortedBucketList = [...filteredBucketList].sort((a, b) => {
+    switch (sortOption) {
+      case "title-asc":
+        return (a.title || "").localeCompare(b.title || "")
+      case "title-desc":
+        return (b.title || "").localeCompare(a.title || "")
+      case "created-asc":
+        return (a.createdAt?.toMillis() || 0) - (b.createdAt?.toMillis() || 0)
+      case "created-desc":
+        return (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0)
+      case "completed":
+        return (a.completed ? 0 : 1) - (b.completed ? 0 : 1)
+      case "incomplete":
+        return (b.completed ? 0 : 1) - (a.completed ? 0 : 1)
+      case "cost-asc":
+        return (a.cost || 0) - (b.cost || 0)
+      case "cost-desc":
+        return (b.cost || 0) - (a.cost || 0)
+      default:
+        return 0
+    }
+  })
+
+  // Extract IDs for selection logic and sortable context
+  const itemIds = sortedBucketList
+    .map((item) => item.id)
+    .filter(Boolean) as string[]
 
   const { selected, selectedIds, handleSelect, clear } = useBucketSelection({
     ids: itemIds,
@@ -58,6 +107,11 @@ export default function BucketListGrid({ className }: BucketListGridProps) {
     })
   }, [])
 
+  function handleExitSelectionMode() {
+    setIsSelectionMode(false)
+    clear()
+  }
+
   return (
     <div ref={gridRef} className="space-y-3">
       {/* Combined selection mode indicator and controls */}
@@ -74,6 +128,7 @@ export default function BucketListGrid({ className }: BucketListGridProps) {
               </span>
             )}
           </div>
+
           <div className="flex items-center gap-2">
             {selected.size > 0 && (
               <>
@@ -96,32 +151,96 @@ export default function BucketListGrid({ className }: BucketListGridProps) {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setIsSelectionMode(false)}
+              onClick={handleExitSelectionMode}
               className="h-7 text-xs"
             >
               <ArrowLeft className="mr-1 h-3 w-3" />
               Exit
             </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="sm" className="h-7 w-7 p-0">
+                  <Info className="h-3 w-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs">
+                <div className="space-y-1">
+                  <p className="font-semibold">Selection Guide:</p>
+                  <div className="space-y-1 text-xs">
+                    <p>
+                      • <kbd>Click</kbd> items to select/deselect
+                    </p>
+                    <p>
+                      • <kbd>Ctrl+Click</kbd> to toggle items
+                    </p>
+                    <p>
+                      • <kbd>Shift+Click</kbd> to select range
+                    </p>
+                    <p>
+                      • <kbd>Ctrl+A</kbd> to select all
+                    </p>
+                    <p>
+                      • <kbd>Arrow keys</kbd> to navigate
+                    </p>
+                    <p>
+                      • <kbd>Space</kbd> to select focused item
+                    </p>
+                    <p>
+                      • <kbd>Delete</kbd> to delete selected
+                    </p>
+                    <p>
+                      • <kbd>Esc</kbd> to exit selection mode
+                    </p>
+                  </div>
+                </div>
+              </TooltipContent>
+            </Tooltip>
           </div>
         </div>
-      ) : bucketList.length > 0 ? (
-        <div className="flex justify-start">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={toggleSelectionMode}
-            className="h-7 text-xs"
-          >
-            <CheckSquare className="mr-1 h-3 w-3" />
-            Select Items
-          </Button>
+      ) : sortedBucketList.length > 0 ? (
+        <div className="flex flex-col gap-2">
+          <div className="flex justify-between gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={toggleSelectionMode}
+              className="h-7 text-xs"
+            >
+              <CheckSquare className="mr-1 h-3 w-3" />
+              Select Items
+            </Button>
+
+            <div className="flex flex-row items-center justify-end gap-2">
+              <SortSelector
+                currentSort={sortOption}
+                onSortChange={setSortOption}
+              />
+              <CategoryFilterSelector
+                selectedCategories={filterCategories}
+                onCategoriesChange={setFilterCategories}
+              />
+              <ViewModeSelector
+                viewMode={viewMode}
+                onViewModeChange={setViewMode}
+              />
+            </div>
+          </div>
         </div>
       ) : null}
 
-      <div className={cn("grid grid-cols-1 gap-3", className)}>
-        {bucketList.map((item, index) => (
+      <div
+        className={cn(
+          viewMode === "grid2"
+            ? "grid grid-cols-2 gap-3"
+            : viewMode === "grid3"
+              ? "grid grid-cols-3 gap-3"
+              : "flex flex-col gap-2",
+          className
+        )}
+      >
+        {sortedBucketList.map((item, index) => (
           <BucketListItem
-            key={index}
+            key={item.id || index}
             item={item}
             isSelected={item.id ? selected.has(item.id) : false}
             onSelect={handleSelect}

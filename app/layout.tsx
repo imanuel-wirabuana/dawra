@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils"
 import Navbar from "@/components/Navbar"
 import DynamicBreadcrumb from "@/components/DynamicBreadcrumb"
 import Providers from "./providers"
+import { TooltipProvider } from "@/components/ui/tooltip"
 
 const figtree = Figtree({ subsets: ["latin"], variable: "--font-sans" })
 
@@ -40,7 +41,9 @@ export default function RootLayout({
         <Navbar className="sticky top-0 z-50" />
         <DynamicBreadcrumb />
         <Providers>
-          <ThemeProvider>{children}</ThemeProvider>
+          <TooltipProvider>
+            <ThemeProvider>{children}</ThemeProvider>
+          </TooltipProvider>
         </Providers>
       </body>
     </html>

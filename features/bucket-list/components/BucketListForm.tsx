@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
+import CategorySelector from "@/features/category/components/CategorySelector"
+import type { Category } from "@/types"
 
 interface BucketListFormProps {
   className?: string
@@ -17,6 +19,8 @@ export default function BucketListForm({ className }: BucketListFormProps) {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [location, setLocation] = useState("")
+  const [cost, setCost] = useState("")
+  const [selectedCategories, setSelectedCategories] = useState<Category[]>([])
   const addBucketListMutation = useAddBucketList()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -30,7 +34,9 @@ export default function BucketListForm({ className }: BucketListFormProps) {
       title: title.trim(),
       description: description.trim(),
       location: location.trim() || undefined,
+      cost: cost.trim() ? parseFloat(cost.trim()) : undefined,
       completed: false,
+      categories: selectedCategories,
     })
   }
 
@@ -39,6 +45,8 @@ export default function BucketListForm({ className }: BucketListFormProps) {
     setTitle("")
     setDescription("")
     setLocation("")
+    setCost("")
+    setSelectedCategories([])
     addBucketListMutation.reset()
   }
 
@@ -86,6 +94,30 @@ export default function BucketListForm({ className }: BucketListFormProps) {
               }
               placeholder="Enter location..."
               disabled={addBucketListMutation.isPending}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="cost">Cost (Optional)</Label>
+            <Input
+              id="cost"
+              type="number"
+              step="0.01"
+              min="0"
+              value={cost}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setCost(e.target.value)
+              }
+              placeholder="Enter cost in IDR..."
+              disabled={addBucketListMutation.isPending}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="categories">Categories</Label>
+            <CategorySelector
+              selectedCategories={selectedCategories}
+              onCategoriesChange={setSelectedCategories}
             />
           </div>
 

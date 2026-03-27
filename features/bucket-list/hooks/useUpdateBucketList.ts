@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { updateBucketList } from "../services/update.service"
+import type { Category } from "@/types"
 
 export function useUpdateBucketList() {
   const queryClient = useQueryClient()
@@ -9,13 +10,18 @@ export function useUpdateBucketList() {
       id,
       title,
       description,
+      cost,
       location,
+      categories,
     }: {
       id: string
       title: string
       description: string
+      cost?: number
       location?: string
-    }) => updateBucketList({ id, title, description, location }),
+      categories?: Category[]
+    }) =>
+      updateBucketList({ id, title, description, cost, location, categories }),
     onSuccess: () => {
       // Invalidate and refetch bucket list queries
       queryClient.invalidateQueries({ queryKey: ["bucket-list"] })
