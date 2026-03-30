@@ -45,11 +45,13 @@ export default function RootLayout({
       )}
     >
       <body>
-        <Navbar className="sticky top-0 z-50" />
-        <DynamicBreadcrumb />
         <Providers>
           <TooltipProvider>
-            <ThemeProvider>{children}</ThemeProvider>
+            <ThemeProvider>
+              <Navbar className="sticky top-0 z-50" />
+              <DynamicBreadcrumb />
+              {children}
+            </ThemeProvider>
           </TooltipProvider>
         </Providers>
       </body>

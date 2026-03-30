@@ -4,6 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useState } from "react"
 import { Menu, X } from "lucide-react"
+import { ThemeToggle } from "./ThemeToggle"
 
 interface NavbarProps {
   className?: string
@@ -57,13 +58,16 @@ export default function Navbar({ className }: NavbarProps) {
               </Link>
             ))}
           </div>
-          <button
-            onClick={toggleMobileMenu}
-            className="p-2 text-foreground md:hidden"
-            aria-label="Toggle menu"
-          >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <button
+              onClick={toggleMobileMenu}
+              className="p-2 text-foreground md:hidden"
+              aria-label="Toggle menu"
+            >
+              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
         </div>
         {isMobileMenuOpen && (
           <div className="absolute top-full right-0 left-0 border-t border-border bg-sidebar px-7 py-4 md:hidden">
