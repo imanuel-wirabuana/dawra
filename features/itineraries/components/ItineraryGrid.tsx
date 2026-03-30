@@ -8,7 +8,15 @@ import ItineraryForm from "./ItineraryForm"
 import { deleteItineraryItem } from "../services/delete.service"
 import type { ItineraryItem } from "@/types"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { CalendarDays } from "lucide-react"
+import { CalendarDays, Settings2 } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
 
 export default function ItineraryGrid() {
   const itineraryItems = useRealtimeItineraryItems()
@@ -38,8 +46,8 @@ export default function ItineraryGrid() {
     <>
       <Card className="border-0 bg-linear-to-br from-background to-muted/20 shadow-lg">
         <CardHeader className="pb-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="flex flex-wrap items-center gap-3">
               <DatePicker />
               <ItineraryForm className="w-fit" />
             </div>
@@ -48,7 +56,27 @@ export default function ItineraryGrid() {
                 {transformedItems.length}{" "}
                 {transformedItems.length === 1 ? "item" : "items"}
               </span>
-              <SlotWidthControl />
+              <div className="hidden md:block">
+                <SlotWidthControl />
+              </div>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="md:hidden"
+                    aria-label="Timeline settings"
+                  >
+                    <Settings2 size={18} />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-75">
+                  <DialogHeader>
+                    <DialogTitle>Timeline Settings</DialogTitle>
+                  </DialogHeader>
+                  <SlotWidthControl />
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         </CardHeader>

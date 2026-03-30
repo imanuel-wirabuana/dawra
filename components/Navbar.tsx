@@ -2,6 +2,8 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useState } from "react"
+import { Menu, X } from "lucide-react"
 
 interface NavbarProps {
   className?: string
@@ -9,12 +11,15 @@ interface NavbarProps {
 
 export default function Navbar({ className }: NavbarProps) {
   const pathname = usePathname()
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const isActive = (href: string) => {
     if (href === "/" && pathname === "/") return true
     if (href !== "/" && pathname.startsWith(href)) return true
     return false
   }
+
+  const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen)
 
   const navItems = [
     { href: "/", label: "Home" },
@@ -37,7 +42,7 @@ export default function Navbar({ className }: NavbarProps) {
               </span>
             </h1>
           </div>
-          <div className="flex items-center gap-7">
+          <div className="hidden items-center gap-7 md:flex">
             {navItems.map((item) => (
               <Link
                 key={item.href}
@@ -52,7 +57,34 @@ export default function Navbar({ className }: NavbarProps) {
               </Link>
             ))}
           </div>
+          <button
+            onClick={toggleMobileMenu}
+            className="p-2 text-foreground md:hidden"
+            aria-label="Toggle menu"
+          >
+            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
+        {isMobileMenuOpen && (
+          <div className="absolute top-full right-0 left-0 border-t border-border bg-sidebar px-7 py-4 md:hidden">
+            <div className="flex flex-col gap-4">
+              {navItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={
+                    isActive(item.href)
+                      ? "font-semibold text-primary dark:brightness-150"
+                      : "transition-colors hover:text-primary"
+                  }
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   )

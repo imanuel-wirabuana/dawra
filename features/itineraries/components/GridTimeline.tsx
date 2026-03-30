@@ -3,6 +3,7 @@
 import TimelineEvent from "./TimelineEvent"
 import { Trash2 } from "lucide-react"
 import { useTimelineStore } from "../store/useTimelineStore"
+import { useState, useEffect } from "react"
 
 type Item = {
   id: string
@@ -39,8 +40,16 @@ export default function NotionHourlyTimeline({
   onDeleteItem: (id: string) => void
 }) {
   const { slotWidth, slotDuration } = useTimelineStore()
-  const totalSlots = (24 * 60) / slotDuration
-  const slots = generateSlots(slotDuration)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener("resize", checkMobile)
+    return () => window.removeEventListener("resize", checkMobile)
+  }, [])
 
   if (items.length === 0) {
     return (
@@ -52,6 +61,72 @@ export default function NotionHourlyTimeline({
       </div>
     )
   }
+
+  // Mobile vertical layout
+  if (isMobile) {
+    const sortedItems = [...items].sort((a, b) =>
+      a.start.localeCompare(b.start)
+    )
+
+    return (
+      <div className="space-y-4 p-4">
+        {sortedItems.map((item, index) => (
+          <div key={item.id} className="flex gap-3">
+            {/* Timeline line */}
+            <div className="flex flex-col items-center">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                {index + 1}
+              </div>
+              {index < sortedItems.length - 1 && (
+                <div className="mt-2 h-full w-0.5 bg-border" />
+              )}
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 pb-6">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <h4 className="font-semibold">{item.title}</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {item.start} - {item.end}
+                  </p>
+                  {item.location && (
+                    <p className="text-sm text-muted-foreground">
+                      {item.location}
+                    </p>
+                  )}
+                </div>
+                <button
+                  onClick={() => onDeleteItem(item.id)}
+                  className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                  title="Delete item"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+              {item.cost !== undefined && item.cost > 0 && (
+                <p className="mt-1 text-sm">
+                  <span className="text-muted-foreground">Cost: </span>
+                  <span className="font-medium">
+                    Rp {item.cost.toLocaleString("id-ID")}
+                  </span>
+                </p>
+              )}
+              {item.description && (
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {item.description}
+                </p>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  // Desktop horizontal layout
+  const totalSlots = (24 * 60) / slotDuration
+  const slots = generateSlots(slotDuration)
 
   return (
     <div className="w-full overflow-x-auto border bg-background">
