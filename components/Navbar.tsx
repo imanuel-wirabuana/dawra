@@ -18,8 +18,9 @@ export default function Navbar({ className }: NavbarProps) {
 
   const navItems = [
     { href: "/", label: "Home" },
-    { href: "/bucket-list", label: "Bucket List" },
-    { href: "/itinerary", label: "Itinerary" },
+    { href: "/bucket-lists", label: "Bucket Lists" },
+    { href: "/itineraries", label: "Itineraries" },
+    { href: "/photos", label: "Photos" },
   ]
 
   return (

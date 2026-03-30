@@ -107,8 +107,9 @@ export default function Page() {
                 variant="outline"
                 size="lg"
                 className="rounded-full border-primary/25 px-6 py-2 text-primary transition-all hover:bg-primary/5 dark:border-primary/30 dark:hover:bg-primary/10"
+                asChild
               >
-                Our Dawra Memories
+                <a href="/photos">Our Dawra Memories</a>
               </Button>
             </div>
           </div>

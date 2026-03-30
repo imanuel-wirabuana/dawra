@@ -80,3 +80,12 @@ type ItineraryItem = {
   /** End date and time for this itinerary item */
   end: string
 }
+
+type Photo = {
+  id: string
+  url: string
+  name: string
+  realFileName: string
+  extension: string
+  size: number
+}
