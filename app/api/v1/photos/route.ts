@@ -9,15 +9,21 @@ import {
   query,
   orderBy,
 } from "firebase/firestore"
+import { apiSuccess, apiError } from "@/lib/utils"
 import type { Photo } from "@/types"
 
-export async function POST(req: Request) {
+/**
+ * POST handler for uploading a new photo
+ * @param {Request} request - The incoming request object with form data
+ * @returns {Promise<Response>} JSON response with uploaded photo data
+ */
+export const POST = async (request: Request) => {
   try {
-    const formData = await req.formData()
+    const formData = await request.formData()
     const file = formData.get("file") as File
 
     if (!file) {
-      return Response.json({ error: "No file" }, { status: 400 })
+      return Response.json(apiError("No file provided"), { status: 400 })
     }
 
     const bytes = await file.arrayBuffer()
@@ -53,54 +59,50 @@ export async function POST(req: Request) {
       },
     })
 
-    const url = webViewLink
-
     // Create Photo object
-    const photo: Photo = {
+    const photo = {
       id: fileId,
-      url,
+      url: webViewLink,
       name: fileName,
       realFileName: file.name,
       extension: extension || "",
       size: file.size,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
     }
 
     // Insert into Firebase Firestore
     const photosRef = collection(db, "photos")
-    await addDoc(photosRef, {
-      ...photo,
-      createdAt: serverTimestamp(),
-    })
+    const docRef = await addDoc(photosRef, photo)
 
-    return Response.json(photo)
-  } catch (err) {
-    console.error(err)
-    return Response.json({ error: "Upload failed" }, { status: 500 })
+    return Response.json(
+      apiSuccess({ ...photo, docId: docRef.id }, "Photo uploaded successfully"),
+      { status: 201 }
+    )
+  } catch (error) {
+    console.error(error)
+    return Response.json(apiError("Failed to upload photo"), { status: 500 })
   }
 }
 
-export async function GET() {
+/**
+ * GET handler for retrieving all photos
+ * @returns {Promise<Response>} JSON response with array of photos
+ */
+export const GET = async () => {
   try {
     const photosRef = collection(db, "photos")
     const q = query(photosRef, orderBy("createdAt", "desc"))
     const querySnapshot = await getDocs(q)
 
-    const photos: Photo[] = []
-    querySnapshot.forEach((doc) => {
-      const data = doc.data()
-      photos.push({
-        id: data.id,
-        url: data.url,
-        name: data.name,
-        realFileName: data.realFileName,
-        extension: data.extension || "",
-        size: data.size || 0,
-      })
-    })
+    const photos: Photo[] = querySnapshot.docs.map((doc) => ({
+      ...doc.data(),
+      id: doc.id,
+    })) as Photo[]
 
-    return Response.json(photos)
-  } catch (err) {
-    console.error(err)
-    return Response.json({ error: "Failed to fetch photos" }, { status: 500 })
+    return Response.json(apiSuccess(photos, "Photos retrieved successfully"))
+  } catch (error) {
+    console.error(error)
+    return Response.json(apiError("Failed to retrieve photos"), { status: 500 })
   }
 }
