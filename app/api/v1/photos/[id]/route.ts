@@ -10,6 +10,8 @@ import {
 } from "firebase/firestore"
 import { apiSuccess, apiError } from "@/lib/utils"
 
+const COLLECTION_NAME = "photos"
+
 /**
  * DELETE handler for removing a specific photo by ID
  * @param {Request} _request - The incoming request object (unused)
@@ -30,7 +32,7 @@ export const DELETE = async (
     })
 
     // Delete from Firestore
-    const photosRef = collection(db, "photos")
+    const photosRef = collection(db, COLLECTION_NAME)
     const q = query(photosRef, where("id", "==", id))
     const querySnapshot = await getDocs(q)
 

@@ -5,7 +5,7 @@ import type { BucketList } from "@/types"
 export function subscribeToBucketList(
   callback: (data: Partial<BucketList>[]) => void
 ) {
-  onSnapshot(collection(db, "bucket-list"), (snapshot) => {
+  onSnapshot(collection(db, "bucket-lists"), (snapshot) => {
     callback(
       snapshot.docs.map((doc) => {
         return {

@@ -8,6 +8,8 @@ import {
 import { db } from "@/lib/firebase/client"
 import { apiSuccess, apiError } from "@/lib/utils"
 
+const COLLECTION_NAME = "itineraries"
+
 /**
  * GET handler for retrieving a specific itinerary item by ID
  * @param {Request} _request - The incoming request object (unused)
@@ -20,7 +22,7 @@ export const GET = async (
   { params }: { params: Promise<{ id: string }> }
 ) => {
   const { id } = await params
-  const querySnapshot = await getDoc(doc(db, "itinerary", id))
+  const querySnapshot = await getDoc(doc(db, COLLECTION_NAME, id))
   const data = querySnapshot.data()
   if (!data) {
     return Response.json(apiError("Itinerary item not found"), { status: 404 })
@@ -44,12 +46,14 @@ export const PATCH = async (
   const { id } = await params
   const body = await request.json()
   try {
-    await updateDoc(doc(db, "itinerary", id), {
+    await updateDoc(doc(db, COLLECTION_NAME, id), {
       ...body,
       updatedAt: serverTimestamp(),
     })
   } catch (error) {
-    return Response.json(apiError("Failed to update itinerary item"), { status: 500 })
+    return Response.json(apiError("Failed to update itinerary item"), {
+      status: 500,
+    })
   }
   return Response.json(apiSuccess(null, "Itinerary item updated successfully"))
 }
@@ -68,12 +72,14 @@ export const PUT = async (
   const { id } = await params
   const body = await request.json()
   try {
-    await updateDoc(doc(db, "itinerary", id), {
+    await updateDoc(doc(db, COLLECTION_NAME, id), {
       ...body,
       updatedAt: serverTimestamp(),
     })
   } catch (error) {
-    return Response.json(apiError("Failed to update itinerary item"), { status: 500 })
+    return Response.json(apiError("Failed to update itinerary item"), {
+      status: 500,
+    })
   }
   return Response.json(apiSuccess(null, "Itinerary item updated successfully"))
 }
@@ -91,9 +97,11 @@ export const DELETE = async (
 ) => {
   const { id } = await params
   try {
-    await deleteDoc(doc(db, "itinerary", id))
+    await deleteDoc(doc(db, COLLECTION_NAME, id))
   } catch (error) {
-    return Response.json(apiError("Failed to delete itinerary item"), { status: 500 })
+    return Response.json(apiError("Failed to delete itinerary item"), {
+      status: 500,
+    })
   }
   return Response.json(apiSuccess(null, "Itinerary item deleted successfully"))
 }

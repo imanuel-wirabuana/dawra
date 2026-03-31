@@ -12,6 +12,8 @@ import {
 import { apiSuccess, apiError } from "@/lib/utils"
 import type { Photo } from "@/types"
 
+const COLLECTION_NAME = "photos"
+
 /**
  * POST handler for uploading a new photo
  * @param {Request} request - The incoming request object with form data
@@ -74,7 +76,7 @@ export const POST = async (request: Request) => {
     }
 
     // Insert into Firebase Firestore
-    const photosRef = collection(db, "photos")
+    const photosRef = collection(db, COLLECTION_NAME)
     const docRef = await addDoc(photosRef, photo)
 
     return Response.json(
@@ -93,7 +95,7 @@ export const POST = async (request: Request) => {
  */
 export const GET = async () => {
   try {
-    const photosRef = collection(db, "photos")
+    const photosRef = collection(db, COLLECTION_NAME)
     const q = query(photosRef, orderBy("createdAt", "desc"))
     const querySnapshot = await getDocs(q)
 

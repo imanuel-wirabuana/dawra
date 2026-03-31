@@ -1,8 +1,8 @@
 import { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Dawra - Bucket List",
-  description: "Dawra - Bucket List",
+  title: "Dawra - Bucket Lists",
+  description: "Dawra - Bucket Lists",
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {

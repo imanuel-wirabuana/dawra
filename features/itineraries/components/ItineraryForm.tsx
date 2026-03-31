@@ -16,52 +16,108 @@ import {
 } from "@/components/ui/popover"
 import { Plus } from "lucide-react"
 import {
-  Combobox,
-  ComboboxContent,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxList,
-} from "@/components/ui/combobox"
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 interface ItineraryFormProps {
   className?: string
 }
 
+type ItemType = "bucket-list" | "custom"
+
 export default function ItineraryForm({ className }: ItineraryFormProps) {
   const [open, setOpen] = useState(false)
-  const [selectedBucketList, setSelectedBucketList] =
-    useState<BucketList | null>(null)
-  const [startTime, setStartTime] = useState("")
-  const [endTime, setEndTime] = useState("")
+  const [itemType, setItemType] = useState<ItemType>("bucket-list")
 
+  // Data hooks - must be before any derived state
   const { selectedDate } = useItineraryStore()
   const addItineraryMutation = useAddItineraryItem()
   const bucketListItems = useGetBucketListItems()
+
+  // Bucket list mode state
+  const [selectedBucketListId, setSelectedBucketListId] = useState<string>("")
+  const selectedBucketList =
+    bucketListItems.find((item) => item.id === selectedBucketListId) || null
+
+  // Custom item mode state
+  const [customTitle, setCustomTitle] = useState("")
+  const [customLocation, setCustomLocation] = useState("")
+  const [customCost, setCustomCost] = useState("")
+  const [customDescription, setCustomDescription] = useState("")
+
+  // Shared state
+  const [startTime, setStartTime] = useState("")
+  const [endTime, setEndTime] = useState("")
 
   // Format selected date for input fields
   const formatDateForInput = (date: Date) => {
     return date.toISOString().split("T")[0] // YYYY-MM-DD format
   }
 
+  const resetForm = () => {
+    setSelectedBucketListId("")
+    setCustomTitle("")
+    setCustomLocation("")
+    setCustomCost("")
+    setCustomDescription("")
+    setStartTime("")
+    setEndTime("")
+    setItemType("bucket-list")
+  }
+
+  const isSubmitDisabled = () => {
+    if (!startTime || !endTime) return true
+    if (itemType === "bucket-list" && !selectedBucketList) return true
+    if (itemType === "custom" && !customTitle.trim()) return true
+    return addItineraryMutation.isPending
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!selectedBucketList || !startTime || !endTime) {
+    if (!startTime || !endTime) {
       return
     }
 
-    addItineraryMutation.mutate({
-      bucketList: selectedBucketList,
+    const baseItem = {
       start: `${formatDateForInput(selectedDate)}T${startTime}`,
       end: `${formatDateForInput(selectedDate)}T${endTime}`,
-    })
+    }
+
+    if (itemType === "bucket-list") {
+      if (!selectedBucketList) return
+
+      addItineraryMutation.mutate({
+        ...baseItem,
+        itemType: "bucket-list",
+        completed: false,
+        bucketList: selectedBucketList,
+      })
+    } else {
+      if (!customTitle.trim()) return
+
+      addItineraryMutation.mutate({
+        ...baseItem,
+        itemType: "custom",
+        completed: false,
+        customItem: {
+          title: customTitle.trim(),
+          location: customLocation.trim() || undefined,
+          cost: customCost ? Number(customCost) : undefined,
+          description: customDescription.trim() || undefined,
+        },
+      })
+    }
   }
 
   // Reset form on successful submission
   if (addItineraryMutation.isSuccess) {
-    setSelectedBucketList(null)
-    setStartTime("")
-    setEndTime("")
+    resetForm()
     setOpen(false)
     addItineraryMutation.reset()
   }
@@ -77,36 +133,96 @@ export default function ItineraryForm({ className }: ItineraryFormProps) {
       <PopoverContent className="sm:max-w-96" align="end">
         <div className="space-y-4">
           <h3 className="text-lg font-semibold">Add New Itinerary Item</h3>
+          <Tabs
+            value={itemType}
+            onValueChange={(v: string) => setItemType(v as ItemType)}
+          >
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="bucket-list">Bucket List</TabsTrigger>
+              <TabsTrigger value="custom">Custom</TabsTrigger>
+            </TabsList>
+          </Tabs>
+
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="bucketList">Bucket List Item</Label>
-              <Combobox
-                items={bucketListItems.filter((item) => !item.completed)}
-                itemToStringValue={(item: BucketList | null) =>
-                  item?.title || ""
-                }
-                value={selectedBucketList}
-                onValueChange={setSelectedBucketList}
-                disabled={addItineraryMutation.isPending}
-              >
-                <ComboboxInput
-                  placeholder="Select a bucket list item..."
+            {/* Bucket List Mode */}
+            {itemType === "bucket-list" && (
+              <div className="space-y-2">
+                <Label htmlFor="bucketList">Select Bucket List Item</Label>
+                <Select
+                  value={selectedBucketListId}
+                  onValueChange={setSelectedBucketListId}
                   disabled={addItineraryMutation.isPending}
-                />
-                <ComboboxContent>
-                  <ComboboxList>
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Choose an item..." />
+                  </SelectTrigger>
+                  <SelectContent>
                     {bucketListItems
                       .filter((item) => !item.completed)
                       .map((item) => (
-                        <ComboboxItem key={item.id} value={item}>
+                        <SelectItem key={item.id} value={item.id!}>
                           {item.title}
-                        </ComboboxItem>
+                        </SelectItem>
                       ))}
-                  </ComboboxList>
-                </ComboboxContent>
-              </Combobox>
-            </div>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
+            {/* Custom Item Mode */}
+            {itemType === "custom" && (
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <Label htmlFor="customTitle">Title *</Label>
+                  <Input
+                    id="customTitle"
+                    placeholder="e.g., Lunch break, Travel time"
+                    value={customTitle}
+                    onChange={(e) => setCustomTitle(e.target.value)}
+                    disabled={addItineraryMutation.isPending}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="customLocation">Location (optional)</Label>
+                    <Input
+                      id="customLocation"
+                      placeholder="e.g., Cafe Central"
+                      value={customLocation}
+                      onChange={(e) => setCustomLocation(e.target.value)}
+                      disabled={addItineraryMutation.isPending}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="customCost">Cost (optional)</Label>
+                    <Input
+                      id="customCost"
+                      type="number"
+                      placeholder="0"
+                      value={customCost}
+                      onChange={(e) => setCustomCost(e.target.value)}
+                      disabled={addItineraryMutation.isPending}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="customDescription">
+                    Description (optional)
+                  </Label>
+                  <Input
+                    id="customDescription"
+                    placeholder="Notes, booking ref, etc."
+                    value={customDescription}
+                    onChange={(e) => setCustomDescription(e.target.value)}
+                    disabled={addItineraryMutation.isPending}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Time fields (always shown) */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="startTime">Start Time</Label>
@@ -114,9 +230,7 @@ export default function ItineraryForm({ className }: ItineraryFormProps) {
                   id="startTime"
                   type="time"
                   value={startTime}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setStartTime(e.target.value)
-                  }
+                  onChange={(e) => setStartTime(e.target.value)}
                   disabled={addItineraryMutation.isPending}
                 />
               </div>
@@ -126,9 +240,7 @@ export default function ItineraryForm({ className }: ItineraryFormProps) {
                   id="endTime"
                   type="time"
                   value={endTime}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setEndTime(e.target.value)
-                  }
+                  onChange={(e) => setEndTime(e.target.value)}
                   disabled={addItineraryMutation.isPending}
                 />
               </div>
@@ -142,7 +254,7 @@ export default function ItineraryForm({ className }: ItineraryFormProps) {
 
             <Button
               type="submit"
-              disabled={addItineraryMutation.isPending}
+              disabled={isSubmitDisabled()}
               className="w-full"
             >
               {addItineraryMutation.isPending ? "Adding..." : "Add Item"}

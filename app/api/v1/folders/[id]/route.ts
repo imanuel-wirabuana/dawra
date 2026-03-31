@@ -8,14 +8,14 @@ import {
 import { db } from "@/lib/firebase/client"
 import { apiSuccess, apiError } from "@/lib/utils"
 
-const COLLECTION_NAME = "bucket-lists"
+const COLLECTION_NAME = "folders"
 
 /**
- * GET handler for retrieving a specific bucket list item by ID
+ * GET handler for retrieving a specific folder by ID
  * @param {Request} _request - The incoming request object (unused)
  * @param {Object} params - Route parameters containing the document ID
  * @param {Promise<{ id: string }>} params.params - Promise resolving to object with id string
- * @returns {Promise<Response>} JSON response with the requested bucket list item
+ * @returns {Promise<Response>} JSON response with the requested folder
  */
 export const GET = async (
   _request: Request,
@@ -25,15 +25,15 @@ export const GET = async (
   const querySnapshot = await getDoc(doc(db, COLLECTION_NAME, id))
   const data = querySnapshot.data()
   if (!data) {
-    return Response.json(apiError("Document not found"), { status: 404 })
+    return Response.json(apiError("Folder not found"), { status: 404 })
   }
   return Response.json(
-    apiSuccess(data, "Bucket list item retrieved successfully")
+    apiSuccess({ ...data, id }, "Folder retrieved successfully")
   )
 }
 
 /**
- * PATCH handler for updating a specific bucket list item by ID (partial update)
+ * PATCH handler for updating a specific folder by ID (partial update)
  * @param {Request} request - The incoming request object containing update data
  * @param {Object} params - Route parameters containing the document ID
  * @param {Promise<{ id: string }>} params.params - Promise resolving to object with id string
@@ -51,13 +51,15 @@ export const PATCH = async (
       updatedAt: serverTimestamp(),
     })
   } catch (error) {
-    return Response.json(apiError("Failed to update document"), { status: 500 })
+    return Response.json(apiError("Failed to update folder"), {
+      status: 500,
+    })
   }
-  return Response.json(apiSuccess(null, "Document updated successfully"))
+  return Response.json(apiSuccess(null, "Folder updated successfully"))
 }
 
 /**
- * PUT handler for updating a specific bucket list item by ID
+ * PUT handler for updating a specific folder by ID (full update)
  * @param {Request} request - The incoming request object containing update data
  * @param {Object} params - Route parameters containing the document ID
  * @param {Promise<{ id: string }>} params.params - Promise resolving to object with id string
@@ -75,13 +77,15 @@ export const PUT = async (
       updatedAt: serverTimestamp(),
     })
   } catch (error) {
-    return Response.json(apiError("Failed to update document"), { status: 500 })
+    return Response.json(apiError("Failed to update folder"), {
+      status: 500,
+    })
   }
-  return Response.json(apiSuccess(null, "Document updated successfully"))
+  return Response.json(apiSuccess(null, "Folder updated successfully"))
 }
 
 /**
- * DELETE handler for removing a specific bucket list item by ID
+ * DELETE handler for removing a specific folder by ID
  * @param {Request} _request - The incoming request object (unused)
  * @param {Object} params - Route parameters containing the document ID
  * @param {Promise<{ id: string }>} params.params - Promise resolving to object with id string
@@ -95,7 +99,9 @@ export const DELETE = async (
   try {
     await deleteDoc(doc(db, COLLECTION_NAME, id))
   } catch (error) {
-    return Response.json(apiError("Failed to delete document"), { status: 500 })
+    return Response.json(apiError("Failed to delete folder"), {
+      status: 500,
+    })
   }
-  return Response.json(apiSuccess(null, "Document deleted successfully"))
+  return Response.json(apiSuccess(null, "Folder deleted successfully"))
 }

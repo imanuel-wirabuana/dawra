@@ -11,6 +11,7 @@ import BulkDeleteButton, { BulkDeleteButtonRef } from "./BulkDeleteButton"
 import ViewModeSelector from "./ViewModeSelector"
 import CategoryFilterSelector from "../../categories/components/CategoryFilterSelector"
 import SortSelector from "./SortSelector"
+import CompletedFilterSelector from "./CompletedFilterSelector"
 import { X, CheckSquare, ArrowLeft, Info } from "lucide-react"
 import { useHotkey } from "@tanstack/react-hotkeys"
 import {
@@ -29,19 +30,35 @@ export default function BucketListGrid({ className }: BucketListGridProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("list")
   const [filterCategories, setFilterCategories] = useState<Category[]>([])
   const [sortOption, setSortOption] = useState<SortOption>("created-desc")
+  const [completedFilter, setCompletedFilter] = useState<
+    "all" | "completed" | "incomplete"
+  >("all")
   const gridRef = useRef<HTMLDivElement>(null)
   const bulkDeleteRef = useRef<BulkDeleteButtonRef>(null)
 
-  // Filter bucket list items based on selected categories
+  // Filter bucket list items based on selected categories and completion status
   const filteredBucketList = bucketList.filter((item) => {
-    if (filterCategories.length === 0) return true
-    if (!item.categories || item.categories.length === 0) return false
+    // Category filter
+    const categoryMatch =
+      filterCategories.length === 0
+        ? true
+        : !item.categories || item.categories.length === 0
+          ? false
+          : filterCategories.some((filterCategory) =>
+              item.categories?.some(
+                (itemCategory) => itemCategory.id === filterCategory.id
+              )
+            )
 
-    return filterCategories.some((filterCategory) =>
-      item.categories?.some(
-        (itemCategory) => itemCategory.id === filterCategory.id
-      )
-    )
+    // Completion filter
+    const completionMatch =
+      completedFilter === "all"
+        ? true
+        : completedFilter === "completed"
+          ? item.completed
+          : !item.completed
+
+    return categoryMatch && completionMatch
   })
 
   // Sort the filtered bucket list
@@ -211,6 +228,10 @@ export default function BucketListGrid({ className }: BucketListGridProps) {
             </Button>
 
             <div className="flex flex-row items-center justify-end gap-2">
+              <CompletedFilterSelector
+                currentFilter={completedFilter}
+                onFilterChange={setCompletedFilter}
+              />
               <SortSelector
                 currentSort={sortOption}
                 onSortChange={setSortOption}

@@ -5,7 +5,7 @@ import type { ItineraryItem } from "@/types"
 export function subscribeToItineraryItems(
   callback: (data: Partial<ItineraryItem>[]) => void
 ) {
-  return onSnapshot(collection(db, "itinerary"), (snapshot) => {
+  return onSnapshot(collection(db, "itineraries"), (snapshot) => {
     callback(
       snapshot.docs.map((doc) => {
         return {

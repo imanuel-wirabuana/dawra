@@ -68,13 +68,33 @@ type SortOption =
   | "cost-desc" /** Sort by cost in descending order (highest first) */
 
 /**
- * Represents an itinerary item linking a bucket list item to specific dates
+ * Represents a custom item that can be added directly to itinerary without being a bucket list item
+ */
+type CustomItineraryItem = {
+  /** Title of the custom item */
+  title: string
+  /** Optional location */
+  location?: string
+  /** Optional cost */
+  cost?: number
+  /** Optional description */
+  description?: string
+}
+
+/**
+ * Represents an itinerary item - can be linked to bucket list or standalone custom item
  */
 type ItineraryItem = {
   /** Unique identifier for the itinerary item */
   id: string
-  /** The bucket list item this itinerary entry references */
-  bucketList: BucketList
+  /** Type discriminator: 'bucket-list' or 'custom' */
+  itemType: "bucket-list" | "custom"
+  /** Whether the item has been completed or not */
+  completed: boolean
+  /** The bucket list item this itinerary entry references (for bucket-list type) */
+  bucketList?: BucketList
+  /** Custom item data (for custom type) */
+  customItem?: CustomItineraryItem
   /** Start date and time for this itinerary item */
   start: string
   /** End date and time for this itinerary item */

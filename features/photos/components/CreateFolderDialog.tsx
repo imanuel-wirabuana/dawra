@@ -1,8 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { doc, setDoc, serverTimestamp, collection } from "firebase/firestore"
-import { db } from "@/lib/firebase/client"
+import { useAddFolder } from "../hooks/useAddFolder"
 import {
   Dialog,
   DialogContent,
@@ -26,35 +25,32 @@ export default function CreateFolderDialog({
 }: CreateFolderDialogProps) {
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")
-  const [isCreating, setIsCreating] = useState(false)
+  const addFolderMutation = useAddFolder()
 
   const handleCreate = async () => {
     if (!name.trim()) return
 
-    setIsCreating(true)
-    try {
-      const folderRef = doc(collection(db, "folders"))
-      await setDoc(folderRef, {
-        name: name.trim(),
-        description: description.trim() || null,
-        createdAt: serverTimestamp(),
-      })
-      setName("")
-      setDescription("")
-      onOpenChange(false)
-    } catch (error) {
-      console.error("Error creating folder:", error)
-    } finally {
-      setIsCreating(false)
-    }
+    await addFolderMutation.mutateAsync({
+      name: name.trim(),
+      description: description.trim() || undefined,
+    })
+
+    setName("")
+    setDescription("")
+    onOpenChange(false)
   }
 
   const handleClose = () => {
-    if (!isCreating) {
+    if (!addFolderMutation.isPending) {
       setName("")
       setDescription("")
       onOpenChange(false)
     }
+  }
+
+  // Reset form on successful submission
+  if (addFolderMutation.isSuccess) {
+    addFolderMutation.reset()
   }
 
   return (
@@ -74,7 +70,7 @@ export default function CreateFolderDialog({
               placeholder="Enter folder name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              disabled={isCreating}
+              disabled={addFolderMutation.isPending}
             />
           </div>
           <div className="space-y-2">
@@ -84,16 +80,23 @@ export default function CreateFolderDialog({
               placeholder="Enter folder description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              disabled={isCreating}
+              disabled={addFolderMutation.isPending}
             />
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={handleClose} disabled={isCreating}>
+          <Button
+            variant="outline"
+            onClick={handleClose}
+            disabled={addFolderMutation.isPending}
+          >
             Cancel
           </Button>
-          <Button onClick={handleCreate} disabled={!name.trim() || isCreating}>
-            {isCreating ? "Creating..." : "Create"}
+          <Button
+            onClick={handleCreate}
+            disabled={!name.trim() || addFolderMutation.isPending}
+          >
+            {addFolderMutation.isPending ? "Creating..." : "Create"}
           </Button>
         </DialogFooter>
       </DialogContent>

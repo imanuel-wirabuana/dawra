@@ -7,12 +7,14 @@ import {
 import { db } from "@/lib/firebase/client"
 import { apiSuccess, apiError } from "@/lib/utils"
 
+const COLLECTION_NAME = "bucket-lists"
+
 /**
  * GET handler for retrieving all bucket list items
  * @returns {Promise<Response>} JSON response with array of bucket list items
  */
 export const GET = async () => {
-  const querySnapshot = await getDocs(collection(db, "bucket-list"))
+  const querySnapshot = await getDocs(collection(db, COLLECTION_NAME))
   const data = querySnapshot.docs.map((doc) => ({
     ...doc.data(),
     id: doc.id,
@@ -30,7 +32,7 @@ export const GET = async () => {
 export const POST = async (request: Request) => {
   const body = await request.json()
   try {
-    await addDoc(collection(db, "bucket-list"), {
+    await addDoc(collection(db, COLLECTION_NAME), {
       ...body,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),

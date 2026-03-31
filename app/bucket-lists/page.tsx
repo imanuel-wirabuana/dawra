@@ -5,7 +5,7 @@ import { Suspense } from "react"
 export default function Page() {
   return (
     <div>
-      <h1 className="mb-6 text-3xl font-bold">Bucket List</h1>
+      <h1 className="mb-6 text-3xl font-bold">Bucket Lists</h1>
       <div className="flex flex-col gap-3 lg:flex-row">
         <div className="w-full lg:w-1/4">
           <BucketListForm className="lg:sticky lg:top-17" />

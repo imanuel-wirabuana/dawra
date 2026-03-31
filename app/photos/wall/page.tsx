@@ -86,8 +86,8 @@ export default function Page() {
 
   return (
     <div className="container">
-      <div className="mb-4 flex items-center justify-end gap-4">
-        <div className="flex w-48 items-center gap-3">
+      <div className="mb-4 flex flex-col items-center justify-end gap-4 lg:flex-row">
+        <div className="flex w-full max-w-xs items-center gap-3">
           <Label
             htmlFor="limit"
             className="text-sm whitespace-nowrap text-muted-foreground"

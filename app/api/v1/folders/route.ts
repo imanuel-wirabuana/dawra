@@ -7,11 +7,11 @@ import {
 import { db } from "@/lib/firebase/client"
 import { apiSuccess, apiError } from "@/lib/utils"
 
-const COLLECTION_NAME = "itineraries"
+const COLLECTION_NAME = "folders"
 
 /**
- * GET handler for retrieving all itinerary items
- * @returns {Promise<Response>} JSON response with array of itinerary items
+ * GET handler for retrieving all folders
+ * @returns {Promise<Response>} JSON response with array of folders
  */
 export const GET = async () => {
   const querySnapshot = await getDocs(collection(db, COLLECTION_NAME))
@@ -19,13 +19,11 @@ export const GET = async () => {
     ...doc.data(),
     id: doc.id,
   }))
-  return Response.json(
-    apiSuccess(data, "Itinerary items retrieved successfully")
-  )
+  return Response.json(apiSuccess(data, "Folders retrieved successfully"))
 }
 
 /**
- * POST handler for adding a new itinerary item
+ * POST handler for adding a new folder
  * @param {Request} request - The incoming request object
  * @returns {Promise<Response>} JSON response indicating success or failure
  */
@@ -38,12 +36,12 @@ export const POST = async (request: Request) => {
       updatedAt: serverTimestamp(),
     })
   } catch (error) {
-    return Response.json(apiError("Failed to add itinerary item"), {
+    return Response.json(apiError("Failed to add folder"), {
       status: 500,
     })
   }
 
-  return Response.json(apiSuccess(null, "Itinerary item added successfully"), {
+  return Response.json(apiSuccess(null, "Folder added successfully"), {
     status: 201,
   })
 }
