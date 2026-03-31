@@ -5,11 +5,17 @@ import { toPng } from "html-to-image"
 import { useHotkey } from "@tanstack/react-hotkeys"
 import { useRandomizedPhotos } from "@/features/photos/hooks/useRandomizedPhotos"
 import { Pendu } from "@inkorange/pendu"
-import { Loader2, Camera, Settings2 } from "lucide-react"
+import { Loader2, Camera, Settings2, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Slider } from "@/components/ui/slider"
 import { Label } from "@/components/ui/label"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import {
   Dialog,
   DialogContent,
@@ -28,6 +34,13 @@ export default function Page() {
   const { photos, loading, refetch } = useRandomizedPhotos(photoLimit)
 
   const [screenshotLoading, setScreenshotLoading] = useState(false)
+  const [pixelRatio, setPixelRatio] = useState(2)
+
+  const qualityOptions = [
+    { label: "HD", ratio: 1 },
+    { label: "Full HD", ratio: 3 },
+    { label: "Ultra HD", ratio: 5 },
+  ] as const
 
   const handleScreenshot = async () => {
     if (!contentRef.current || screenshotLoading) return
@@ -35,7 +48,7 @@ export default function Page() {
     try {
       const dataUrl = await toPng(contentRef.current, {
         cacheBust: true,
-        pixelRatio: 2,
+        pixelRatio,
         skipFonts: true,
         imagePlaceholder:
           "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
@@ -133,19 +146,39 @@ export default function Page() {
             </div>
           </DialogContent>
         </Dialog>
-        <Button
-          onClick={handleScreenshot}
-          variant="outline"
-          size="sm"
-          disabled={screenshotLoading}
-        >
-          {screenshotLoading ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Camera className="mr-2 h-4 w-4" />
-          )}
-          Screenshot
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" disabled={screenshotLoading}>
+              {screenshotLoading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Camera className="mr-2 h-4 w-4" />
+              )}
+              Screenshot (
+              {qualityOptions.find((o) => o.ratio === pixelRatio)?.label ||
+                pixelRatio + "x"}
+              )
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {qualityOptions.map((option) => (
+              <DropdownMenuItem
+                key={option.ratio}
+                onClick={() => setPixelRatio(option.ratio)}
+                className="flex items-center justify-between"
+              >
+                {option.label} ({option.ratio}x)
+                {pixelRatio === option.ratio && <Check className="h-4 w-4" />}
+              </DropdownMenuItem>
+            ))}
+            <DropdownMenuItem
+              onClick={handleScreenshot}
+              className="font-semibold"
+            >
+              Take Screenshot Now
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       <p className="text-sm text-muted-foreground">
         Press <kbd>R</kbd> to randomize.
