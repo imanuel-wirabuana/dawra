@@ -19,16 +19,19 @@ import {
 } from "@/components/ui/dialog"
 
 export default function Page() {
-  const [seed, setSeed] = useState(42)
+  const [seed, setSeed] = useState(37)
   const [width, setWidth] = useState(1200)
   const [height, setHeight] = useState(800)
-  const [photoLimit, setPhotoLimit] = useState(50)
+  const [photoLimit, setPhotoLimit] = useState(7)
   const contentRef = useRef<HTMLDivElement>(null)
 
   const { photos, loading, refetch } = useRandomizedPhotos(photoLimit)
 
+  const [screenshotLoading, setScreenshotLoading] = useState(false)
+
   const handleScreenshot = async () => {
-    if (!contentRef.current) return
+    if (!contentRef.current || screenshotLoading) return
+    setScreenshotLoading(true)
     try {
       const dataUrl = await toPng(contentRef.current, {
         cacheBust: true,
@@ -46,6 +49,8 @@ export default function Page() {
       if (err instanceof Error) {
         console.error("Error message:", err.message)
       }
+    } finally {
+      setScreenshotLoading(false)
     }
   }
 
@@ -128,8 +133,17 @@ export default function Page() {
             </div>
           </DialogContent>
         </Dialog>
-        <Button onClick={handleScreenshot} variant="outline" size="sm">
-          <Camera className="mr-2 h-4 w-4" />
+        <Button
+          onClick={handleScreenshot}
+          variant="outline"
+          size="sm"
+          disabled={screenshotLoading}
+        >
+          {screenshotLoading ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Camera className="mr-2 h-4 w-4" />
+          )}
           Screenshot
         </Button>
       </div>
