@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Sparkles, ArrowRight } from "lucide-react"
+import Link from "next/link"
 
 export default function Page() {
   return (
@@ -99,17 +100,20 @@ export default function Page() {
             <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
               <Button
                 size="lg"
+                asChild
                 className="gap-2 rounded-full px-6 py-2 shadow-md transition-all hover:shadow-lg dark:shadow-lg dark:hover:shadow-xl"
               >
-                Start Our Dawra <ArrowRight className="h-4 w-4" />
+                <Link href="/bucket-lists">
+                  Start Our Dawra <ArrowRight className="h-4 w-4" />
+                </Link>
               </Button>
               <Button
                 variant="outline"
                 size="lg"
-                className="rounded-full border-primary/25 px-6 py-2 text-primary transition-all hover:bg-primary/5 dark:border-primary/30 dark:hover:bg-primary/10"
                 asChild
+                className="rounded-full border-primary/25 px-6 py-2 text-primary transition-all hover:bg-primary/5 dark:border-primary/30 dark:hover:bg-primary/10"
               >
-                <a href="/photos">Our Dawra Memories</a>
+                <Link href="/photos">Our Dawra Memories</Link>
               </Button>
             </div>
           </div>

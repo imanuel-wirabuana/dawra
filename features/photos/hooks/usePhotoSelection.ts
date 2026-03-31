@@ -1,15 +1,15 @@
 import { useState, useCallback } from "react"
 import { useHotkey } from "@tanstack/react-hotkeys"
 
-interface UseBucketSelectionProps {
+interface UsePhotoSelectionProps {
   ids: string[]
   isSelectionMode?: boolean
 }
 
-export function useBucketSelection({
+export function usePhotoSelection({
   ids,
   isSelectionMode = false,
-}: UseBucketSelectionProps) {
+}: UsePhotoSelectionProps) {
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [lastSelected, setLastSelected] = useState<string | null>(null)
   const [focusedIndex, setFocusedIndex] = useState<number>(-1)
@@ -21,6 +21,7 @@ export function useBucketSelection({
   const handleSelect = useCallback(
     (e: React.MouseEvent, id: string) => {
       e.preventDefault()
+      e.stopPropagation()
 
       const currentIndex = ids.indexOf(id)
       if (currentIndex === -1) return
@@ -70,7 +71,7 @@ export function useBucketSelection({
     [ids, lastSelected, isMobile]
   )
 
-  // Keyboard navigation with TanStack HotKeys - only active in selection mode
+  // Keyboard navigation
   useHotkey("ArrowDown", () => {
     if (!isSelectionMode || ids.length === 0) return
     const nextIndex = focusedIndex < ids.length - 1 ? focusedIndex + 1 : 0
@@ -115,7 +116,7 @@ export function useBucketSelection({
     setLastSelected(currentId)
   })
 
-  // Select all - using separate calls for each platform - only active in selection mode
+  // Select all
   useHotkey({ key: "a", meta: true }, () => {
     if (!isSelectionMode) return
     setSelected(new Set(ids))

@@ -116,7 +116,7 @@ export default function BucketListGrid({ className }: BucketListGridProps) {
     <div ref={gridRef} className="space-y-3">
       {/* Combined selection mode indicator and controls */}
       {isSelectionMode ? (
-        <div className="flex items-center justify-between rounded-lg border bg-primary/10 p-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-primary/10 p-3">
           <div className="flex items-center gap-2">
             <CheckSquare className="h-4 w-4 text-primary" />
             <span className="text-sm font-medium text-primary">
@@ -129,7 +129,7 @@ export default function BucketListGrid({ className }: BucketListGridProps) {
             )}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {selected.size > 0 && (
               <>
                 <BulkDeleteButton

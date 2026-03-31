@@ -1,8 +1,14 @@
 import type { Photo } from "@/types"
 
-export async function uploadPhoto(file: File): Promise<Photo> {
+export async function uploadPhoto(
+  file: File,
+  folderId?: string
+): Promise<Photo> {
   const formData = new FormData()
   formData.append("file", file)
+  if (folderId) {
+    formData.append("folderId", folderId)
+  }
 
   try {
     const response = await fetch("/api/v1/photos", {

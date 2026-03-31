@@ -21,6 +21,7 @@ export const POST = async (request: Request) => {
   try {
     const formData = await request.formData()
     const file = formData.get("file") as File
+    const folderId = formData.get("folderId") as string | undefined
 
     if (!file) {
       return Response.json(apiError("No file provided"), { status: 400 })
@@ -67,6 +68,7 @@ export const POST = async (request: Request) => {
       realFileName: file.name,
       extension: extension || "",
       size: file.size,
+      folderId: folderId || null,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     }

@@ -81,11 +81,20 @@ type ItineraryItem = {
   end: string
 }
 
+type Folder = {
+  id: string
+  name: string
+  description?: string
+  createdAt?: Timestamp
+}
+
 type Photo = {
   id: string
   url: string
-  name: string
-  realFileName: string
+  name: string // dawra-<folderName>-<timestamp>.<extension>
+  realFileName: string // <originalFileName>.<extension>
   extension: string
   size: number
+  folderId?: string // optional folder reference
+  createdAt?: Timestamp
 }

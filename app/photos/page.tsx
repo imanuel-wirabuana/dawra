@@ -1,20 +1,32 @@
 "use client"
 
 import { useRealtimePhotos } from "@/features/photos/hooks/useRealtimePhotos"
+import { useRealtimeFolders } from "@/features/photos/hooks/useRealtimeFolders"
+import { useDeleteFolder } from "@/features/photos/hooks/useDeleteFolder"
 import { useUploadPhoto } from "@/features/photos/hooks/useUploadPhoto"
 import { useDeletePhoto } from "@/features/photos/hooks/useDeletePhoto"
 import PhotoUploadArea from "@/features/photos/components/PhotoUploadArea"
 import PhotoGrid from "@/features/photos/components/PhotoGrid"
+import FolderGrid from "@/features/photos/components/FolderGrid"
+import CreateFolderDialog from "@/features/photos/components/CreateFolderDialog"
 import EmptyState from "@/features/photos/components/EmptyState"
 import LoadingState from "@/features/photos/components/LoadingState"
+import { useState } from "react"
 
 export default function PhotoWall() {
-  const { photos, loading } = useRealtimePhotos()
+  const { photos, loading: photosLoading } = useRealtimePhotos()
+  const { folders, loading: foldersLoading } = useRealtimeFolders()
   const { mutateAsync: uploadPhoto, isPending: isUploading } = useUploadPhoto()
   const { mutateAsync: deletePhoto } = useDeletePhoto()
+  const { mutateAsync: deleteFolder } = useDeleteFolder()
+  const [createFolderOpen, setCreateFolderOpen] = useState(false)
+
+  const loading = photosLoading || foldersLoading
 
   const handleUpload = async (files: FileList) => {
-    const uploadPromises = Array.from(files).map((file) => uploadPhoto(file))
+    const uploadPromises = Array.from(files).map((file) =>
+      uploadPhoto({ file })
+    )
 
     try {
       await Promise.all(uploadPromises)
@@ -31,26 +43,51 @@ export default function PhotoWall() {
     }
   }
 
+  const handleDeleteFolder = async (folderId: string) => {
+    try {
+      await deleteFolder(folderId)
+    } catch (error) {
+      console.error("Delete folder error:", error)
+    }
+  }
+
   return (
-    <div>
-      <h1 className="mb-6 text-3xl font-bold">Photo Wall</h1>
+    <div className="space-y-6">
+      <h1 className="text-3xl font-bold">Photo Wall</h1>
 
-      <div className="flex flex-col gap-4">
-        {/* Upload Section */}
-        <PhotoUploadArea isUploading={isUploading} onUpload={handleUpload} />
-        <div>
-          {/* Photo Grid */}
-          {photos.length > 0 && (
-            <PhotoGrid photos={photos} onRemovePhoto={handleRemovePhoto} />
-          )}
+      {/* Upload Section */}
+      <PhotoUploadArea isUploading={isUploading} onUpload={handleUpload} />
 
-          {/* Empty State */}
-          {photos.length === 0 && !loading && <EmptyState />}
-
-          {/* Loading State */}
-          {loading && <LoadingState />}
+      {/* Folders Section */}
+      {folders.length > 0 && (
+        <div className="space-y-2 pt-3">
+          <FolderGrid
+            folders={folders}
+            photos={photos}
+            onCreateFolder={() => setCreateFolderOpen(true)}
+          />
         </div>
+      )}
+
+      {/* All Photos Section */}
+      <div className="space-y-2">
+        {photos.length > 0 ? (
+          <PhotoGrid
+            photos={photos}
+            onRemovePhoto={handleRemovePhoto}
+            folders={folders}
+          />
+        ) : !loading ? (
+          <EmptyState />
+        ) : null}
       </div>
+
+      {loading && <LoadingState />}
+
+      <CreateFolderDialog
+        open={createFolderOpen}
+        onOpenChange={setCreateFolderOpen}
+      />
     </div>
   )
 }

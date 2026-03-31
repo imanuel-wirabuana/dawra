@@ -5,7 +5,8 @@ export function useUploadPhoto() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: uploadPhoto,
+    mutationFn: ({ file, folderId }: { file: File; folderId?: string }) =>
+      uploadPhoto(file, folderId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["photos"] })
     },

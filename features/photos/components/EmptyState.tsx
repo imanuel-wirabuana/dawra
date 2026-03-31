@@ -3,7 +3,11 @@
 import { Card } from "@/components/ui/card"
 import { Image as ImageIcon } from "lucide-react"
 
-export default function EmptyState() {
+interface EmptyStateProps {
+  message?: string
+}
+
+export default function EmptyState({ message }: EmptyStateProps) {
   return (
     <Card className="p-12 text-center">
       <div className="mx-auto mb-4 rounded-full bg-muted/50 p-6">
@@ -11,7 +15,7 @@ export default function EmptyState() {
       </div>
       <h3 className="mb-2 text-lg font-medium">No photos yet</h3>
       <p className="text-muted-foreground">
-        Start uploading photos to build your memory wall
+        {message || "Start uploading photos to build your memory wall"}
       </p>
     </Card>
   )

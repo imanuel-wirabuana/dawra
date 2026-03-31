@@ -1,10 +1,17 @@
-import { onSnapshot, collection, query, orderBy } from "firebase/firestore"
+import { onSnapshot, collection, query, orderBy, where } from "firebase/firestore"
 import { db } from "@/lib/firebase/client"
 import type { Photo } from "@/types"
 
-export function subscribeToPhotos(callback: (data: Photo[]) => void) {
+export function subscribeToPhotosByFolder(
+  folderId: string,
+  callback: (data: Photo[]) => void
+) {
   const photosRef = collection(db, "photos")
-  const q = query(photosRef, orderBy("createdAt", "desc"))
+  const q = query(
+    photosRef,
+    where("folderId", "==", folderId),
+    orderBy("createdAt", "desc")
+  )
 
   return onSnapshot(q, (snapshot) => {
     callback(
@@ -17,7 +24,7 @@ export function subscribeToPhotos(callback: (data: Photo[]) => void) {
           realFileName: data.realFileName,
           extension: data.extension || "",
           size: data.size || 0,
-          folderId: data.folderId || undefined,
+          folderId: data.folderId,
         } as Photo
       })
     )
