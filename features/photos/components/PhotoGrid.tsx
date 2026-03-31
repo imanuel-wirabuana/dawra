@@ -10,7 +10,7 @@ import PhotoBulkDeleteButton, {
   type PhotoBulkDeleteButtonRef,
 } from "./PhotoBulkDeleteButton"
 import { usePhotoSelection } from "../hooks/usePhotoSelection"
-import { CheckSquare, X, ArrowLeft, Info, Folder } from "lucide-react"
+import { CheckSquare, X, ArrowLeft, Info, Folder, Filter } from "lucide-react"
 import { useHotkey } from "@tanstack/react-hotkeys"
 import {
   Tooltip,
@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/tooltip"
 import type { Photo, Folder as FolderType } from "@/types"
 import MoveToFolderDialog from "./MoveToFolderDialog"
+import PhotoGalleryModal from "./PhotoGalleryModal"
 import { movePhotosToFolder } from "../services/movePhotos.service"
 
 interface PhotoGridProps {
@@ -26,6 +27,8 @@ interface PhotoGridProps {
   onRemovePhoto: (id: string) => void
   folders?: FolderType[]
   currentFolderId?: string
+  showUnassignedOnly?: boolean
+  onToggleFilter?: () => void
 }
 
 export interface PhotoGridRef {
@@ -33,11 +36,23 @@ export interface PhotoGridRef {
 }
 
 const PhotoGrid = forwardRef<PhotoGridRef, PhotoGridProps>(
-  ({ photos, onRemovePhoto, folders = [], currentFolderId }, ref) => {
+  (
+    {
+      photos,
+      onRemovePhoto,
+      folders = [],
+      currentFolderId,
+      showUnassignedOnly,
+      onToggleFilter,
+    },
+    ref
+  ) => {
     const [deletingPhotoId, setDeletingPhotoId] = useState<string | null>(null)
     const [viewMode, setViewMode] = useState<PhotoViewMode>("masonry")
     const [isSelectionMode, setIsSelectionMode] = useState(false)
     const [moveDialogOpen, setMoveDialogOpen] = useState(false)
+    const [galleryOpen, setGalleryOpen] = useState(false)
+    const [galleryIndex, setGalleryIndex] = useState(0)
     const bulkDeleteRef = useRef<PhotoBulkDeleteButtonRef>(null)
 
     // Extract IDs for selection logic
@@ -94,6 +109,11 @@ const PhotoGrid = forwardRef<PhotoGridRef, PhotoGridProps>(
       clear()
     }
 
+    const openGallery = (index: number) => {
+      setGalleryIndex(index)
+      setGalleryOpen(true)
+    }
+
     const handleRemovePhoto = async (photoId: string) => {
       setDeletingPhotoId(photoId)
       try {
@@ -118,51 +138,66 @@ const PhotoGrid = forwardRef<PhotoGridRef, PhotoGridProps>(
         case "full":
           return (
             <div className="space-y-4">
-              {photos.map((photo) => (
-                <PhotoCard
+              {photos.map((photo, index) => (
+                <div
                   key={photo.id}
-                  photo={photo}
-                  folders={folders}
-                  onRemove={isSelectionMode ? undefined : handleRemovePhoto}
-                  isDeleting={deletingPhotoId === photo.id}
-                  isSelected={selected.has(photo.id)}
-                  isSelectionMode={isSelectionMode}
-                  onSelect={handleSelect}
-                />
+                  onClick={() => !isSelectionMode && openGallery(index)}
+                  className={isSelectionMode ? "" : "cursor-pointer"}
+                >
+                  <PhotoCard
+                    photo={photo}
+                    folders={folders}
+                    onRemove={isSelectionMode ? undefined : handleRemovePhoto}
+                    isDeleting={deletingPhotoId === photo.id}
+                    isSelected={selected.has(photo.id)}
+                    isSelectionMode={isSelectionMode}
+                    onSelect={handleSelect}
+                  />
+                </div>
               ))}
             </div>
           )
         case "grid2x2":
           return (
             <div className="grid grid-cols-2 gap-4">
-              {photos.map((photo) => (
-                <PhotoCard
+              {photos.map((photo, index) => (
+                <div
                   key={photo.id}
-                  photo={photo}
-                  folders={folders}
-                  onRemove={isSelectionMode ? undefined : handleRemovePhoto}
-                  isDeleting={deletingPhotoId === photo.id}
-                  isSelected={selected.has(photo.id)}
-                  isSelectionMode={isSelectionMode}
-                  onSelect={handleSelect}
-                />
+                  onClick={() => !isSelectionMode && openGallery(index)}
+                  className={isSelectionMode ? "" : "cursor-pointer"}
+                >
+                  <PhotoCard
+                    photo={photo}
+                    folders={folders}
+                    onRemove={isSelectionMode ? undefined : handleRemovePhoto}
+                    isDeleting={deletingPhotoId === photo.id}
+                    isSelected={selected.has(photo.id)}
+                    isSelectionMode={isSelectionMode}
+                    onSelect={handleSelect}
+                  />
+                </div>
               ))}
             </div>
           )
         case "grid3x3":
           return (
             <div className="grid grid-cols-3 gap-4">
-              {photos.map((photo) => (
-                <PhotoCard
+              {photos.map((photo, index) => (
+                <div
                   key={photo.id}
-                  photo={photo}
-                  folders={folders}
-                  onRemove={isSelectionMode ? undefined : handleRemovePhoto}
-                  isDeleting={deletingPhotoId === photo.id}
-                  isSelected={selected.has(photo.id)}
-                  isSelectionMode={isSelectionMode}
-                  onSelect={handleSelect}
-                />
+                  onClick={() => !isSelectionMode && openGallery(index)}
+                  className={isSelectionMode ? "" : "cursor-pointer"}
+                >
+                  <PhotoCard
+                    photo={photo}
+                    folders={folders}
+                    onRemove={isSelectionMode ? undefined : handleRemovePhoto}
+                    isDeleting={deletingPhotoId === photo.id}
+                    isSelected={selected.has(photo.id)}
+                    isSelectionMode={isSelectionMode}
+                    onSelect={handleSelect}
+                  />
+                </div>
               ))}
             </div>
           )
@@ -170,8 +205,12 @@ const PhotoGrid = forwardRef<PhotoGridRef, PhotoGridProps>(
         default:
           return (
             <div className="columns-2 gap-4 space-y-4 sm:columns-3 md:columns-4 lg:columns-5 xl:columns-6">
-              {photos.map((photo) => (
-                <div key={photo.id} className="break-inside-avoid">
+              {photos.map((photo, index) => (
+                <div
+                  key={photo.id}
+                  className={`break-inside-avoid ${isSelectionMode ? "" : "cursor-pointer"}`}
+                  onClick={() => !isSelectionMode && openGallery(index)}
+                >
                   <PhotoCard
                     photo={photo}
                     folders={folders}
@@ -281,6 +320,17 @@ const PhotoGrid = forwardRef<PhotoGridRef, PhotoGridProps>(
                 <CheckSquare className="mr-1 h-3 w-3" />
                 Select
               </Button>
+              {onToggleFilter && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onToggleFilter}
+                  className={`h-7 text-xs ${showUnassignedOnly ? "border-primary text-primary" : ""}`}
+                >
+                  <Filter className="mr-1 h-3 w-3" />
+                  {showUnassignedOnly ? "Unassigned" : "All"}
+                </Button>
+              )}
               <PhotoViewModeSelector
                 viewMode={viewMode}
                 onViewModeChange={setViewMode}
@@ -298,6 +348,13 @@ const PhotoGrid = forwardRef<PhotoGridRef, PhotoGridProps>(
           selectedCount={selected.size}
           onMove={handleMovePhotos}
           currentFolderId={currentFolderId}
+        />
+        <PhotoGalleryModal
+          photos={photos}
+          currentIndex={galleryIndex}
+          isOpen={galleryOpen}
+          onClose={() => setGalleryOpen(false)}
+          onNavigate={setGalleryIndex}
         />
       </div>
     )

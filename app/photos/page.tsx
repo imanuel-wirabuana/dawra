@@ -11,6 +11,8 @@ import FolderGrid from "@/features/photos/components/FolderGrid"
 import CreateFolderDialog from "@/features/photos/components/CreateFolderDialog"
 import EmptyState from "@/features/photos/components/EmptyState"
 import LoadingState from "@/features/photos/components/LoadingState"
+import { Filter } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { useState } from "react"
 
 export default function PhotoWall() {
@@ -20,8 +22,13 @@ export default function PhotoWall() {
   const { mutateAsync: deletePhoto } = useDeletePhoto()
   const { mutateAsync: deleteFolder } = useDeleteFolder()
   const [createFolderOpen, setCreateFolderOpen] = useState(false)
+  const [showUnassignedOnly, setShowUnassignedOnly] = useState(true)
 
   const loading = photosLoading || foldersLoading
+
+  const filteredPhotos = showUnassignedOnly
+    ? photos.filter((p) => !p.folderId)
+    : photos
 
   const handleUpload = async (files: FileList) => {
     const uploadPromises = Array.from(files).map((file) =>
@@ -69,13 +76,15 @@ export default function PhotoWall() {
         </div>
       )}
 
-      {/* All Photos Section */}
+      {/* Unassigned Photos Section */}
       <div className="space-y-2">
-        {photos.length > 0 ? (
+        {filteredPhotos.length > 0 ? (
           <PhotoGrid
-            photos={photos}
+            photos={filteredPhotos}
             onRemovePhoto={handleRemovePhoto}
             folders={folders}
+            showUnassignedOnly={showUnassignedOnly}
+            onToggleFilter={() => setShowUnassignedOnly(!showUnassignedOnly)}
           />
         ) : !loading ? (
           <EmptyState />
