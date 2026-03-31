@@ -97,10 +97,13 @@ export const GET = async () => {
     const q = query(photosRef, orderBy("createdAt", "desc"))
     const querySnapshot = await getDocs(q)
 
-    const photos: Photo[] = querySnapshot.docs.map((doc) => ({
-      ...doc.data(),
-      id: doc.id,
-    })) as Photo[]
+    const photos: Photo[] = querySnapshot.docs.map((doc) => {
+      const data = doc.data() as Photo
+      return {
+        ...data,
+        docId: doc.id,
+      }
+    })
 
     return Response.json(apiSuccess(photos, "Photos retrieved successfully"))
   } catch (error) {

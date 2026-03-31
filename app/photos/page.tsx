@@ -14,6 +14,7 @@ import LoadingState from "@/features/photos/components/LoadingState"
 import { Filter } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
+import Link from "next/link"
 
 export default function PhotoWall() {
   const { photos, loading: photosLoading } = useRealtimePhotos()
@@ -60,7 +61,16 @@ export default function PhotoWall() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Photo Wall</h1>
+      <div className="flex flex-row items-center justify-between gap-2">
+        <div>
+          <h1 className="text-3xl font-bold">Photos </h1>
+        </div>
+        <Link href="/photos/wall">
+          <Button variant="outline" size="sm">
+            Wall View
+          </Button>
+        </Link>
+      </div>
 
       {/* Upload Section */}
       <PhotoUploadArea isUploading={isUploading} onUpload={handleUpload} />

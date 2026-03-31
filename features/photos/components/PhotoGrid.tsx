@@ -306,7 +306,7 @@ const PhotoGrid = forwardRef<PhotoGridRef, PhotoGridProps>(
             </div>
           </div>
         ) : (
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex-row items-center justify-between gap-3 space-y-2 lg:flex lg:space-y-0">
             <h2 className="text-xl font-medium">
               Our Memories ({photos.length})
             </h2>
