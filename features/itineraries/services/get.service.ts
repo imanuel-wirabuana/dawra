@@ -17,7 +17,7 @@ export async function getItineraryItems(): Promise<ItineraryItem[]> {
     const data = await response.json()
     return data.data.sort(
       (a: ItineraryItem, b: ItineraryItem) =>
-        new Date(a.start).getTime() - new Date(b.start).getTime()
+        new Date(a.date).getTime() - new Date(b.date).getTime()
     )
   } catch (error) {
     console.error("Error fetching itinerary items:", error)

@@ -7,7 +7,7 @@ import { useItineraryStore } from "@/store/itineraryStore"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import type { BucketList } from "@/types"
+import type { BucketList, Category } from "@/types"
 import { cn } from "@/lib/utils"
 import {
   Popover,
@@ -23,12 +23,40 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import CategorySelector from "@/features/categories/components/CategorySelector"
 
 interface ItineraryFormProps {
   className?: string
 }
 
 type ItemType = "bucket-list" | "custom"
+
+// Generate time options in 15-min intervals
+const generateTimeOptions = (): string[] => {
+  const options: string[] = []
+  for (let h = 0; h < 24; h++) {
+    for (let m = 0; m < 60; m += 15) {
+      const time = `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`
+      options.push(time)
+    }
+  }
+  return options
+}
+
+const TIME_OPTIONS = generateTimeOptions()
+
+// Convert time string (HH:MM) to minutes
+const timeToMinutes = (time: string): number => {
+  const [h, m] = time.split(":").map(Number)
+  return h * 60 + m
+}
+
+// Get valid end time options based on start time
+const getValidEndTimes = (startTime: string): string[] => {
+  if (!startTime) return TIME_OPTIONS
+  const startMinutes = timeToMinutes(startTime)
+  return TIME_OPTIONS.filter((time) => timeToMinutes(time) > startMinutes)
+}
 
 export default function ItineraryForm({ className }: ItineraryFormProps) {
   const [open, setOpen] = useState(false)
@@ -49,6 +77,7 @@ export default function ItineraryForm({ className }: ItineraryFormProps) {
   const [customLocation, setCustomLocation] = useState("")
   const [customCost, setCustomCost] = useState("")
   const [customDescription, setCustomDescription] = useState("")
+  const [selectedCategories, setSelectedCategories] = useState<Category[]>([])
 
   // Shared state
   const [startTime, setStartTime] = useState("")
@@ -65,6 +94,7 @@ export default function ItineraryForm({ className }: ItineraryFormProps) {
     setCustomLocation("")
     setCustomCost("")
     setCustomDescription("")
+    setSelectedCategories([])
     setStartTime("")
     setEndTime("")
     setItemType("bucket-list")
@@ -85,8 +115,9 @@ export default function ItineraryForm({ className }: ItineraryFormProps) {
     }
 
     const baseItem = {
-      start: `${formatDateForInput(selectedDate)}T${startTime}`,
-      end: `${formatDateForInput(selectedDate)}T${endTime}`,
+      date: formatDateForInput(selectedDate),
+      start: startTime,
+      end: endTime,
     }
 
     if (itemType === "bucket-list") {
@@ -110,6 +141,7 @@ export default function ItineraryForm({ className }: ItineraryFormProps) {
           location: customLocation.trim() || undefined,
           cost: customCost ? Number(customCost) : undefined,
           description: customDescription.trim() || undefined,
+          categories: selectedCategories,
         },
       })
     }
@@ -219,6 +251,14 @@ export default function ItineraryForm({ className }: ItineraryFormProps) {
                     disabled={addItineraryMutation.isPending}
                   />
                 </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="categories">Categories</Label>
+                  <CategorySelector
+                    selectedCategories={selectedCategories}
+                    onCategoriesChange={setSelectedCategories}
+                  />
+                </div>
               </div>
             )}
 
@@ -226,23 +266,54 @@ export default function ItineraryForm({ className }: ItineraryFormProps) {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="startTime">Start Time</Label>
-                <Input
-                  id="startTime"
-                  type="time"
+                <Select
                   value={startTime}
-                  onChange={(e) => setStartTime(e.target.value)}
+                  onValueChange={(value) => {
+                    setStartTime(value)
+                    // Reset end time if it's now invalid
+                    if (
+                      endTime &&
+                      timeToMinutes(endTime) <= timeToMinutes(value)
+                    ) {
+                      setEndTime("")
+                    }
+                  }}
                   disabled={addItineraryMutation.isPending}
-                />
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select time..." />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-60">
+                    {TIME_OPTIONS.map((time) => (
+                      <SelectItem key={time} value={time}>
+                        {time}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="endTime">End Time</Label>
-                <Input
-                  id="endTime"
-                  type="time"
+                <Select
                   value={endTime}
-                  onChange={(e) => setEndTime(e.target.value)}
-                  disabled={addItineraryMutation.isPending}
-                />
+                  onValueChange={setEndTime}
+                  disabled={addItineraryMutation.isPending || !startTime}
+                >
+                  <SelectTrigger>
+                    <SelectValue
+                      placeholder={
+                        startTime ? "Select end time..." : "Select start first"
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-60">
+                    {getValidEndTimes(startTime).map((time) => (
+                      <SelectItem key={time} value={time}>
+                        {time}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 

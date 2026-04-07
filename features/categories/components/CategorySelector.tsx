@@ -23,12 +23,14 @@ interface CategorySelectorProps {
   selectedCategories: Category[]
   onCategoriesChange: (categories: Category[]) => void
   className?: string
+  disabled?: boolean
 }
 
 export default function CategorySelector({
   selectedCategories,
   onCategoriesChange,
   className,
+  disabled = false,
 }: CategorySelectorProps) {
   const {
     categories,
@@ -112,6 +114,7 @@ export default function CategorySelector({
             </ComboboxValue>
             <ComboboxChipsInput
               placeholder={isLoading ? "Loading..." : "Select categories..."}
+              disabled={disabled}
             />
           </ComboboxChips>
           <ComboboxContent>
@@ -139,6 +142,7 @@ export default function CategorySelector({
           createCategory={createCategory}
           isCreating={isCreating}
           onCategoryDeleted={handleCategoryDeleted}
+          disabled={disabled}
         />
       </div>
     </div>

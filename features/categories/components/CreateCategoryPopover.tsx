@@ -21,6 +21,7 @@ interface CreateCategoryPopoverProps {
   isCreating: boolean
   trigger?: React.ReactNode
   onCategoryDeleted?: (categoryId: string) => void
+  disabled?: boolean
 }
 
 export default function CreateCategoryPopover({
@@ -30,6 +31,7 @@ export default function CreateCategoryPopover({
   isCreating,
   trigger,
   onCategoryDeleted,
+  disabled = false,
 }: CreateCategoryPopoverProps) {
   const [open, setOpen] = useState(false)
   const [name, setName] = useState("")
@@ -82,7 +84,7 @@ export default function CreateCategoryPopover({
   }
 
   const defaultTrigger = (
-    <Button variant="outline" size="icon">
+    <Button variant="outline" size="icon" disabled={disabled}>
       <Plus className="h-4 w-4" />
     </Button>
   )

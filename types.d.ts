@@ -79,6 +79,8 @@ type CustomItineraryItem = {
   cost?: number
   /** Optional description */
   description?: string
+  /** Optional categories associated with this item */
+  categories?: Category[]
 }
 
 /**
@@ -95,6 +97,8 @@ type ItineraryItem = {
   bucketList?: BucketList
   /** Custom item data (for custom type) */
   customItem?: CustomItineraryItem
+
+  date: string //new!
   /** Start date and time for this itinerary item */
   start: string
   /** End date and time for this itinerary item */

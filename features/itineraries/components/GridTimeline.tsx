@@ -8,108 +8,56 @@ import {
   PointerSensor,
   type DragEndEvent,
   type DragStartEvent,
+  type DragOverEvent,
 } from "@dnd-kit/core"
-import { useDroppable } from "@dnd-kit/core"
-import TimelineEvent from "./TimelineEvent"
-import { Trash2, Pencil } from "lucide-react"
-import { useTimelineStore } from "../store/useTimelineStore"
-import { useState, useEffect } from "react"
+import { Trash2, Pencil, ChevronLeft, ChevronRight } from "lucide-react"
+import { useState, useEffect, useMemo } from "react"
 import { cn } from "@/lib/utils"
+import { Calendar } from "@/components/ui/calendar"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Button } from "@/components/ui/button"
+import {
+  format,
+  isSameDay,
+  startOfWeek,
+  endOfWeek,
+  eachDayOfInterval,
+  addDays,
+  addMonths,
+  subMonths,
+} from "date-fns"
 
-type Item = {
-  id: string
-  itemType: "bucket-list" | "custom"
-  title: string
-  start: string
-  end: string
-  location?: string
-  cost?: number
-  description?: string
-  completed?: boolean
-}
+import DayGrid from "./timeline/DayGrid"
+import WeekGrid from "./timeline/WeekGrid"
+import MonthGrid from "./timeline/MonthGrid"
+import {
+  formatDuration,
+  getDurationMinutes,
+  minutesToTime,
+  timeToMinutes,
+  HOUR_HEIGHT,
+  type Item,
+  type ViewMode,
+} from "./timeline/shared"
 
 interface GridTimelineProps {
   items: Item[]
   onDeleteItem: (id: string) => void
   onEditItem?: (item: Item) => void
-  onReschedule?: (id: string, newStartTime: string, newEndTime: string) => void
-}
-
-const SIDEBAR_WIDTH = 160
-
-const timeToIndex = (time: string, slotDuration: number) => {
-  const [h, m] = time.split(":").map(Number)
-  return (h * 60 + m) / slotDuration
-}
-
-const generateSlots = (slotDuration: number) => {
-  const slots = []
-  for (let i = 0; i < 24 * 60; i += slotDuration) {
-    const h = String(Math.floor(i / 60)).padStart(2, "0")
-    const m = String(i % 60).padStart(2, "0")
-    slots.push(`${h}:${m}`)
-  }
-  return slots
-}
-
-// Convert slot index to time string (HH:MM)
-const indexToTime = (index: number, slotDuration: number): string => {
-  const minutes = index * slotDuration
-  const h = String(Math.floor(minutes / 60)).padStart(2, "0")
-  const m = String(minutes % 60).padStart(2, "0")
-  return `${h}:${m}`
-}
-
-// Calculate duration in minutes between two times
-const getDurationMinutes = (start: string, end: string): number => {
-  const [startH, startM] = start.split(":").map(Number)
-  const [endH, endM] = end.split(":").map(Number)
-  return endH * 60 + endM - (startH * 60 + startM)
-}
-
-// Format duration as "2h 30m"
-const formatDuration = (start: string, end: string): string => {
-  const totalMinutes = getDurationMinutes(start, end)
-  const hours = Math.floor(totalMinutes / 60)
-  const minutes = totalMinutes % 60
-
-  if (hours === 0) return `${minutes}m`
-  if (minutes === 0) return `${hours}h`
-  return `${hours}h ${minutes}m`
-}
-
-// Droppable grid cell component
-interface DroppableGridCellProps {
-  id: string
-  index: number
-  slotDuration: number
-  isHour: boolean
-  draggedItemId: string | null
-}
-
-function DroppableGridCell({
-  id,
-  index,
-  slotDuration,
-  isHour,
-  draggedItemId,
-}: DroppableGridCellProps) {
-  const { isOver, setNodeRef } = useDroppable({
-    id: `${id}-slot-${index}`,
-    data: { slotIndex: index, itemId: id },
-    disabled: !draggedItemId || draggedItemId !== id,
-  })
-
-  return (
-    <div
-      ref={setNodeRef}
-      className={cn(
-        "border-l transition-colors",
-        isHour ? "border-muted-foreground/30" : "border-muted-foreground/10",
-        isOver && "bg-primary/30"
-      )}
-    />
-  )
+  onReschedule?: (
+    id: string,
+    newStartTime: string,
+    newEndTime: string,
+    targetDate?: Date
+  ) => void
+  selectedDate?: Date
+  onDateChange?: (date: Date) => void
 }
 
 export default function GridTimeline({
@@ -117,16 +65,25 @@ export default function GridTimeline({
   onDeleteItem,
   onEditItem,
   onReschedule,
+  selectedDate: externalSelectedDate,
+  onDateChange,
 }: GridTimelineProps) {
-  const { slotWidth, slotDuration } = useTimelineStore()
   const [isMobile, setIsMobile] = useState(false)
   const [draggedItem, setDraggedItem] = useState<Item | null>(null)
+  const [dropTarget, setDropTarget] = useState<{
+    time: string
+    date: Date
+  } | null>(null)
+  const [viewMode, setViewMode] = useState<ViewMode>("week")
+  const [internalDate, setInternalDate] = useState<Date>(new Date())
 
-  // Configure dnd-kit sensors for smooth dragging
+  const selectedDate = externalSelectedDate || internalDate
+  const setSelectedDate = onDateChange || setInternalDate
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 5, // Start dragging after moving 5px
+        distance: 5,
       },
     })
   )
@@ -140,18 +97,172 @@ export default function GridTimeline({
     return () => window.removeEventListener("resize", checkMobile)
   }, [])
 
-  if (items.length === 0) {
+  const weekDays = useMemo(() => {
+    const start = startOfWeek(selectedDate, { weekStartsOn: 1 })
+    const end = endOfWeek(selectedDate, { weekStartsOn: 1 })
+    return eachDayOfInterval({ start, end })
+  }, [selectedDate])
+
+  // Navigation handlers
+  const goToPrevious = () => {
+    if (viewMode === "day") {
+      setSelectedDate(new Date(selectedDate.getTime() - 24 * 60 * 60 * 1000))
+    } else if (viewMode === "week") {
+      setSelectedDate(
+        new Date(selectedDate.getTime() - 7 * 24 * 60 * 60 * 1000)
+      )
+    } else {
+      setSelectedDate(subMonths(selectedDate, 1))
+    }
+  }
+
+  const goToNext = () => {
+    if (viewMode === "day") {
+      setSelectedDate(new Date(selectedDate.getTime() + 24 * 60 * 60 * 1000))
+    } else if (viewMode === "week") {
+      setSelectedDate(
+        new Date(selectedDate.getTime() + 7 * 24 * 60 * 60 * 1000)
+      )
+    } else {
+      setSelectedDate(addMonths(selectedDate, 1))
+    }
+  }
+
+  const goToToday = () => {
+    setSelectedDate(new Date())
+  }
+
+  const handleDragStart = (event: DragStartEvent) => {
+    const item = items.find((i) => i.id === event.active.id)
+    if (item) {
+      setDraggedItem(item)
+      setDropTarget(null)
+    }
+  }
+
+  const handleDragOver = (event: DragOverEvent) => {
+    const { over } = event
+    if (!over || !draggedItem) {
+      setDropTarget(null)
+      return
+    }
+
+    const hour = over.data.current?.hour as number
+    const minute = over.data.current?.minute as number
+    const dayIndex = over.data.current?.dayIndex as number
+
+    if (hour === undefined || minute === undefined) {
+      setDropTarget(null)
+      return
+    }
+
+    const newStartMinutes = hour * 60 + minute
+    const newStartTime = minutesToTime(newStartMinutes)
+
+    // Calculate target date based on dayIndex (for week view cross-day drag)
+    let targetDate = selectedDate
+    if (viewMode === "week" && dayIndex !== undefined && dayIndex >= 0) {
+      const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 })
+      targetDate = addDays(weekStart, dayIndex)
+    }
+
+    setDropTarget({ time: newStartTime, date: targetDate })
+  }
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+
+    if (!over || !onReschedule || !draggedItem) {
+      setDraggedItem(null)
+      return
+    }
+
+    const hour = over.data.current?.hour as number
+    const minute = over.data.current?.minute as number
+    const dayIndex = over.data.current?.dayIndex as number
+
+    if (hour === undefined || minute === undefined) {
+      setDraggedItem(null)
+      return
+    }
+
+    const newStartMinutes = hour * 60 + minute
+    const duration = getDurationMinutes(draggedItem.start, draggedItem.end)
+    const newEndMinutes = newStartMinutes + duration
+
+    const newStartTime = minutesToTime(newStartMinutes)
+    const newEndTime = minutesToTime(newEndMinutes)
+
+    // Calculate target date based on dayIndex (for week view cross-day drag)
+    let targetDate = selectedDate
+    if (viewMode === "week" && dayIndex !== undefined && dayIndex >= 0) {
+      const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 })
+      targetDate = addDays(weekStart, dayIndex)
+    }
+
+    onReschedule(draggedItem.id, newStartTime, newEndTime, targetDate)
+    setDraggedItem(null)
+    setDropTarget(null)
+  }
+
+  const renderSidebar = () => {
+    if (isMobile) return null
+
+    const sidebarItems = items.filter((item) => {
+      if (!item.date) return false
+      return isSameDay(item.date, selectedDate)
+    })
+
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-center">
-        <div className="text-muted-foreground">
-          <h3 className="text-lg font-semibold">No itinerary items</h3>
-          <p className="text-sm">Start by adding items to your itinerary</p>
+      <div className="hidden w-64 shrink-0 border-r bg-background lg:block">
+        <div className="p-3">
+          <Calendar
+            mode="single"
+            selected={selectedDate}
+            onSelect={(date) => date && setSelectedDate(date)}
+            className="rounded-md border"
+          />
+        </div>
+
+        <div className="border-t p-3">
+          <h3 className="mb-2 text-sm font-medium">
+            {format(selectedDate, "MMMM d, yyyy")}
+          </h3>
+          <div className="max-h-64 space-y-2 overflow-y-auto">
+            {sidebarItems.length === 0 ? (
+              <p className="text-xs text-muted-foreground">No items</p>
+            ) : (
+              sidebarItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex items-center gap-2 rounded-md border p-2 text-xs"
+                >
+                  <span
+                    className={cn(
+                      "rounded px-1 text-[8px] font-bold",
+                      item.itemType === "bucket-list"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground"
+                    )}
+                  >
+                    {item.itemType === "bucket-list" ? "BL" : "CS"}
+                  </span>
+                  <div className="flex-1 truncate">
+                    <div className="font-medium">{item.title}</div>
+                    <div className="text-muted-foreground">
+                      {item.start} - {item.end}
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </div>
     )
   }
 
-  // Mobile vertical layout
+  // Mobile layout
   if (isMobile) {
     const sortedItems = [...items].sort((a, b) =>
       a.start.localeCompare(b.start)
@@ -159,9 +270,39 @@ export default function GridTimeline({
 
     return (
       <div className="space-y-4 p-4">
+        {/* Mobile view switcher */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="icon" onClick={goToPrevious}>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="text-sm font-medium">
+              {viewMode === "day" && format(selectedDate, "MMM d")}
+              {viewMode === "week" &&
+                `${format(weekDays[0], "MMM d")} - ${format(weekDays[6], "MMM d")}`}
+              {viewMode === "month" && format(selectedDate, "MMMM yyyy")}
+            </span>
+            <Button variant="outline" size="icon" onClick={goToNext}>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+          <Select
+            value={viewMode}
+            onValueChange={(v) => setViewMode(v as ViewMode)}
+          >
+            <SelectTrigger className="w-24">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="day">Day</SelectItem>
+              <SelectItem value="week">Week</SelectItem>
+              <SelectItem value="month">Month</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
         {sortedItems.map((item, index) => (
           <div key={item.id} className="flex gap-3">
-            {/* Timeline line */}
             <div className="flex flex-col items-center">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
                 {index + 1}
@@ -171,7 +312,6 @@ export default function GridTimeline({
               )}
             </div>
 
-            {/* Content */}
             <div className="flex-1 pb-6">
               <div className="flex items-start justify-between gap-2">
                 <div>
@@ -215,6 +355,26 @@ export default function GridTimeline({
                   </span>
                 </p>
               )}
+              {item.categories && item.categories.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {item.categories.map((category) => (
+                    <span
+                      key={category.id}
+                      className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px]"
+                      style={{
+                        backgroundColor: `${category.color}20`,
+                        color: category.color,
+                      }}
+                    >
+                      <span
+                        className="h-1.5 w-1.5 rounded-full"
+                        style={{ backgroundColor: category.color }}
+                      />
+                      {category.name}
+                    </span>
+                  ))}
+                </div>
+              )}
               {item.description && (
                 <p className="mt-2 text-sm text-muted-foreground">
                   {item.description}
@@ -227,175 +387,85 @@ export default function GridTimeline({
     )
   }
 
-  // Desktop horizontal layout
-  const totalSlots = (24 * 60) / slotDuration
-  const slots = generateSlots(slotDuration)
-
-  const handleDragStart = (event: DragStartEvent) => {
-    const item = items.find((i) => i.id === event.active.id)
-    if (item) {
-      setDraggedItem(item)
-    }
-  }
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event
-
-    if (!over || !onReschedule || !draggedItem) {
-      setDraggedItem(null)
-      return
-    }
-
-    // Get the slot index from the droppable
-    const slotIndex = over.data.current?.slotIndex as number
-    if (slotIndex === undefined) {
-      setDraggedItem(null)
-      return
-    }
-
-    // Calculate new start time based on drop position
-    const newStart = indexToTime(slotIndex, slotDuration)
-    const duration = getDurationMinutes(draggedItem.start, draggedItem.end)
-    const newEndMinutes = slotIndex * slotDuration + duration
-    const newEndH = String(Math.floor(newEndMinutes / 60)).padStart(2, "0")
-    const newEndM = String(newEndMinutes % 60).padStart(2, "0")
-    const newEnd = `${newEndH}:${newEndM}`
-
-    onReschedule(draggedItem.id, newStart, newEnd)
-    setDraggedItem(null)
-  }
-
   return (
     <DndContext
       sensors={sensors}
       onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className="w-full overflow-x-auto border bg-background">
-        {/* HEADER */}
-        <div
-          className="sticky top-0 z-30 grid w-max border-b bg-primary/10 text-xs"
-          style={{
-            gridTemplateColumns: `${SIDEBAR_WIDTH}px repeat(${totalSlots}, ${slotWidth}px)`,
-          }}
-        >
-          {/* Sticky Task Header */}
-          <div className="sticky left-0 z-40 border-r bg-transparent p-3 font-medium text-primary-foreground shadow-sm"></div>
+      <div className="flex h-full flex-col">
+        {/* Toolbar */}
+        <div className="flex items-center justify-between border-b bg-background p-3">
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="icon" onClick={goToPrevious}>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" onClick={goToToday}>
+              Today
+            </Button>
+            <Button variant="outline" size="icon" onClick={goToNext}>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+            <span className="ml-4 text-lg font-semibold">
+              {viewMode === "day" && format(selectedDate, "EEEE, MMMM d, yyyy")}
+              {viewMode === "week" &&
+                `${format(weekDays[0], "MMMM d")} - ${format(weekDays[6], "MMMM d, yyyy")}`}
+              {viewMode === "month" && format(selectedDate, "MMMM yyyy")}
+            </span>
+          </div>
 
-          {slots.map((s, i) => {
-            const isHour = i % 4 === 0
-            return (
-              <div
-                key={i}
-                className={`relative border-l ${
-                  isHour
-                    ? "border-muted-foreground/40 bg-muted/30"
-                    : "border-muted-foreground/10"
-                }`}
-              >
-                {isHour && (
-                  <span className="absolute top-1 left-1 text-[10px] font-semibold text-muted-foreground">
-                    {s}
-                  </span>
-                )}
-              </div>
-            )
-          })}
+          <Select
+            value={viewMode}
+            onValueChange={(v) => setViewMode(v as ViewMode)}
+          >
+            <SelectTrigger className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="day">Day</SelectItem>
+              <SelectItem value="week">Week</SelectItem>
+              <SelectItem value="month">Month</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
-        {/* ROWS */}
-        {items.map((item) => {
-          const start = timeToIndex(item.start, slotDuration)
-          const end = timeToIndex(item.end, slotDuration)
-          const span = end - start
+        {/* Main content */}
+        <div className="flex flex-1 overflow-hidden">
+          {renderSidebar()}
 
-          return (
-            <div
-              key={item.id}
-              className="relative grid h-12 w-max border-b"
-              style={{
-                gridTemplateColumns: `${SIDEBAR_WIDTH}px repeat(${totalSlots}, ${slotWidth}px)`,
-              }}
-            >
-              {/* Sticky Task Column */}
-              <div
-                className={cn(
-                  "sticky left-0 z-20 flex items-center justify-between truncate border-r p-2 text-sm",
-                  item.itemType === "bucket-list"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground"
-                )}
-              >
-                <span className="truncate px-1">{item.title}</span>
-                <div className="flex gap-1">
-                  {item.itemType === "custom" && onEditItem && (
-                    <button
-                      onClick={() => onEditItem(item)}
-                      className="flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground/70 transition-colors hover:bg-muted-foreground/10 hover:text-muted-foreground"
-                      title="Edit item"
-                    >
-                      <Pencil className="h-3 w-3" />
-                    </button>
-                  )}
-                  <button
-                    onClick={() => onDeleteItem(item.id)}
-                    className={cn(
-                      "flex h-6 w-6 items-center justify-center rounded-md transition-colors",
-                      item.itemType === "bucket-list"
-                        ? "text-primary-foreground/70 hover:bg-primary-foreground/10 hover:text-primary-foreground"
-                        : "text-muted-foreground/70 hover:bg-muted-foreground/10 hover:text-muted-foreground"
-                    )}
-                    title="Delete item"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </button>
-                </div>
-              </div>
-
-              {/* GRID BACKGROUND */}
-              {Array.from({ length: totalSlots }).map((_, i) => {
-                const isHour = i % 4 === 0
-                return (
-                  <DroppableGridCell
-                    key={i}
-                    id={item.id}
-                    index={i}
-                    slotDuration={slotDuration}
-                    isHour={isHour}
-                    draggedItemId={draggedItem?.id || null}
-                  />
-                )
-              })}
-
-              {/* EVENT */}
-              <TimelineEvent
-                item={{
-                  id: item.id,
-                  itemType: item.itemType,
-                  title: item.title,
-                  start: item.start,
-                  end: item.end,
-                  location: item.location,
-                  cost: item.cost,
-                  description: item.description,
-                  completed: item.completed,
-                }}
-                draggable={!!onReschedule}
-                style={{
-                  position: "absolute",
-                  left: `calc(${SIDEBAR_WIDTH}px + ${start * slotWidth}px)`,
-                  width: `${span * slotWidth}px`,
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  zIndex: 10,
-                }}
+          <div className="flex-1 overflow-auto">
+            {viewMode === "day" && (
+              <DayGrid
+                items={items}
+                selectedDate={selectedDate}
+                onReschedule={onReschedule}
+                onEditItem={onEditItem}
+                onDeleteItem={onDeleteItem}
+                draggedItemId={draggedItem?.id || null}
               />
-            </div>
-          )
-        })}
+            )}
+            {viewMode === "week" && (
+              <WeekGrid
+                items={items}
+                selectedDate={selectedDate}
+                onReschedule={onReschedule}
+                onEditItem={onEditItem}
+                onDeleteItem={onDeleteItem}
+                draggedItemId={draggedItem?.id || null}
+              />
+            )}
+            {viewMode === "month" && (
+              <MonthGrid
+                items={items}
+                selectedDate={selectedDate}
+                onDateChange={setSelectedDate}
+              />
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* Drag Overlay for smooth visual feedback */}
       <DragOverlay dropAnimation={null}>
         {draggedItem ? (
           <div
@@ -406,9 +476,17 @@ export default function GridTimeline({
                 : "border-muted-foreground/20 bg-muted"
             )}
             style={{
-              width: `${(timeToIndex(draggedItem.end, slotDuration) - timeToIndex(draggedItem.start, slotDuration)) * slotWidth}px`,
+              width: "120px",
+              height: `${(getDurationMinutes(draggedItem.start, draggedItem.end) / 60) * HOUR_HEIGHT}px`,
+              minHeight: "40px",
             }}
           >
+            {/* Drop target indicator */}
+            {dropTarget && (
+              <div className="mb-1 rounded bg-primary-foreground/20 px-1.5 py-0.5 text-[10px] font-medium text-primary-foreground">
+                {format(dropTarget.date, "MMM d")} @ {dropTarget.time}
+              </div>
+            )}
             <div className="flex items-start gap-2">
               <span
                 className={cn(
@@ -420,10 +498,27 @@ export default function GridTimeline({
               >
                 {draggedItem.itemType === "bucket-list" ? "BL" : "CS"}
               </span>
-              <h3 className="truncate text-xs font-semibold text-primary-foreground">
+              <h3
+                className={cn(
+                  "truncate text-xs font-semibold",
+                  draggedItem.itemType === "bucket-list"
+                    ? "text-primary-foreground"
+                    : "text-foreground"
+                )}
+              >
                 {draggedItem.title}
               </h3>
             </div>
+            <p
+              className={cn(
+                "text-[10px] opacity-80",
+                draggedItem.itemType === "bucket-list"
+                  ? "text-primary-foreground"
+                  : "text-muted-foreground"
+              )}
+            >
+              {draggedItem.start} - {draggedItem.end}
+            </p>
           </div>
         ) : null}
       </DragOverlay>

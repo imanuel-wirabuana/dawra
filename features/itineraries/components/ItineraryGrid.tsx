@@ -4,13 +4,11 @@ import { useState } from "react"
 import { useRealtimeItineraryItems } from "../hooks/useRealtimeItineraryItems"
 import { useUpdateItineraryItem } from "../hooks/useUpdateItineraryItem"
 import GridTimeline from "@/features/itineraries/components/GridTimeline"
-import SlotWidthControl from "./SlotWidthControl"
 import DatePicker from "./DatePicker"
 import ItineraryForm from "./ItineraryForm"
 import { deleteItineraryItem } from "../services/delete.service"
-import type { ItineraryItem } from "@/types"
+import type { ItineraryItem, Category } from "@/types"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { CalendarDays, DollarSign, Settings2 } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -21,12 +19,48 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { useItineraryStore } from "@/store/itineraryStore"
+import { isSameDay, parseISO, format } from "date-fns"
+import CategorySelector from "@/features/categories/components/CategorySelector"
+
+// Generate time options in 15-min intervals
+const generateTimeOptions = (): string[] => {
+  const options: string[] = []
+  for (let h = 0; h < 24; h++) {
+    for (let m = 0; m < 60; m += 15) {
+      const time = `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`
+      options.push(time)
+    }
+  }
+  return options
+}
+
+const TIME_OPTIONS = generateTimeOptions()
+
+// Convert time string (HH:MM) to minutes
+const timeToMinutes = (time: string): number => {
+  const [h, m] = time.split(":").map(Number)
+  return h * 60 + m
+}
+
+// Get valid end time options based on start time
+const getValidEndTimes = (startTime: string): string[] => {
+  if (!startTime) return TIME_OPTIONS
+  const startMinutes = timeToMinutes(startTime)
+  return TIME_OPTIONS.filter((time) => timeToMinutes(time) > startMinutes)
+}
 
 export default function ItineraryGrid() {
   const itineraryItems = useRealtimeItineraryItems()
   const updateMutation = useUpdateItineraryItem()
-  const { selectedDate } = useItineraryStore()
+  const { selectedDate, setSelectedDate } = useItineraryStore()
   const [editingItem, setEditingItem] = useState<{
     id: string
     itemType: "bucket-list" | "custom"
@@ -34,6 +68,7 @@ export default function ItineraryGrid() {
     location?: string
     cost?: number
     description?: string
+    categories?: Category[]
     start: string
     end: string
   } | null>(null)
@@ -45,15 +80,19 @@ export default function ItineraryGrid() {
   const handleReschedule = async (
     id: string,
     newStartTime: string,
-    newEndTime: string
+    newEndTime: string,
+    targetDate?: Date
   ) => {
-    const formatDateForInput = (date: Date) => date.toISOString().split("T")[0]
+    // Use format to get yyyy-MM-dd in local timezone, avoiding UTC conversion issues
+    const formatDateForInput = (date: Date) => format(date, "yyyy-MM-dd")
+    const dateToUse = targetDate || selectedDate
 
     await updateMutation.mutateAsync({
       id,
       updates: {
-        start: `${formatDateForInput(selectedDate)}T${newStartTime}`,
-        end: `${formatDateForInput(selectedDate)}T${newEndTime}`,
+        date: formatDateForInput(dateToUse),
+        start: newStartTime,
+        end: newEndTime,
       },
     })
   }
@@ -65,6 +104,7 @@ export default function ItineraryGrid() {
     location?: string
     cost?: number
     description?: string
+    categories?: Category[]
     start: string
     end: string
   }) => {
@@ -75,20 +115,29 @@ export default function ItineraryGrid() {
     e.preventDefault()
     if (!editingItem) return
 
-    const selectedDate = new Date()
-    const formatDateForInput = (date: Date) => date.toISOString().split("T")[0]
+    // Parse the time from the full ISO string if needed
+    const parseTime = (timeStr: string) => {
+      // If timeStr is already just time (HH:mm), return it
+      if (timeStr.length === 5 && timeStr.includes(":")) {
+        return timeStr
+      }
+      // If timeStr includes date portion, extract just time
+      const match = timeStr.match(/T(\d{2}:\d{2})/)
+      return match ? match[1] : timeStr
+    }
 
     await updateMutation.mutateAsync({
       id: editingItem.id,
       updates: {
-        start: `${formatDateForInput(selectedDate)}T${editingItem.start}`,
-        end: `${formatDateForInput(selectedDate)}T${editingItem.end}`,
+        start: parseTime(editingItem.start),
+        end: parseTime(editingItem.end),
         ...(editingItem.itemType === "custom" && {
           customItem: {
             title: editingItem.title,
             location: editingItem.location,
             cost: editingItem.cost,
             description: editingItem.description,
+            categories: editingItem.categories,
           },
         }),
       },
@@ -110,22 +159,25 @@ export default function ItineraryGrid() {
         id: item.id,
         itemType: item.itemType,
         title: itemData?.title || "Untitled",
+        location: itemData?.location,
+        cost: itemData?.cost,
+        description: itemData?.description,
+        categories: itemData?.categories,
         completed: item.completed,
-        start: new Date(item.start).toLocaleTimeString("en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        }),
-        end: new Date(item.end).toLocaleTimeString("en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        }),
+        date: item.date ? parseISO(item.date) : new Date(item.start),
+        start: item.start?.includes("T")
+          ? item.start.split("T")[1]
+          : item.start,
+        end: item.end?.includes("T") ? item.end.split("T")[1] : item.end,
       }
     }) || []
 
-  // Calculate total daily budget from all items with costs
+  // Calculate total daily budget from items with costs for the selected date only
   const totalCost = itineraryItems.reduce((sum, item) => {
+    if (!item.date) return sum
+    const itemDate = parseISO(item.date)
+    if (!isSameDay(itemDate, selectedDate)) return sum
+
     const cost =
       item.itemType === "bucket-list"
         ? item.bucketList?.cost
@@ -153,27 +205,6 @@ export default function ItineraryGrid() {
                   {totalCost.toLocaleString()}
                 </span>
               )}
-              <div className="hidden md:block">
-                <SlotWidthControl />
-              </div>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="md:hidden"
-                    aria-label="Timeline settings"
-                  >
-                    <Settings2 size={18} />
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-75">
-                  <DialogHeader>
-                    <DialogTitle>Timeline Settings</DialogTitle>
-                  </DialogHeader>
-                  <SlotWidthControl />
-                </DialogContent>
-              </Dialog>
             </div>
           </div>
         </CardHeader>
@@ -183,6 +214,8 @@ export default function ItineraryGrid() {
             onDeleteItem={handleDelete}
             onEditItem={handleEdit}
             onReschedule={handleReschedule}
+            selectedDate={selectedDate}
+            onDateChange={setSelectedDate}
           />
         </CardContent>
       </Card>
@@ -198,95 +231,139 @@ export default function ItineraryGrid() {
           </DialogHeader>
           {editingItem && (
             <form onSubmit={handleUpdate} className="space-y-4">
-              {editingItem.itemType === "custom" ? (
-                <>
-                  <div className="space-y-2">
-                    <Label htmlFor="editTitle">Title</Label>
-                    <Input
-                      id="editTitle"
-                      value={editingItem.title}
-                      onChange={(e) =>
-                        setEditingItem({
-                          ...editingItem,
-                          title: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="editLocation">Location</Label>
-                    <Input
-                      id="editLocation"
-                      value={editingItem.location || ""}
-                      onChange={(e) =>
-                        setEditingItem({
-                          ...editingItem,
-                          location: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-2">
-                      <Label htmlFor="editCost">Cost</Label>
-                      <Input
-                        id="editCost"
-                        type="number"
-                        value={editingItem.cost || ""}
-                        onChange={(e) =>
-                          setEditingItem({
-                            ...editingItem,
-                            cost: e.target.value
-                              ? Number(e.target.value)
-                              : undefined,
-                          })
-                        }
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="editDescription">Description</Label>
-                    <Input
-                      id="editDescription"
-                      value={editingItem.description || ""}
-                      onChange={(e) =>
-                        setEditingItem({
-                          ...editingItem,
-                          description: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                </>
-              ) : (
-                <div className="rounded-md bg-muted p-3 text-sm text-muted-foreground">
-                  Bucket list items can only have their time updated. Edit the
-                  bucket list item directly for other changes.
+              <div className="space-y-2">
+                <Label htmlFor="editTitle">Title</Label>
+                <Input
+                  id="editTitle"
+                  value={editingItem.title}
+                  onChange={(e) =>
+                    setEditingItem({
+                      ...editingItem,
+                      title: e.target.value,
+                    })
+                  }
+                  disabled={editingItem.itemType === "bucket-list"}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="editLocation">Location</Label>
+                <Input
+                  id="editLocation"
+                  value={editingItem.location || ""}
+                  onChange={(e) =>
+                    setEditingItem({
+                      ...editingItem,
+                      location: e.target.value,
+                    })
+                  }
+                  disabled={editingItem.itemType === "bucket-list"}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="editCost">Cost</Label>
+                  <Input
+                    id="editCost"
+                    type="number"
+                    value={editingItem.cost || ""}
+                    onChange={(e) =>
+                      setEditingItem({
+                        ...editingItem,
+                        cost: e.target.value
+                          ? Number(e.target.value)
+                          : undefined,
+                      })
+                    }
+                    disabled={editingItem.itemType === "bucket-list"}
+                  />
                 </div>
-              )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="editDescription">Description</Label>
+                <Input
+                  id="editDescription"
+                  value={editingItem.description || ""}
+                  onChange={(e) =>
+                    setEditingItem({
+                      ...editingItem,
+                      description: e.target.value,
+                    })
+                  }
+                  disabled={editingItem.itemType === "bucket-list"}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="editCategories">Categories</Label>
+                <CategorySelector
+                  selectedCategories={editingItem.categories || []}
+                  onCategoriesChange={(categories) =>
+                    setEditingItem({
+                      ...editingItem,
+                      categories,
+                    })
+                  }
+                  disabled={editingItem.itemType === "bucket-list"}
+                />
+              </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="editStart">Start Time</Label>
-                  <Input
-                    id="editStart"
-                    type="time"
+                  <Select
                     value={editingItem.start}
-                    onChange={(e) =>
-                      setEditingItem({ ...editingItem, start: e.target.value })
-                    }
-                  />
+                    onValueChange={(value) => {
+                      setEditingItem({ ...editingItem, start: value })
+                      // Reset end time if it's now invalid
+                      if (
+                        editingItem.end &&
+                        timeToMinutes(editingItem.end) <= timeToMinutes(value)
+                      ) {
+                        setEditingItem((prev) =>
+                          prev ? { ...prev, end: "" } : null
+                        )
+                      }
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select time..." />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-60">
+                      {TIME_OPTIONS.map((time: string) => (
+                        <SelectItem key={time} value={time}>
+                          {time}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="editEnd">End Time</Label>
-                  <Input
-                    id="editEnd"
-                    type="time"
+                  <Select
                     value={editingItem.end}
-                    onChange={(e) =>
-                      setEditingItem({ ...editingItem, end: e.target.value })
+                    onValueChange={(value) =>
+                      setEditingItem({ ...editingItem, end: value })
                     }
-                  />
+                    disabled={!editingItem.start}
+                  >
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder={
+                          editingItem.start
+                            ? "Select end time..."
+                            : "Select start first"
+                        }
+                      />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-60">
+                      {getValidEndTimes(editingItem.start).map(
+                        (time: string) => (
+                          <SelectItem key={time} value={time}>
+                            {time}
+                          </SelectItem>
+                        )
+                      )}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
