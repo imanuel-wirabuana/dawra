@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
 import Navbar from "@/components/Navbar"
 import DynamicBreadcrumb from "@/components/DynamicBreadcrumb"
+import ChatWidget from "@/components/ChatWidget"
 import Providers from "./providers"
 import { TooltipProvider } from "@/components/ui/tooltip"
 
@@ -51,6 +52,7 @@ export default function RootLayout({
               <Navbar className="sticky top-0 z-50" />
               <DynamicBreadcrumb />
               {children}
+              <ChatWidget />
             </ThemeProvider>
           </TooltipProvider>
         </Providers>

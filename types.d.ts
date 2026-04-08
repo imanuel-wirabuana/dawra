@@ -123,9 +123,38 @@ type Photo = {
   createdAt?: Timestamp
 }
 
+type Channel = {
+  id: string
+  name: string
+  description?: string
+  createdBy: string
+  createdAt?: Timestamp
+  updatedAt?: Timestamp
+}
+
+type Reaction = {
+  emoji: string
+  userId: string
+  displayName: string
+}
+
 type ChatMessage = {
   id?: string
+  channelId: string
+  userId: string
   displayName: string
   message: string
   createdAt?: Timestamp
+  editedAt?: Timestamp
+  isDeleted?: boolean
+  replyToId?: string
+  reactions?: Reaction[]
+}
+
+type TypingStatus = {
+  userId: string
+  displayName: string
+  channelId: string
+  isTyping: boolean
+  timestamp: Timestamp
 }

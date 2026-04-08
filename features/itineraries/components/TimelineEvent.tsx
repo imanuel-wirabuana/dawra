@@ -217,7 +217,7 @@ export default function TimelineEvent({
         <div
           className={cn(
             "flex items-center gap-1",
-            compact ? "max-w-[100px] text-[9px]" : "text-[10px]",
+            compact ? "max-w-25 text-[9px]" : "text-[10px]",
             item.itemType === "bucket-list"
               ? "text-primary-foreground/70"
               : "text-muted-foreground/70"
