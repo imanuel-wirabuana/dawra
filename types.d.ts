@@ -122,3 +122,10 @@ type Photo = {
   folderId?: string // optional folder reference
   createdAt?: Timestamp
 }
+
+type ChatMessage = {
+  id?: string
+  displayName: string
+  message: string
+  createdAt?: Timestamp
+}

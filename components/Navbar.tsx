@@ -27,6 +27,7 @@ export default function Navbar({ className }: NavbarProps) {
     { href: "/bucket-lists", label: "Bucket Lists" },
     { href: "/itineraries", label: "Itineraries" },
     { href: "/photos", label: "Photos" },
+    { href: "/chats", label: "Chats" },
   ]
 
   return (
