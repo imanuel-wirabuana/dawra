@@ -7,7 +7,7 @@ import { useItineraryStore } from "@/store/itineraryStore"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import type { BucketList, Category } from "@/types"
+import type { Category } from "@/types"
 import { cn } from "@/lib/utils"
 import {
   Popover,
@@ -69,8 +69,6 @@ export default function ItineraryForm({ className }: ItineraryFormProps) {
 
   // Bucket list mode state
   const [selectedBucketListId, setSelectedBucketListId] = useState<string>("")
-  const selectedBucketList =
-    bucketListItems.find((item) => item.id === selectedBucketListId) || null
 
   // Custom item mode state
   const [customTitle, setCustomTitle] = useState("")
@@ -102,7 +100,7 @@ export default function ItineraryForm({ className }: ItineraryFormProps) {
 
   const isSubmitDisabled = () => {
     if (!startTime || !endTime) return true
-    if (itemType === "bucket-list" && !selectedBucketList) return true
+    if (itemType === "bucket-list" && !selectedBucketListId) return true
     if (itemType === "custom" && !customTitle.trim()) return true
     return addItineraryMutation.isPending
   }
@@ -121,13 +119,13 @@ export default function ItineraryForm({ className }: ItineraryFormProps) {
     }
 
     if (itemType === "bucket-list") {
-      if (!selectedBucketList) return
+      if (!selectedBucketListId) return
 
       addItineraryMutation.mutate({
         ...baseItem,
         itemType: "bucket-list",
         completed: false,
-        bucketList: selectedBucketList,
+        bucketList: selectedBucketListId,
       })
     } else {
       if (!customTitle.trim()) return

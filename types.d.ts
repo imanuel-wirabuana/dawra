@@ -93,8 +93,8 @@ type ItineraryItem = {
   itemType: "bucket-list" | "custom"
   /** Whether the item has been completed or not */
   completed: boolean
-  /** The bucket list item this itinerary entry references (for bucket-list type) */
-  bucketList?: BucketList
+  /** The bucket list document id this itinerary entry references (for bucket-list type) */
+  bucketList?: string
   /** Custom item data (for custom type) */
   customItem?: CustomItineraryItem
 

@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRealtimeItineraryItems } from "../hooks/useRealtimeItineraryItems"
+import { useGetBucketListItems } from "../hooks/useGetBucketListItems"
 import { useUpdateItineraryItem } from "../hooks/useUpdateItineraryItem"
 import GridTimeline from "@/features/itineraries/components/GridTimeline"
 import DatePicker from "./DatePicker"
@@ -59,6 +60,7 @@ const getValidEndTimes = (startTime: string): string[] => {
 
 export default function ItineraryGrid() {
   const itineraryItems = useRealtimeItineraryItems()
+  const bucketListItems = useGetBucketListItems()
   const updateMutation = useUpdateItineraryItem()
   const { selectedDate, setSelectedDate } = useItineraryStore()
   const [editingItem, setEditingItem] = useState<{
@@ -149,13 +151,17 @@ export default function ItineraryGrid() {
   // Transform ItineraryItem to the format expected by GridTimeline
   const transformedItems =
     itineraryItems.map((item: ItineraryItem) => {
-      // For bucket-list items, use bucketList data
+      // For bucket-list items, resolve the linked bucket list by id
       // For custom items, use customItem data
+      const bucketListItem =
+        item.itemType === "bucket-list"
+          ? bucketListItems.find((bucketList) => bucketList.id === item.bucketList)
+          : undefined
       const itemData =
-        item.itemType === "bucket-list" ? item.bucketList : item.customItem
+        item.itemType === "bucket-list" ? bucketListItem : item.customItem
 
       return {
-        ...itemData,
+        ...(itemData || {}),
         id: item.id,
         itemType: item.itemType,
         title: itemData?.title || "Untitled",
@@ -180,7 +186,8 @@ export default function ItineraryGrid() {
 
     const cost =
       item.itemType === "bucket-list"
-        ? item.bucketList?.cost
+        ? bucketListItems.find((bucketList) => bucketList.id === item.bucketList)
+            ?.cost
         : item.customItem?.cost
     return sum + (cost || 0)
   }, 0)
