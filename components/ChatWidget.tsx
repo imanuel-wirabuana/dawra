@@ -61,12 +61,19 @@ const generateUserId = () => {
   return "guest"
 }
 
+const getStoredDisplayName = () => {
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("chatDisplayName") || ""
+  }
+  return ""
+}
+
 export default function ChatWidget() {
   const [currentUserId] = useState(generateUserId)
   const [isOpen, setIsOpen] = useState(false)
   const [isMinimized, setIsMinimized] = useState(false)
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null)
-  const [displayName, setDisplayName] = useState("")
+  const [displayName, setDisplayName] = useState(getStoredDisplayName)
   const [message, setMessage] = useState("")
   const [replyTo, setReplyTo] = useState<ChatMessage | null>(null)
   const [editingMessage, setEditingMessage] = useState<ChatMessage | null>(null)
@@ -107,6 +114,13 @@ export default function ChatWidget() {
     },
     [updateTyping]
   )
+
+  const handleDisplayNameChange = (value: string) => {
+    setDisplayName(value)
+    if (typeof window !== "undefined") {
+      localStorage.setItem("chatDisplayName", value)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -217,35 +231,37 @@ export default function ChatWidget() {
           {!isMinimized && (
             <>
               {/* Messages */}
-              <ScrollArea className="flex-1 p-3">
-                <div className="space-y-3">
-                  {messagesLoading ? (
-                    <p className="py-4 text-center text-sm text-muted-foreground">
-                      Loading...
-                    </p>
-                  ) : messages.length === 0 ? (
-                    <p className="py-8 text-center text-sm text-muted-foreground">
-                      No messages yet. Say hello!
-                    </p>
-                  ) : (
-                    messages.map((item) => (
-                      <MessageItem
-                        key={item.id}
-                        message={item}
-                        currentUserId={currentUserId}
-                        displayName={displayName}
-                        getReplyMessage={getReplyMessage}
-                        onReply={() => setReplyTo(item)}
-                        onStartEdit={(msg) => {
-                          setEditingMessage(msg)
-                          setEditText(msg.message)
-                        }}
-                      />
-                    ))
-                  )}
-                  <div ref={messagesEndRef} />
-                </div>
-              </ScrollArea>
+              <div className="min-h-0 flex-1">
+                <ScrollArea className="h-full p-3">
+                  <div className="space-y-3">
+                    {messagesLoading ? (
+                      <p className="py-4 text-center text-sm text-muted-foreground">
+                        Loading...
+                      </p>
+                    ) : messages.length === 0 ? (
+                      <p className="py-8 text-center text-sm text-muted-foreground">
+                        No messages yet. Say hello!
+                      </p>
+                    ) : (
+                      messages.map((item) => (
+                        <MessageItem
+                          key={item.id}
+                          message={item}
+                          currentUserId={currentUserId}
+                          displayName={displayName}
+                          getReplyMessage={getReplyMessage}
+                          onReply={() => setReplyTo(item)}
+                          onStartEdit={(msg) => {
+                            setEditingMessage(msg)
+                            setEditText(msg.message)
+                          }}
+                        />
+                      ))
+                    )}
+                    <div ref={messagesEndRef} />
+                  </div>
+                </ScrollArea>
+              </div>
 
               {/* Typing Indicator */}
               {typingUsers.length > 0 && (
@@ -289,7 +305,7 @@ export default function ChatWidget() {
                   <Input
                     placeholder="Name"
                     value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
+                    onChange={(e) => handleDisplayNameChange(e.target.value)}
                     className="h-9 w-24 shrink-0"
                     disabled={addChatMessage.isPending}
                   />

@@ -144,8 +144,8 @@ export default function ChatsPanel() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-200px)] min-h-[500px] overflow-hidden rounded-xl border border-border bg-card shadow-lg">
-      <div className="flex w-64 flex-col border-r border-border bg-muted/30">
+    <div className="flex h-fit min-h-[500px] items-stretch overflow-hidden rounded-xl border border-border bg-card shadow-lg">
+      <div className="flex min-h-0 w-64 flex-col border-r border-border bg-muted/30">
         <div className="flex items-center justify-between border-b border-border p-4">
           <h2 className="text-lg font-semibold">Channels</h2>
           <Dialog
@@ -187,7 +187,7 @@ export default function ChatsPanel() {
           </Dialog>
         </div>
 
-        <div className="flex-1 space-y-1 overflow-y-auto p-2">
+        <div className="min-h-0 flex-1 space-y-1 overflow-y-auto p-2">
           {channelsLoading ? (
             <p className="p-4 text-sm text-muted-foreground">Loading...</p>
           ) : channels.length === 0 ? (
@@ -218,7 +218,7 @@ export default function ChatsPanel() {
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col">
+      <div className="flex h-full min-h-0 flex-1 flex-col">
         {selectedChannel ? (
           <>
             <div className="flex items-center justify-between border-b border-border p-4">
@@ -244,37 +244,39 @@ export default function ChatsPanel() {
               </div>
             </div>
 
-            <ScrollArea className="flex-1 p-4">
-              <div className="space-y-4">
-                {messagesLoading ? (
-                  <p className="text-sm text-muted-foreground">
-                    Loading messages...
-                  </p>
-                ) : filteredMessages.length === 0 ? (
-                  <p className="py-8 text-center text-sm text-muted-foreground">
-                    {searchQuery
-                      ? "No messages found"
-                      : "No messages yet. Start the conversation!"}
-                  </p>
-                ) : (
-                  filteredMessages.map((item) => (
-                    <MessageItem
-                      key={item.id}
-                      message={item}
-                      currentUserId={currentUserId}
-                      displayName={displayName}
-                      getReplyMessage={getReplyMessage}
-                      onReply={() => setReplyTo(item)}
-                      onStartEdit={(msg) => {
-                        setEditingMessage(msg)
-                        setEditText(msg.message)
-                      }}
-                    />
-                  ))
-                )}
-                <div ref={messagesEndRef} />
-              </div>
-            </ScrollArea>
+            <div className="h-120">
+              <ScrollArea className="h-full flex-1 p-4">
+                <div className="space-y-4">
+                  {messagesLoading ? (
+                    <p className="text-sm text-muted-foreground">
+                      Loading messages...
+                    </p>
+                  ) : filteredMessages.length === 0 ? (
+                    <p className="py-8 text-center text-sm text-muted-foreground">
+                      {searchQuery
+                        ? "No messages found"
+                        : "No messages yet. Start the conversation!"}
+                    </p>
+                  ) : (
+                    filteredMessages.map((item) => (
+                      <MessageItem
+                        key={item.id}
+                        message={item}
+                        currentUserId={currentUserId}
+                        displayName={displayName}
+                        getReplyMessage={getReplyMessage}
+                        onReply={() => setReplyTo(item)}
+                        onStartEdit={(msg) => {
+                          setEditingMessage(msg)
+                          setEditText(msg.message)
+                        }}
+                      />
+                    ))
+                  )}
+                  <div ref={messagesEndRef} />
+                </div>
+              </ScrollArea>
+            </div>
 
             {typingUsers.length > 0 && (
               <div className="px-4 py-2 text-xs text-muted-foreground italic">

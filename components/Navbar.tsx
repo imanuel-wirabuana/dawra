@@ -51,7 +51,7 @@ export default function Navbar({ className }: NavbarProps) {
                 href={item.href}
                 className={
                   isActive(item.href)
-                    ? "font-semibold text-primary dark:brightness-150"
+                    ? "font-semibold text-primary"
                     : "transition-colors hover:text-primary"
                 }
               >

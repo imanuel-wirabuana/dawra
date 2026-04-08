@@ -11,8 +11,9 @@ import {
   type DragOverEvent,
 } from "@dnd-kit/core"
 import { Trash2, Pencil, ChevronLeft, ChevronRight } from "lucide-react"
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useCallback, useRef } from "react"
 import { cn } from "@/lib/utils"
+import { useDebounce } from "@/hooks/useDebounce"
 import { Calendar } from "@/components/ui/calendar"
 import {
   Select,
@@ -55,10 +56,11 @@ interface GridTimelineProps {
     newStartTime: string,
     newEndTime: string,
     targetDate?: Date
-  ) => void
+  ) => Promise<void> | void
   onSlotClick?: (date: Date, hour: number, minute: number) => void
   selectedDate?: Date
   onDateChange?: (date: Date) => void
+  debounceMs?: number
 }
 
 export default function GridTimeline({
@@ -69,6 +71,7 @@ export default function GridTimeline({
   onSlotClick,
   selectedDate: externalSelectedDate,
   onDateChange,
+  debounceMs = 300,
 }: GridTimelineProps) {
   const [isMobile, setIsMobile] = useState(false)
   const [draggedItem, setDraggedItem] = useState<Item | null>(null)
@@ -78,6 +81,17 @@ export default function GridTimeline({
   } | null>(null)
   const [viewMode, setViewMode] = useState<ViewMode>("week")
   const [internalDate, setInternalDate] = useState<Date>(new Date())
+
+  // Optimistic items state for smooth drag/drop visual feedback
+  const [optimisticItems, setOptimisticItems] = useState<Map<string, Item>>(
+    new Map()
+  )
+  const pendingUpdateRef = useRef<{
+    id: string
+    newStartTime: string
+    newEndTime: string
+    targetDate: Date
+  } | null>(null)
 
   const selectedDate = externalSelectedDate || internalDate
   const setSelectedDate = onDateChange || setInternalDate
@@ -89,6 +103,16 @@ export default function GridTimeline({
       },
     })
   )
+
+  // Merge optimistic items with actual items for rendering
+  const displayItems = useMemo(() => {
+    if (optimisticItems.size === 0) return items
+
+    return items.map((item) => {
+      const optimistic = optimisticItems.get(item.id)
+      return optimistic || item
+    })
+  }, [items, optimisticItems])
 
   useEffect(() => {
     const checkMobile = () => {
@@ -134,13 +158,16 @@ export default function GridTimeline({
     setSelectedDate(new Date())
   }
 
-  const handleDragStart = (event: DragStartEvent) => {
-    const item = items.find((i) => i.id === event.active.id)
-    if (item) {
-      setDraggedItem(item)
-      setDropTarget(null)
-    }
-  }
+  const handleDragStart = useCallback(
+    (event: DragStartEvent) => {
+      const item = displayItems.find((i) => i.id === event.active.id)
+      if (item) {
+        setDraggedItem(item)
+        setDropTarget(null)
+      }
+    },
+    [displayItems]
+  )
 
   const handleDragOver = (event: DragOverEvent) => {
     const { over } = event
@@ -171,46 +198,125 @@ export default function GridTimeline({
     setDropTarget({ time: newStartTime, date: targetDate })
   }
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event
+  // Debounced reschedule handler for smooth background updates
+  const {
+    debouncedCallback: debouncedReschedule,
+    cancel: cancelReschedule,
+    flush: flushReschedule,
+  } = useDebounce(
+    async (
+      id: string,
+      newStartTime: string,
+      newEndTime: string,
+      targetDate: Date
+    ) => {
+      if (!onReschedule) return
 
-    if (!over || !onReschedule || !draggedItem) {
+      pendingUpdateRef.current = null
+      await onReschedule(id, newStartTime, newEndTime, targetDate)
+      // Clear optimistic item after successful update
+      setOptimisticItems((prev) => {
+        const next = new Map(prev)
+        next.delete(id)
+        return next
+      })
+    },
+    debounceMs
+  )
+
+  // Flush any pending reschedule on unmount or when items change externally
+  useEffect(() => {
+    return () => {
+      flushReschedule()
+    }
+  }, [flushReschedule])
+
+  // Reset optimistic items when external items change
+  useEffect(() => {
+    setOptimisticItems(new Map())
+    cancelReschedule()
+    pendingUpdateRef.current = null
+  }, [items, cancelReschedule])
+
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event
+
+      if (!over || !onReschedule || !draggedItem) {
+        setDraggedItem(null)
+        setDropTarget(null)
+        return
+      }
+
+      const hour = over.data.current?.hour as number
+      const minute = over.data.current?.minute as number
+      const dayIndex = over.data.current?.dayIndex as number
+
+      if (hour === undefined || minute === undefined) {
+        setDraggedItem(null)
+        setDropTarget(null)
+        return
+      }
+
+      const newStartMinutes = hour * 60 + minute
+      const duration = getDurationMinutes(draggedItem.start, draggedItem.end)
+      const newEndMinutes = newStartMinutes + duration
+
+      const newStartTime = minutesToTime(newStartMinutes)
+      const newEndTime = minutesToTime(newEndMinutes)
+
+      // Calculate target date based on dayIndex (for week view cross-day drag)
+      let targetDate = selectedDate
+      if (viewMode === "week" && dayIndex !== undefined && dayIndex >= 0) {
+        const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 })
+        targetDate = addDays(weekStart, dayIndex)
+      }
+
+      // Cancel any pending previous reschedule
+      cancelReschedule()
+
+      // Store pending update reference
+      pendingUpdateRef.current = {
+        id: draggedItem.id,
+        newStartTime,
+        newEndTime,
+        targetDate,
+      }
+
+      // Optimistically update the item position for immediate visual feedback
+      const updatedItem: Item = {
+        ...draggedItem,
+        start: newStartTime,
+        end: newEndTime,
+        date: targetDate,
+      }
+
+      setOptimisticItems((prev) => {
+        const next = new Map(prev)
+        next.set(draggedItem.id, updatedItem)
+        return next
+      })
+
+      // Trigger debounced background update
+      debouncedReschedule(draggedItem.id, newStartTime, newEndTime, targetDate)
+
       setDraggedItem(null)
-      return
-    }
-
-    const hour = over.data.current?.hour as number
-    const minute = over.data.current?.minute as number
-    const dayIndex = over.data.current?.dayIndex as number
-
-    if (hour === undefined || minute === undefined) {
-      setDraggedItem(null)
-      return
-    }
-
-    const newStartMinutes = hour * 60 + minute
-    const duration = getDurationMinutes(draggedItem.start, draggedItem.end)
-    const newEndMinutes = newStartMinutes + duration
-
-    const newStartTime = minutesToTime(newStartMinutes)
-    const newEndTime = minutesToTime(newEndMinutes)
-
-    // Calculate target date based on dayIndex (for week view cross-day drag)
-    let targetDate = selectedDate
-    if (viewMode === "week" && dayIndex !== undefined && dayIndex >= 0) {
-      const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 })
-      targetDate = addDays(weekStart, dayIndex)
-    }
-
-    onReschedule(draggedItem.id, newStartTime, newEndTime, targetDate)
-    setDraggedItem(null)
-    setDropTarget(null)
-  }
+      setDropTarget(null)
+    },
+    [
+      draggedItem,
+      onReschedule,
+      selectedDate,
+      viewMode,
+      debouncedReschedule,
+      cancelReschedule,
+    ]
+  )
 
   const renderSidebar = () => {
     if (isMobile) return null
 
-    const sidebarItems = items.filter((item) => {
+    const sidebarItems = displayItems.filter((item) => {
       if (!item.date) return false
       return isSameDay(item.date, selectedDate)
     })
@@ -266,7 +372,7 @@ export default function GridTimeline({
 
   // Mobile layout
   if (isMobile) {
-    const sortedItems = [...items].sort((a, b) =>
+    const sortedItems = [...displayItems].sort((a, b) =>
       a.start.localeCompare(b.start)
     )
 
@@ -439,7 +545,7 @@ export default function GridTimeline({
           <div className="flex-1 overflow-auto">
             {viewMode === "day" && (
               <DayGrid
-                items={items}
+                items={displayItems}
                 selectedDate={selectedDate}
                 onReschedule={onReschedule}
                 onEditItem={onEditItem}
@@ -450,7 +556,7 @@ export default function GridTimeline({
             )}
             {viewMode === "week" && (
               <WeekGrid
-                items={items}
+                items={displayItems}
                 selectedDate={selectedDate}
                 onReschedule={onReschedule}
                 onEditItem={onEditItem}
@@ -461,7 +567,7 @@ export default function GridTimeline({
             )}
             {viewMode === "month" && (
               <MonthGrid
-                items={items}
+                items={displayItems}
                 selectedDate={selectedDate}
                 onDateChange={setSelectedDate}
               />

@@ -9,6 +9,7 @@ import DynamicBreadcrumb from "@/components/DynamicBreadcrumb"
 import ChatWidget from "@/components/ChatWidget"
 import Providers from "./providers"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { Toaster } from "@/components/ui/sonner"
 
 const figtree = Figtree({ subsets: ["latin"], variable: "--font-sans" })
 
@@ -53,6 +54,7 @@ export default function RootLayout({
               <DynamicBreadcrumb />
               {children}
               <ChatWidget />
+              <Toaster position="bottom-right" />
             </ThemeProvider>
           </TooltipProvider>
         </Providers>

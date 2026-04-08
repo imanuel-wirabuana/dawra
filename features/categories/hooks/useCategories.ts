@@ -5,6 +5,7 @@ import {
   deleteCategory,
 } from "../services/category.service"
 import type { Category } from "@/types"
+import { toast } from "sonner"
 
 export function useCategories() {
   const queryClient = useQueryClient()
@@ -16,7 +17,25 @@ export function useCategories() {
   })
 
   const createCategoryMutation = useMutation({
-    mutationFn: addCategory,
+    mutationFn: async (category: Omit<Category, "id">) => {
+      const toastId = toast.loading("Creating category...")
+      try {
+        const result = await addCategory(category)
+        if (result.success) {
+          toast.success("Category created", { id: toastId })
+        } else {
+          toast.error(result.error || "Failed to create category", {
+            id: toastId,
+          })
+        }
+        return result
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Failed to create category"
+        toast.error(message, { id: toastId })
+        throw error
+      }
+    },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["categories"] })
       return data
@@ -24,7 +43,25 @@ export function useCategories() {
   })
 
   const deleteCategoryMutation = useMutation({
-    mutationFn: deleteCategory,
+    mutationFn: async (id: string) => {
+      const toastId = toast.loading("Deleting category...")
+      try {
+        const result = await deleteCategory(id)
+        if (result.success) {
+          toast.success("Category deleted", { id: toastId })
+        } else {
+          toast.error(result.error || "Failed to delete category", {
+            id: toastId,
+          })
+        }
+        return result
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Failed to delete category"
+        toast.error(message, { id: toastId })
+        throw error
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] })
     },
