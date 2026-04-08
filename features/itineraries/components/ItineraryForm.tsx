@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { format } from "date-fns"
 import { useAddItineraryItem } from "../hooks/useAddItineraryItem"
 import { useGetBucketListItems } from "../hooks/useGetBucketListItems"
 import { useItineraryStore } from "@/store/itineraryStore"
@@ -83,7 +84,7 @@ export default function ItineraryForm({ className }: ItineraryFormProps) {
 
   // Format selected date for input fields
   const formatDateForInput = (date: Date) => {
-    return date.toISOString().split("T")[0] // YYYY-MM-DD format
+    return format(date, "yyyy-MM-dd")
   }
 
   const resetForm = () => {
