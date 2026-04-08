@@ -30,6 +30,7 @@ interface WeekGridProps {
   onReschedule?: (id: string, newStartTime: string, newEndTime: string) => void
   onEditItem?: (item: Item) => void
   onDeleteItem?: (id: string) => void
+  onSlotClick?: (date: Date, hour: number, minute: number) => void
   draggedItemId: string | null
 }
 
@@ -39,6 +40,7 @@ export default function WeekGrid({
   onReschedule,
   onEditItem,
   onDeleteItem,
+  onSlotClick,
   draggedItemId,
 }: WeekGridProps) {
   const hours = generateHours()
@@ -131,7 +133,7 @@ export default function WeekGrid({
                   />
                 ))}
 
-                {onReschedule &&
+                {(onReschedule || onSlotClick) &&
                   hours.map((hour) => (
                     <div key={hour}>
                       {[0, 15, 30, 45].map((minute) => (
@@ -141,6 +143,11 @@ export default function WeekGrid({
                           minute={minute}
                           draggedItemId={draggedItemId}
                           dayIndex={dayIndex}
+                          onClick={
+                            onSlotClick
+                              ? (h, m) => onSlotClick(day, h, m)
+                              : undefined
+                          }
                         />
                       ))}
                     </div>

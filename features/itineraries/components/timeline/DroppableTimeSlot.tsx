@@ -9,6 +9,7 @@ interface DroppableTimeSlotProps {
   minute: number
   draggedItemId: string | null
   dayIndex?: number
+  onClick?: (hour: number, minute: number, dayIndex: number) => void
 }
 
 export default function DroppableTimeSlot({
@@ -16,6 +17,7 @@ export default function DroppableTimeSlot({
   minute,
   draggedItemId,
   dayIndex = 0,
+  onClick,
 }: DroppableTimeSlotProps) {
   const slotId = `slot-${dayIndex}-${hour}-${minute}`
   const { isOver, setNodeRef } = useDroppable({
@@ -24,11 +26,18 @@ export default function DroppableTimeSlot({
     disabled: !draggedItemId,
   })
 
+  const handleClick = () => {
+    if (!draggedItemId && onClick) {
+      onClick(hour, minute, dayIndex)
+    }
+  }
+
   return (
     <div
       ref={setNodeRef}
+      onClick={handleClick}
       className={cn(
-        "absolute w-full transition-colors",
+        "absolute w-full cursor-pointer transition-colors hover:bg-primary/10",
         isOver && "bg-primary/20"
       )}
       style={{

@@ -22,6 +22,7 @@ interface DayGridProps {
   onReschedule?: (id: string, newStartTime: string, newEndTime: string) => void
   onEditItem?: (item: Item) => void
   onDeleteItem?: (id: string) => void
+  onSlotClick?: (date: Date, hour: number, minute: number) => void
   draggedItemId: string | null
 }
 
@@ -31,6 +32,7 @@ export default function DayGrid({
   onReschedule,
   onEditItem,
   onDeleteItem,
+  onSlotClick,
   draggedItemId,
 }: DayGridProps) {
   const hours = generateHours()
@@ -94,7 +96,7 @@ export default function DayGrid({
             />
           ))}
 
-          {onReschedule &&
+          {(onReschedule || onSlotClick) &&
             hours.map((hour) => (
               <div key={hour}>
                 {[0, 15, 30, 45].map((minute) => (
@@ -104,6 +106,11 @@ export default function DayGrid({
                     minute={minute}
                     draggedItemId={draggedItemId}
                     dayIndex={0}
+                    onClick={
+                      onSlotClick
+                        ? (h, m) => onSlotClick(selectedDate, h, m)
+                        : undefined
+                    }
                   />
                 ))}
               </div>

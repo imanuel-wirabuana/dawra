@@ -56,6 +56,7 @@ interface GridTimelineProps {
     newEndTime: string,
     targetDate?: Date
   ) => void
+  onSlotClick?: (date: Date, hour: number, minute: number) => void
   selectedDate?: Date
   onDateChange?: (date: Date) => void
 }
@@ -65,6 +66,7 @@ export default function GridTimeline({
   onDeleteItem,
   onEditItem,
   onReschedule,
+  onSlotClick,
   selectedDate: externalSelectedDate,
   onDateChange,
 }: GridTimelineProps) {
@@ -442,6 +444,7 @@ export default function GridTimeline({
                 onReschedule={onReschedule}
                 onEditItem={onEditItem}
                 onDeleteItem={onDeleteItem}
+                onSlotClick={onSlotClick}
                 draggedItemId={draggedItem?.id || null}
               />
             )}
@@ -452,6 +455,7 @@ export default function GridTimeline({
                 onReschedule={onReschedule}
                 onEditItem={onEditItem}
                 onDeleteItem={onDeleteItem}
+                onSlotClick={onSlotClick}
                 draggedItemId={draggedItem?.id || null}
               />
             )}

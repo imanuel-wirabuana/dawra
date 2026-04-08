@@ -447,7 +447,7 @@ function MessageItem({
   const groupedReactions = (message.reactions || []).reduce(
     (acc, reaction) => {
       if (!acc[reaction.emoji]) acc[reaction.emoji] = []
-      acc[reaction.emoji].push(reaction)
+      acc[reaction.emoji]!.push(reaction)
       return acc
     },
     {} as Record<string, typeof message.reactions>
