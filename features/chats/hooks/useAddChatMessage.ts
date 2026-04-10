@@ -3,14 +3,12 @@ import { addChatMessage } from "../services/add.service"
 import type { ChatMessage } from "@/types"
 import { toast } from "sonner"
 
-export function useAddChatMessage(channelId: string) {
+export function useAddChatMessage() {
   return useMutation({
-    mutationFn: async (
-      message: Omit<ChatMessage, "id" | "createdAt" | "channelId">
-    ) => {
+    mutationFn: async (message: Omit<ChatMessage, "id" | "createdAt">) => {
       const toastId = toast.loading("Sending message...")
       try {
-        const result = await addChatMessage({ ...message, channelId })
+        const result = await addChatMessage(message)
         toast.success("Message sent", { id: toastId })
         return result
       } catch (error) {

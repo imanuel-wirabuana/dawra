@@ -11,7 +11,7 @@ import FolderGrid from "@/features/photos/components/FolderGrid"
 import CreateFolderDialog from "@/features/photos/components/CreateFolderDialog"
 import EmptyState from "@/features/photos/components/EmptyState"
 import LoadingState from "@/features/photos/components/LoadingState"
-import { Filter } from "lucide-react"
+import { LayoutGrid } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import Link from "next/link"
@@ -60,13 +60,21 @@ export default function PhotoWall() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-row items-center justify-between gap-2">
+    <div className="mx-auto max-w-7xl">
+      <div className="mb-8 flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Photos </h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Photos</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Organize your travel memories into folders and albums.
+          </p>
         </div>
         <Link href="/photos/wall">
-          <Button variant="outline" size="sm">
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 gap-1.5 border-border/60 text-xs font-medium transition-all duration-150 hover:border-primary/50 hover:bg-primary/5"
+          >
+            <LayoutGrid className="h-3.5 w-3.5" />
             Wall View
           </Button>
         </Link>
@@ -77,7 +85,7 @@ export default function PhotoWall() {
 
       {/* Folders Section */}
       {folders.length > 0 && (
-        <div className="space-y-2 pt-3">
+        <div className="mt-6">
           <FolderGrid
             folders={folders}
             photos={photos}
@@ -87,7 +95,7 @@ export default function PhotoWall() {
       )}
 
       {/* Unassigned Photos Section */}
-      <div className="space-y-2">
+      <div className="mt-6">
         {filteredPhotos.length > 0 ? (
           <PhotoGrid
             photos={filteredPhotos}

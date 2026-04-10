@@ -48,25 +48,30 @@ export default function PhotoUploadArea({
   }
 
   return (
-    <Card className={cn("mb-4 p-4", className)}>
+    <Card
+      className={cn(
+        "overflow-hidden border-border/50 shadow-sm transition-shadow duration-200 hover:shadow-md",
+        className
+      )}
+    >
       <div
         className={cn(
-          "rounded-lg border-2 border-dashed p-4 text-center transition-colors",
+          "p-6 text-center transition-all duration-200",
           dragActive
-            ? "border-primary bg-primary/5"
-            : "border-muted-foreground/25 hover:border-muted-foreground/50"
+            ? "border-2 border-dashed border-primary bg-primary/5"
+            : "border-2 border-dashed border-border/50 hover:border-primary/30"
         )}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
         onDragOver={handleDrag}
         onDrop={handleDrop}
       >
-        <div className="flex flex-col items-center gap-3">
+        <div className="flex flex-col items-center gap-4">
           <div className="rounded-full bg-primary/10 p-3">
-            <Upload className="h-5 w-5 text-primary" />
+            <Upload className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <p className="mb-1 text-sm font-medium">
+            <p className="mb-1 text-sm font-medium text-foreground">
               Drop photos here or click to upload
             </p>
             <p className="text-xs text-muted-foreground">
@@ -76,16 +81,16 @@ export default function PhotoUploadArea({
           <Button
             onClick={() => fileInputRef.current?.click()}
             disabled={isUploading}
-            className="h-8 gap-2 px-3 text-sm"
+            className="h-9 gap-1.5 bg-primary px-4 font-medium text-primary-foreground transition-all duration-150 hover:bg-primary/90 active:scale-[0.98] disabled:opacity-50"
           >
             {isUploading ? (
               <>
-                <Loader2 className="h-3 w-3 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
                 Uploading...
               </>
             ) : (
               <>
-                <Upload className="h-3 w-3" />
+                <Upload className="h-4 w-4" />
                 Choose Photos
               </>
             )}

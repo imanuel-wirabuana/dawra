@@ -12,12 +12,7 @@ export async function addChatMessage(
     throw new Error("Message cannot be empty")
   }
 
-  if (!message.channelId) {
-    throw new Error("Channel ID is required")
-  }
-
   const docRef = await addDoc(collection(db, "chats"), {
-    channelId: message.channelId,
     userId: message.userId || "guest",
     displayName,
     message: text,
@@ -32,7 +27,6 @@ export async function addChatMessage(
     id: docRef.id,
     displayName,
     message: text,
-    channelId: message.channelId,
     userId: message.userId || "guest",
   }
 }

@@ -130,7 +130,7 @@ export default function BucketListGrid({ className }: BucketListGridProps) {
   }
 
   return (
-    <div ref={gridRef} className="space-y-3">
+    <div ref={gridRef} className="flex flex-col gap-4">
       {/* Combined selection mode indicator and controls */}
       {isSelectionMode ? (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-primary/10 p-3">
@@ -215,36 +215,43 @@ export default function BucketListGrid({ className }: BucketListGridProps) {
           </div>
         </div>
       ) : sortedBucketList.length > 0 ? (
-        <div className="flex flex-col gap-2">
-          <div className="flex justify-between gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border/50 bg-card/50 p-2">
+          <div className="flex items-center gap-2">
             <Button
               variant="outline"
               size="sm"
               onClick={toggleSelectionMode}
-              className="h-7 text-xs"
+              className="h-8 gap-1.5 border-border/60 bg-background px-3 text-xs font-medium transition-all duration-150 hover:border-primary/50 hover:bg-primary/5"
             >
-              <CheckSquare className="mr-1 h-3 w-3" />
-              Select Items
+              <CheckSquare className="h-3.5 w-3.5" />
+              Select
             </Button>
+            <span className="text-xs text-muted-foreground">
+              {sortedBucketList.length} items
+            </span>
+          </div>
 
-            <div className="flex flex-row items-center justify-end gap-2">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <div className="flex items-center gap-1 rounded-lg bg-muted/50 p-1">
               <CompletedFilterSelector
                 currentFilter={completedFilter}
                 onFilterChange={setCompletedFilter}
               />
+              <div className="h-4 w-px bg-border/50" />
               <SortSelector
                 currentSort={sortOption}
                 onSortChange={setSortOption}
               />
-              <CategoryFilterSelector
-                selectedCategories={filterCategories}
-                onCategoriesChange={setFilterCategories}
-              />
-              <ViewModeSelector
-                viewMode={viewMode}
-                onViewModeChange={setViewMode}
-              />
             </div>
+            <CategoryFilterSelector
+              selectedCategories={filterCategories}
+              onCategoriesChange={setFilterCategories}
+            />
+            <div className="mx-1 h-6 w-px bg-border/50" />
+            <ViewModeSelector
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+            />
           </div>
         </div>
       ) : null}

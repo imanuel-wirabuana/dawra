@@ -9,7 +9,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { Badge } from "@/components/ui/badge"
-import { MoreHorizontal } from "lucide-react"
+import {
+  MoreHorizontal,
+  MapPin,
+  Wallet,
+  CheckCircle2,
+  Circle,
+} from "lucide-react"
 
 interface BucketListItemProps {
   item: Partial<BucketList>
@@ -35,85 +41,116 @@ export default function BucketListItem({
   return (
     <div
       className={cn(
-        "group flex flex-col gap-1 rounded-lg border p-3 shadow-sm",
+        "group relative flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-sm transition-all duration-200",
         isSelectionMode ? "cursor-pointer" : "cursor-default",
         isSelected
-          ? "border-primary bg-primary text-primary-foreground"
-          : "bg-card",
+          ? "border-primary bg-primary/5 ring-1 ring-primary"
+          : "border-border/50 hover:border-primary/30 hover:bg-card/80 hover:shadow-md",
         className
       )}
       onClick={handleItemClick}
     >
-      <div className="flex flex-row items-start justify-between gap-3">
-        <div className="flex items-start gap-2">
+      {/* Header: Title + Actions */}
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 flex-1 items-start gap-3">
+          {/* Completion Toggle */}
           {!isSelectionMode && (
             <ToggleBucketListButton
               itemId={item.id}
               completed={item.completed}
-              className="hidden group-hover:flex"
+              className="shrink-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100"
             />
           )}
-          <div>
+
+          {/* Title Section */}
+          <div className="flex min-w-0 flex-1 flex-col gap-0.5">
             <h3
-              className={`text-xs font-semibold ${item.completed ? (isSelected ? "line-through opacity-70" : "text-muted-foreground line-through") : ""}`}
+              className={cn(
+                "text-sm leading-tight font-semibold tracking-tight transition-colors",
+                item.completed
+                  ? "text-muted-foreground line-through"
+                  : "text-foreground"
+              )}
             >
               {item.title}
             </h3>
-            <p
-              className={`text-xs ${item.completed ? (isSelected ? "line-through opacity-70" : "text-muted-foreground line-through") : isSelected ? "opacity-90" : "text-muted-foreground"}`}
-            >
-              {item.description}
-            </p>
-            {item.location && (
-              <p
-                className={`text-xs ${item.completed ? (isSelected ? "line-through opacity-70" : "text-muted-foreground line-through") : isSelected ? "opacity-90" : "text-muted-foreground"}`}
-              >
-                📍 {item.location}
-              </p>
-            )}
-            {item.cost && (
-              <p
-                className={`text-xs ${item.completed ? (isSelected ? "line-through opacity-70" : "text-muted-foreground line-through") : isSelected ? "opacity-90" : "text-muted-foreground"}`}
-              >
-                💰 Rp {item.cost.toLocaleString("id-ID")}
-              </p>
-            )}
-            {item.categories && item.categories.length > 0 && (
-              <div className="mt-1 flex flex-wrap gap-1">
-                {item.categories.map((category) => (
-                  <Badge
-                    key={category.id}
-                    variant="secondary"
-                    className="h-1 w-7 px-1.5 py-0.5 text-xs"
-                    style={{
-                      backgroundColor: category.color,
-                      color: "white",
-                      border: "none",
-                    }}
-                  >
-                    <span className="hidden">{category.name}</span>
-                  </Badge>
-                ))}
-              </div>
-            )}
           </div>
         </div>
-        <div className="">
-          <Popover>
-            <PopoverTrigger asChild>
-              <button className="inline-flex h-8 w-8 items-center justify-center rounded-md p-0 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50">
-                <MoreHorizontal className="h-4 w-4" />
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-fit" align="center">
-              <div className="flex flex-row items-center gap-1">
-                <UpdateBucketListButton itemId={item.id} item={item} />
-                <DeleteBucketListButton itemId={item.id} />
-              </div>
-            </PopoverContent>
-          </Popover>
-        </div>
+
+        {/* Actions Menu */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <button
+              className={cn(
+                "shrink-0 rounded-md p-1.5 transition-all duration-150",
+                "hover:bg-accent hover:text-accent-foreground",
+                "focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none"
+              )}
+            >
+              <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-fit p-1.5" align="end">
+            <div className="flex items-center gap-1">
+              <UpdateBucketListButton itemId={item.id} item={item} />
+              <DeleteBucketListButton itemId={item.id} />
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
+
+      {/* Description */}
+      {item.description && (
+        <p
+          className={cn(
+            "line-clamp-2 text-sm leading-relaxed text-muted-foreground",
+            item.completed && "line-through opacity-60"
+          )}
+        >
+          {item.description}
+        </p>
+      )}
+
+      {/* Metadata Row */}
+      <div className="flex flex-wrap items-center gap-3 pt-1">
+        {/* Location */}
+        {item.location && (
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            <MapPin className="h-3 w-3 shrink-0" />
+            <span className="max-w-30 truncate">{item.location}</span>
+          </div>
+        )}
+
+        {/* Cost */}
+        {item.cost && (
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Wallet className="h-3 w-3 shrink-0" />
+            <span>Rp {item.cost.toLocaleString("id-ID")}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Categories */}
+      {item.categories && item.categories.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 pt-1">
+          {item.categories.map((category) => (
+            <div
+              key={category.id}
+              className="flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs"
+              style={{
+                borderColor: `${category.color}40`,
+                backgroundColor: `${category.color}15`,
+              }}
+            >
+              <div
+                className="h-1.5 w-1.5 rounded-full"
+                style={{ backgroundColor: category.color }}
+              />
+              <span style={{ color: category.color }}>{category.name}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

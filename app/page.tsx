@@ -1,5 +1,3 @@
-"use client"
-
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Sparkles, ArrowRight } from "lucide-react"
@@ -15,8 +13,11 @@ export default function Page() {
       >
         <div className="container mx-auto px-6">
           <div className="mx-auto max-w-4xl text-center">
-            <Badge className="mb-4 border border-primary/30 bg-background/90 px-3 py-1 text-primary shadow-sm backdrop-blur-sm dark:border-primary/40 dark:bg-background/80">
-              <Sparkles className="mr-2 h-3 w-3" />
+            <Badge
+              variant="outline"
+              className="mb-6 h-7 gap-1.5 rounded-full border-primary/20 bg-background/80 px-3 text-xs font-medium text-primary shadow-sm backdrop-blur-sm transition-all duration-200 hover:border-primary/40 hover:bg-primary/5"
+            >
+              <Sparkles className="h-3 w-3" />
               Dawra - Our Journey Together
             </Badge>
             <h1 className="mb-4 text-3xl leading-tight font-light tracking-wide sm:text-4xl lg:text-5xl">
@@ -51,48 +52,48 @@ export default function Page() {
                 lways
               </span>
             </h1>
-            <p className="mx-auto mb-6 max-w-2xl text-lg leading-relaxed font-light text-muted-foreground dark:text-muted-foreground/80">
-              <span className="font-medium text-primary dark:text-primary/90">
-                Dawra
-              </span>{" "}
-              — where every moment becomes a milestone, every adventure a
-              achievement, and every day a step toward our goals.
+            <p className="mx-auto mb-8 max-w-2xl text-base leading-relaxed font-light text-muted-foreground/90 sm:text-lg">
+              <span className="font-medium text-primary">Dawra</span> — where
+              every moment becomes a milestone, every adventure an achievement,
+              and every day a step toward our goals.
             </p>
-            <div className="mb-6 flex justify-center">
-              <div className="max-w-sm rounded-xl border border-primary/15 bg-background/70 p-4 shadow-lg backdrop-blur-sm dark:border-primary/20 dark:bg-background/60 dark:shadow-xl">
-                <div className="mb-3 text-xl font-light tracking-widest text-primary dark:text-primary/90">
+            <div className="mb-8 flex justify-center">
+              <div className="max-w-sm overflow-hidden rounded-xl border border-border/50 bg-card/50 p-5 shadow-sm backdrop-blur-sm transition-all duration-200 hover:border-border/70 hover:shadow-md">
+                <div className="mb-4 text-center text-lg font-light tracking-widest text-primary">
                   DAWRA
                 </div>
-                <div className="space-y-2 text-sm text-muted-foreground dark:text-muted-foreground/80">
-                  <div className="flex items-start gap-2">
-                    <span className="font-semibold text-primary dark:text-primary/90">
+                <div className="space-y-2.5 text-sm text-muted-foreground">
+                  <div className="flex items-start gap-2.5">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
                       D
                     </span>
-                    <span>Dreams we chase together</span>
+                    <span className="pt-0.5">Dreams we chase together</span>
                   </div>
-                  <div className="flex items-start gap-2">
-                    <span className="font-semibold text-primary dark:text-primary/90">
+                  <div className="flex items-start gap-2.5">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
                       A
                     </span>
-                    <span>Adventures we&apos;ll remember forever</span>
+                    <span className="pt-0.5">
+                      Adventures we&apos;ll remember forever
+                    </span>
                   </div>
-                  <div className="flex items-start gap-2">
-                    <span className="font-semibold text-primary dark:text-primary/90">
+                  <div className="flex items-start gap-2.5">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
                       W
                     </span>
-                    <span>Wishes that come true</span>
+                    <span className="pt-0.5">Wishes that come true</span>
                   </div>
-                  <div className="flex items-start gap-2">
-                    <span className="font-semibold text-primary dark:text-primary/90">
+                  <div className="flex items-start gap-2.5">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
                       R
                     </span>
-                    <span>Results that matter</span>
+                    <span className="pt-0.5">Results that matter</span>
                   </div>
-                  <div className="flex items-start gap-2">
-                    <span className="font-semibold text-primary dark:text-primary/90">
+                  <div className="flex items-start gap-2.5">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
                       A
                     </span>
-                    <span>Always moving forward</span>
+                    <span className="pt-0.5">Always moving forward</span>
                   </div>
                 </div>
               </div>
@@ -101,7 +102,7 @@ export default function Page() {
               <Button
                 size="lg"
                 asChild
-                className="gap-2 rounded-full px-6 py-2 shadow-md transition-all hover:shadow-lg dark:shadow-lg dark:hover:shadow-xl"
+                className="h-11 gap-2 rounded-full bg-primary px-6 font-medium text-primary-foreground shadow-md transition-all duration-150 hover:bg-primary/90 hover:shadow-lg active:scale-[0.98]"
               >
                 <Link href="/bucket-lists">
                   Start Our Dawra <ArrowRight className="h-4 w-4" />
@@ -111,7 +112,7 @@ export default function Page() {
                 variant="outline"
                 size="lg"
                 asChild
-                className="rounded-full border-primary/25 px-6 py-2 text-primary transition-all hover:bg-primary/5 dark:border-primary/30 dark:hover:bg-primary/10"
+                className="h-11 gap-2 rounded-full border-border/60 px-6 font-medium text-foreground transition-all duration-150 hover:border-primary/50 hover:bg-primary/5 hover:text-primary"
               >
                 <Link href="/photos">Our Dawra Memories</Link>
               </Button>

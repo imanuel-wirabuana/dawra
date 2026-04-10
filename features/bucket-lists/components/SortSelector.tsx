@@ -50,12 +50,15 @@ export default function SortSelector({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
-          variant="outline"
+          variant="ghost"
           size="sm"
-          className={cn("h-7 px-2 text-xs", className)}
+          className={cn(
+            "h-6 gap-1.5 rounded-md px-2 text-xs font-medium text-muted-foreground transition-all duration-150 hover:bg-primary/10 hover:text-primary",
+            className
+          )}
         >
-          <ArrowUpDown className="mr-1 h-3 w-3" />
-          Sort
+          <ArrowUpDown className="h-3 w-3" />
+          <span className="hidden sm:inline">Sort</span>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-48 p-1" align="end">
@@ -68,12 +71,23 @@ export default function SortSelector({
                 setOpen(false)
               }}
               className={cn(
-                "flex items-center justify-between gap-2 rounded px-2 py-1.5 text-xs hover:bg-accent",
-                currentSort === value && "bg-accent"
+                "flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-xs font-medium transition-all duration-150",
+                currentSort === value
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
               )}
             >
               <span>{label}</span>
-              <span className="text-muted-foreground">{icon}</span>
+              <span
+                className={cn(
+                  "text-xs",
+                  currentSort === value
+                    ? "text-primary-foreground/70"
+                    : "text-muted-foreground"
+                )}
+              >
+                {icon}
+              </span>
             </button>
           ))}
         </div>

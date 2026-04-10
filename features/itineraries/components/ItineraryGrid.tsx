@@ -245,37 +245,42 @@ export default function ItineraryGrid() {
 
   return (
     <>
-      <Card className="border-0 bg-linear-to-br from-background to-muted/20 shadow-lg">
-        <CardHeader className="pb-4">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="flex flex-wrap items-center gap-3">
+      <Card className="overflow-hidden border-border/50 shadow-sm">
+        <CardHeader className="border-b border-border/50 bg-muted/30 px-5 py-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-wrap items-center gap-2">
               <DatePicker />
               <Popover open={formOpen} onOpenChange={setFormOpen}>
                 <PopoverTrigger asChild>
-                  <Button className="w-fit">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Itinerary Item
+                  <Button
+                    size="sm"
+                    className="h-8 gap-1.5 bg-primary px-3 font-medium text-primary-foreground transition-all duration-150 hover:bg-primary/90 active:scale-[0.98]"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add Item
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="sm:max-w-96" align="end">
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold">
-                      Add New Itinerary Item
-                    </h3>
+                <PopoverContent className="w-80 p-0" align="end">
+                  <div className="border-b border-border/50 bg-muted/30 px-4 py-3">
+                    <h3 className="text-sm font-semibold">Add New Item</h3>
+                    <p className="text-xs text-muted-foreground">
+                      Schedule a new activity
+                    </p>
+                  </div>
+                  <div className="p-4">
                     <ItineraryForm onSuccess={() => setFormOpen(false)} />
                   </div>
                 </PopoverContent>
               </Popover>
             </div>
-            <div className="flex items-center gap-4">
-              <span className="text-sm font-normal text-muted-foreground">
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-muted-foreground">
                 {transformedItems.length}{" "}
                 {transformedItems.length === 1 ? "item" : "items"}
               </span>
               {totalCost > 0 && (
-                <span className="flex items-center gap-1 text-sm font-medium text-emerald-600">
-                  Rp.
-                  {totalCost.toLocaleString()}
+                <span className="flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                  Rp {totalCost.toLocaleString("id-ID")}
                 </span>
               )}
             </div>

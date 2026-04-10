@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation"
 import { useState } from "react"
 import { Menu, X } from "lucide-react"
 import { ThemeToggle } from "./ThemeToggle"
+import { cn } from "@/lib/utils"
 
 interface NavbarProps {
   className?: string
@@ -32,8 +33,8 @@ export default function Navbar({ className }: NavbarProps) {
 
   return (
     <nav className={className}>
-      <div className="mx-auto bg-sidebar py-3 shadow">
-        <div className="flex items-center justify-between px-7 lg:px-27">
+      <div className="mx-auto border-b border-border/50 bg-sidebar/80 backdrop-blur-md">
+        <div className="flex h-14 items-center justify-between px-4 lg:px-8">
           <div className="flex items-center">
             <h1 className="font-brand text-3xl tracking-normal">
               <span className="bg-linear-to-r from-primary to-primary/60 bg-clip-text text-transparent dark:from-primary dark:to-primary/80">
@@ -44,18 +45,22 @@ export default function Navbar({ className }: NavbarProps) {
               </span>
             </h1>
           </div>
-          <div className="hidden items-center gap-7 md:flex">
+          <div className="hidden items-center gap-1 md:flex">
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className={
+                className={cn(
+                  "relative rounded-md px-3 py-1.5 text-sm font-medium transition-all duration-150",
                   isActive(item.href)
-                    ? "font-semibold text-primary"
-                    : "transition-colors hover:text-primary"
-                }
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                )}
               >
                 {item.label}
+                {isActive(item.href) && (
+                  <span className="absolute bottom-0 left-1/2 h-0.5 w-4 -translate-x-1/2 rounded-full bg-primary" />
+                )}
               </Link>
             ))}
           </div>
@@ -71,18 +76,19 @@ export default function Navbar({ className }: NavbarProps) {
           </div>
         </div>
         {isMobileMenuOpen && (
-          <div className="absolute top-full right-0 left-0 border-t border-border bg-sidebar px-7 py-4 md:hidden">
-            <div className="flex flex-col gap-4">
+          <div className="absolute top-full right-0 left-0 border-t border-border bg-sidebar/95 px-4 py-3 backdrop-blur-md md:hidden">
+            <div className="flex flex-col gap-1">
               {navItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={
+                  className={cn(
+                    "rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150",
                     isActive(item.href)
-                      ? "font-semibold text-primary dark:brightness-150"
-                      : "transition-colors hover:text-primary"
-                  }
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                  )}
                 >
                   {item.label}
                 </Link>

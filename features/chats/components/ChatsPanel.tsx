@@ -12,30 +12,27 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { Smile, X, Pencil, Send, Loader2 } from "lucide-react"
+import { Smile, X, Pencil, Send, Loader2, Search } from "lucide-react"
 import { useAddChatMessage } from "../hooks/useAddChatMessage"
 import { useRealtimeChats } from "../hooks/useRealtimeChats"
-import { useChannels } from "../hooks/useChannels"
-import { useCreateChannel } from "../hooks/useCreateChannel"
 import { useSearchMessages } from "../hooks/useSearchMessages"
 import { useTyping } from "../hooks/useTyping"
 import { useReactions } from "../hooks/useReactions"
 import { useEditDelete } from "../hooks/useEditDelete"
 import { editMessage } from "../services/edit-delete.service"
-import type { Channel, ChatMessage } from "@/types"
+import type { ChatMessage } from "@/types"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { MoreVertical, Reply, Trash2, Hash, Plus, Search } from "lucide-react"
+import { MoreVertical, Reply, Trash2 } from "lucide-react"
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
 
 const COMMON_EMOJIS = ["👍", "❤️", "😂", "🎉", "🔥", "👏", "😍", "🤔", "🤘"]
@@ -58,39 +55,24 @@ interface ChatsPanelProps {
 
 export default function ChatsPanel({ className }: ChatsPanelProps) {
   const [currentUserId] = useState(generateUserId)
-  const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null)
   const [displayName, setDisplayName] = useState("")
   const [message, setMessage] = useState("")
   const [searchQuery, setSearchQuery] = useState("")
   const [replyTo, setReplyTo] = useState<ChatMessage | null>(null)
   const [editingMessage, setEditingMessage] = useState<ChatMessage | null>(null)
   const [editText, setEditText] = useState("")
-  const [isNewChannelDialogOpen, setIsNewChannelDialogOpen] = useState(false)
-  const [newChannelName, setNewChannelName] = useState("")
-  const [newChannelDesc, setNewChannelDesc] = useState("")
 
-  const { channels, loading: channelsLoading } = useChannels()
-  const { messages, loading: messagesLoading } = useRealtimeChats(
-    selectedChannel?.id || ""
-  )
-  const addChatMessage = useAddChatMessage(selectedChannel?.id || "")
-  const createChannel = useCreateChannel()
+  const { messages, loading: messagesLoading } = useRealtimeChats()
+  const addChatMessage = useAddChatMessage()
   const filteredMessages = useSearchMessages(messages, searchQuery)
 
   const { typingUsers, updateTyping } = useTyping(
-    selectedChannel?.id || "",
     currentUserId,
     displayName || "Guest"
   )
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
-
-  useEffect(() => {
-    if (channels.length > 0 && !selectedChannel) {
-      setSelectedChannel(channels[0])
-    }
-  }, [channels, selectedChannel])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -106,7 +88,7 @@ export default function ChatsPanel({ className }: ChatsPanelProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!selectedChannel || !message.trim()) return
+    if (!message.trim()) return
 
     try {
       await addChatMessage.mutateAsync({
@@ -121,18 +103,6 @@ export default function ChatsPanel({ className }: ChatsPanelProps) {
     } catch (error) {
       console.error("Failed to send chat message:", error)
     }
-  }
-
-  const handleCreateChannel = async () => {
-    if (!newChannelName.trim()) return
-    await createChannel.mutateAsync({
-      name: newChannelName.trim(),
-      description: newChannelDesc.trim() || undefined,
-      createdBy: currentUserId,
-    })
-    setNewChannelName("")
-    setNewChannelDesc("")
-    setIsNewChannelDialogOpen(false)
   }
 
   const getReplyMessage = (replyToId: string) => {
@@ -151,245 +121,159 @@ export default function ChatsPanel({ className }: ChatsPanelProps) {
   return (
     <div
       className={cn(
-        "flex h-fit min-h-125 items-stretch overflow-hidden rounded-xl border border-border bg-card shadow-lg",
+        "flex h-[calc(100vh-14rem)] min-h-96 flex-col overflow-hidden rounded-xl border border-border/50 bg-card shadow-sm",
         className
       )}
     >
-      <div className="flex min-h-0 w-64 flex-col border-r border-border bg-muted/30">
-        <div className="flex items-center justify-between border-b border-border p-4">
-          <h2 className="text-lg font-semibold">Channels</h2>
-          <Dialog
-            open={isNewChannelDialogOpen}
-            onOpenChange={setIsNewChannelDialogOpen}
-          >
-            <DialogTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Plus className="h-4 w-4" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create New Channel</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 pt-4">
-                <Input
-                  placeholder="Channel name"
-                  value={newChannelName}
-                  onChange={(e) => setNewChannelName(e.target.value)}
-                />
-                <Input
-                  placeholder="Description (optional)"
-                  value={newChannelDesc}
-                  onChange={(e) => setNewChannelDesc(e.target.value)}
-                />
-                <Button
-                  onClick={handleCreateChannel}
-                  disabled={!newChannelName.trim() || createChannel.isPending}
-                  className="w-full"
-                >
-                  {createChannel.isPending && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  Create Channel
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
-
-        <div className="min-h-0 flex-1 space-y-1 overflow-y-auto p-2">
-          {channelsLoading ? (
-            <p className="p-4 text-sm text-muted-foreground">Loading...</p>
-          ) : channels.length === 0 ? (
-            <p className="p-4 text-sm text-muted-foreground">No channels yet</p>
-          ) : (
-            channels.map((channel) => (
-              <button
-                key={channel.id}
-                onClick={() => setSelectedChannel(channel)}
-                className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors ${
-                  selectedChannel?.id === channel.id
-                    ? "bg-primary text-primary-foreground"
-                    : "hover:bg-muted"
-                }`}
-              >
-                <Hash className="h-4 w-4 shrink-0" />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium">{channel.name}</p>
-                  {channel.description && (
-                    <p className="truncate text-xs opacity-80">
-                      {channel.description}
-                    </p>
-                  )}
-                </div>
-              </button>
-            ))
-          )}
+      <div className="flex items-center justify-between border-b border-border/50 bg-muted/20 px-3 py-2">
+        <h2 className="text-xs font-semibold text-foreground">Chat</h2>
+        <div className="relative">
+          <Search className="absolute top-1/2 left-2.5 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="h-7 w-48 border-input/60 bg-background pl-8 text-xs transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20"
+          />
         </div>
       </div>
 
-      <div className="flex h-full min-h-0 flex-1 flex-col">
-        {selectedChannel ? (
-          <>
-            <div className="flex items-center justify-between border-b border-border p-4">
-              <div>
-                <h2 className="flex items-center gap-2 text-lg font-semibold">
-                  <Hash className="h-5 w-5" />
-                  {selectedChannel.name}
-                </h2>
-                {selectedChannel.description && (
-                  <p className="text-sm text-muted-foreground">
-                    {selectedChannel.description}
-                  </p>
-                )}
-              </div>
-              <div className="relative">
-                <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  placeholder="Search messages..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-64 pl-9"
+      <div className="min-h-0 flex-1">
+        <ScrollArea className="h-full flex-1 p-3">
+          <div className="space-y-2">
+            {messagesLoading ? (
+              <p className="text-xs text-muted-foreground">Loading...</p>
+            ) : filteredMessages.length === 0 ? (
+              <p className="py-6 text-center text-xs text-muted-foreground">
+                {searchQuery
+                  ? "No messages found"
+                  : "No messages yet. Start chatting!"}
+              </p>
+            ) : (
+              filteredMessages.map((item) => (
+                <MessageItem
+                  key={item.id}
+                  message={item}
+                  currentUserId={currentUserId}
+                  displayName={displayName}
+                  getReplyMessage={getReplyMessage}
+                  onReply={() => setReplyTo(item)}
+                  onStartEdit={(msg) => {
+                    setEditingMessage(msg)
+                    setEditText(msg.message)
+                  }}
                 />
-              </div>
-            </div>
-
-            <div className="h-120">
-              <ScrollArea className="h-full flex-1 p-4">
-                <div className="space-y-4">
-                  {messagesLoading ? (
-                    <p className="text-sm text-muted-foreground">
-                      Loading messages...
-                    </p>
-                  ) : filteredMessages.length === 0 ? (
-                    <p className="py-8 text-center text-sm text-muted-foreground">
-                      {searchQuery
-                        ? "No messages found"
-                        : "No messages yet. Start the conversation!"}
-                    </p>
-                  ) : (
-                    filteredMessages.map((item) => (
-                      <MessageItem
-                        key={item.id}
-                        message={item}
-                        currentUserId={currentUserId}
-                        displayName={displayName}
-                        getReplyMessage={getReplyMessage}
-                        onReply={() => setReplyTo(item)}
-                        onStartEdit={(msg) => {
-                          setEditingMessage(msg)
-                          setEditText(msg.message)
-                        }}
-                      />
-                    ))
-                  )}
-                  <div ref={messagesEndRef} />
-                </div>
-              </ScrollArea>
-            </div>
-
-            {typingUsers.length > 0 && (
-              <div className="px-4 py-2 text-xs text-muted-foreground italic">
-                {formatTypingIndicator()}
-              </div>
+              ))
             )}
+            <div ref={messagesEndRef} />
+          </div>
+        </ScrollArea>
+      </div>
 
-            {replyTo && (
-              <div className="flex items-center justify-between border-t border-border bg-muted/50 px-4 py-2">
-                <div className="flex items-center gap-2 text-sm">
-                  <Reply className="h-4 w-4" />
-                  <span className="text-muted-foreground">Replying to</span>
-                  <span className="font-medium">{replyTo.displayName}</span>
-                  <span className="max-w-50 truncate text-muted-foreground">
-                    {replyTo.message}
-                  </span>
-                </div>
+      {typingUsers.length > 0 && (
+        <div className="px-3 py-1 text-[10px] text-muted-foreground italic">
+          {formatTypingIndicator()}
+        </div>
+      )}
+
+      {replyTo && (
+        <div className="flex items-center justify-between border-t border-border bg-muted/50 px-3 py-1.5">
+          <div className="flex items-center gap-1.5 text-xs">
+            <Reply className="h-3 w-3" />
+            <span className="text-muted-foreground">Reply to</span>
+            <span className="font-medium">{replyTo.displayName}</span>
+            <span className="max-w-32 truncate text-muted-foreground">
+              {replyTo.message}
+            </span>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-5 w-5"
+            onClick={() => setReplyTo(null)}
+          >
+            <X className="h-3 w-3" />
+          </Button>
+        </div>
+      )}
+
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-2 border-t border-border/50 bg-muted/10 p-3"
+      >
+        <div className="flex gap-2">
+          <Input
+            placeholder="Name"
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            className="h-8 w-28 shrink-0 border-input/60 bg-background text-xs transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20"
+            disabled={addChatMessage.isPending}
+          />
+          <div className="flex flex-1 gap-1.5">
+            <Popover>
+              <PopoverTrigger asChild>
                 <Button
+                  type="button"
                   variant="ghost"
                   size="icon"
-                  onClick={() => setReplyTo(null)}
+                  className="h-8 w-8 shrink-0 rounded-md text-muted-foreground transition-all duration-150 hover:bg-primary/10 hover:text-primary"
                 >
-                  <X className="h-4 w-4" />
+                  <Smile className="h-4 w-4" />
                 </Button>
-              </div>
-            )}
-
-            <form
-              onSubmit={handleSubmit}
-              className="space-y-3 border-t border-border p-4"
-            >
-              <div className="flex gap-3">
-                <Input
-                  placeholder="Your name"
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  className="w-40 shrink-0"
-                  disabled={addChatMessage.isPending}
-                />
-                <div className="flex flex-1 gap-2">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button type="button" variant="ghost" size="icon">
-                        <Smile className="h-5 w-5" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-2" align="end">
-                      <div className="grid grid-cols-8 gap-1">
-                        {COMMON_EMOJIS.map((emoji) => (
-                          <button
-                            key={emoji}
-                            type="button"
-                            onClick={() => setMessage((prev) => prev + emoji)}
-                            className="flex h-8 w-8 items-center justify-center rounded text-lg transition-colors hover:bg-muted"
-                          >
-                            {emoji}
-                          </button>
-                        ))}
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                  <Textarea
-                    ref={inputRef}
-                    placeholder="Write a message..."
-                    value={message}
-                    onChange={(e) => handleTyping(e.target.value)}
-                    disabled={addChatMessage.isPending}
-                    rows={1}
-                    className="min-h-10 resize-none"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault()
-                        handleSubmit(e)
-                      }
-                    }}
-                  />
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-2" align="end">
+                <div className="grid grid-cols-8 gap-1">
+                  {COMMON_EMOJIS.map((emoji) => (
+                    <button
+                      key={emoji}
+                      type="button"
+                      onClick={() => setMessage((prev) => prev + emoji)}
+                      className="flex h-7 w-7 items-center justify-center rounded text-base transition-colors hover:bg-muted"
+                    >
+                      {emoji}
+                    </button>
+                  ))}
                 </div>
-              </div>
-              <div className="flex items-center justify-end gap-3">
-                {addChatMessage.error && (
-                  <p className="text-sm text-destructive">
-                    {addChatMessage.error.message}
-                  </p>
-                )}
-                <Button
-                  type="submit"
-                  disabled={addChatMessage.isPending || !message.trim()}
-                >
-                  {addChatMessage.isPending ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Send className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-            </form>
-          </>
-        ) : (
-          <div className="flex flex-1 items-center justify-center text-muted-foreground">
-            Select a channel to start chatting
+              </PopoverContent>
+            </Popover>
+            <Textarea
+              ref={inputRef}
+              placeholder="Write a message..."
+              value={message}
+              onChange={(e) => handleTyping(e.target.value)}
+              disabled={addChatMessage.isPending}
+              rows={1}
+              className="min-h-8 resize-none border-input/60 bg-background text-xs transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault()
+                  handleSubmit(e)
+                }
+              }}
+            />
           </div>
-        )}
-      </div>
+        </div>
+        <div className="flex items-center justify-end gap-2">
+          {addChatMessage.error && (
+            <p className="text-[10px] text-destructive">
+              {addChatMessage.error.message}
+            </p>
+          )}
+          <Button
+            type="submit"
+            size="sm"
+            disabled={addChatMessage.isPending || !message.trim()}
+            className="h-7 gap-1 bg-primary px-3 text-xs font-medium text-primary-foreground transition-all duration-150 hover:bg-primary/90 active:scale-[0.98] disabled:opacity-50"
+          >
+            {addChatMessage.isPending ? (
+              <Loader2 className="h-3 w-3 animate-spin" />
+            ) : (
+              <Send className="h-3 w-3" />
+            )}
+            Send
+          </Button>
+        </div>
+      </form>
 
       <Dialog
         open={!!editingMessage}

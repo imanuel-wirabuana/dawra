@@ -51,88 +51,155 @@ export default function BucketListForm({ className }: BucketListFormProps) {
   }
 
   return (
-    <Card className={cn("mb-6", className)}>
-      <CardHeader>
-        <CardTitle>Add New Item</CardTitle>
+    <Card
+      className={cn(
+        "overflow-hidden border-border/50 shadow-sm transition-shadow duration-200 hover:shadow-md",
+        className
+      )}
+    >
+      <CardHeader className="space-y-1 border-b bg-muted/30 px-5 py-4">
+        <CardTitle className="text-base font-semibold">Add New Item</CardTitle>
+        <p className="text-xs text-muted-foreground">
+          Create a new bucket list goal
+        </p>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+      <CardContent className="p-5">
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Title Field */}
           <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
+            <Label
+              htmlFor="title"
+              className="text-xs font-medium text-foreground"
+            >
+              Title
+            </Label>
             <Input
               id="title"
               value={title}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setTitle(e.target.value)
               }
-              placeholder="Enter title..."
+              placeholder="What do you want to achieve?"
               disabled={addBucketListMutation.isPending}
+              className="h-10 border-input/60 bg-background transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
 
+          {/* Description Field */}
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label
+              htmlFor="description"
+              className="text-xs font-medium text-foreground"
+            >
+              Description
+            </Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                 setDescription(e.target.value)
               }
-              placeholder="Enter description..."
+              placeholder="Add some details about this goal..."
               disabled={addBucketListMutation.isPending}
               rows={3}
+              className="resize-none border-input/60 bg-background transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="location">Location (Optional)</Label>
-            <Input
-              id="location"
-              value={location}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setLocation(e.target.value)
-              }
-              placeholder="Enter location..."
-              disabled={addBucketListMutation.isPending}
-            />
+          {/* Optional Fields Row */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label
+                htmlFor="location"
+                className="text-xs font-medium text-muted-foreground"
+              >
+                Location
+              </Label>
+              <Input
+                id="location"
+                value={location}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setLocation(e.target.value)
+                }
+                placeholder="Where?"
+                disabled={addBucketListMutation.isPending}
+                className="h-9 border-input/60 bg-background text-sm transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label
+                htmlFor="cost"
+                className="text-xs font-medium text-muted-foreground"
+              >
+                Cost (IDR)
+              </Label>
+              <Input
+                id="cost"
+                type="number"
+                step="0.01"
+                min="0"
+                value={cost}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setCost(e.target.value)
+                }
+                placeholder="How much?"
+                disabled={addBucketListMutation.isPending}
+                className="h-9 border-input/60 bg-background text-sm transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
           </div>
 
+          {/* Categories */}
           <div className="space-y-2">
-            <Label htmlFor="cost">Cost (Optional)</Label>
-            <Input
-              id="cost"
-              type="number"
-              step="0.01"
-              min="0"
-              value={cost}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setCost(e.target.value)
-              }
-              placeholder="Enter cost in IDR..."
-              disabled={addBucketListMutation.isPending}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="categories">Categories</Label>
+            <Label className="text-xs font-medium text-muted-foreground">
+              Categories
+            </Label>
             <CategorySelector
               selectedCategories={selectedCategories}
               onCategoriesChange={setSelectedCategories}
             />
           </div>
 
+          {/* Error Message */}
           {addBucketListMutation.error && (
-            <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive">
+            <div className="rounded-lg border border-destructive/20 bg-destructive/10 px-3 py-2.5 text-xs text-destructive">
               {addBucketListMutation.error.message}
             </div>
           )}
 
+          {/* Submit Button */}
           <Button
             type="submit"
-            disabled={addBucketListMutation.isPending}
-            className="w-full"
+            disabled={addBucketListMutation.isPending || !title.trim()}
+            className="h-10 w-full bg-primary font-medium text-primary-foreground transition-all duration-150 hover:bg-primary/90 active:scale-[0.98] disabled:opacity-50"
           >
-            {addBucketListMutation.isPending ? "Adding..." : "Add Item"}
+            {addBucketListMutation.isPending ? (
+              <span className="flex items-center gap-2">
+                <svg
+                  className="h-4 w-4 animate-spin"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
+                </svg>
+                Adding...
+              </span>
+            ) : (
+              "Add to Bucket List"
+            )}
           </Button>
         </form>
       </CardContent>

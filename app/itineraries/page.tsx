@@ -5,13 +5,16 @@ import { Suspense } from "react"
 
 export default function Page() {
   return (
-    <div>
-      <h1 className="mb-6 text-3xl font-bold">Itineraries</h1>
-      <div className="flex flex-col">
-        <Suspense fallback={<p>Loading...</p>}>
-          <ItineraryGrid />
-        </Suspense>
+    <div className="mx-auto max-w-7xl">
+      <div className="mb-8">
+        <h1 className="text-2xl font-semibold tracking-tight">Itineraries</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Plan your daily activities and schedule your travel adventures.
+        </p>
       </div>
+      <Suspense fallback={<p>Loading...</p>}>
+        <ItineraryGrid />
+      </Suspense>
     </div>
   )
 }

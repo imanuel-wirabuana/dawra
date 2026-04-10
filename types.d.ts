@@ -124,33 +124,12 @@ type Photo = {
 }
 
 /**
- * Represents a chat channel for group discussions.
- * Channels organize conversations by topic or purpose.
- */
-type Channel = {
-  /** Unique identifier for the channel (Firebase document ID) */
-  id: string
-  /** Display name of the channel */
-  name: string
-  /** Optional description of the channel's purpose */
-  description?: string
-  /** User ID of the channel creator */
-  createdBy: string
-  /** Timestamp when the channel was created */
-  createdAt?: Timestamp
-  /** Timestamp when the channel was last updated */
-  updatedAt?: Timestamp
-}
-
-/**
- * Represents a chat message sent in a channel.
+ * Represents a chat message.
  * Supports text content, reactions, replies, and soft deletion.
  */
 type ChatMessage = {
   /** Unique identifier for the message (Firebase document ID) */
   id?: string
-  /** Channel ID where the message was sent */
-  channelId: string
   /** User ID of the message sender */
   userId: string
   /** Display name of the message sender */
@@ -233,15 +212,13 @@ type Reaction = {
 
 /**
  * Represents a real-time typing indicator status.
- * Shows who is currently typing in a channel.
+ * Shows who is currently typing.
  */
 type TypingStatus = {
   /** User ID of the typing user */
   userId: string
   /** Display name of the typing user */
   displayName: string
-  /** Channel ID where the user is typing */
-  channelId: string
   /** Whether the user is currently typing (true) or stopped (false) */
   isTyping: boolean
   /** Timestamp of when this status was last updated */

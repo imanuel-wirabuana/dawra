@@ -37,19 +37,21 @@ export default function ViewModeSelector({
     <Popover>
       <PopoverTrigger asChild>
         <Button
-          variant="outline"
+          variant="ghost"
           size="sm"
-          className={cn("h-7 px-2 text-xs", className)}
+          className={cn(
+            "h-7 w-7 shrink-0 rounded-md p-0 text-muted-foreground transition-all duration-150 hover:bg-primary/10 hover:text-primary",
+            className
+          )}
         >
           {(() => {
             const currentOption = viewModeOptions.find(
               (option) => option.mode === viewMode
             )
             return currentOption ? (
-              <currentOption.icon className="mr-1 h-3 w-3" />
+              <currentOption.icon className="h-3.5 w-3.5" />
             ) : null
           })()}
-          View
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-40 p-1" align="end">
@@ -59,11 +61,13 @@ export default function ViewModeSelector({
               key={mode}
               onClick={() => onViewModeChange(mode)}
               className={cn(
-                "flex items-center gap-2 rounded px-2 py-1.5 text-xs hover:bg-accent",
-                viewMode === mode && "bg-accent"
+                "flex items-center gap-2 rounded-md px-2 py-1.5 text-xs font-medium transition-all duration-150",
+                viewMode === mode
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
               )}
             >
-              <Icon className="h-3 w-3" />
+              <Icon className="h-3.5 w-3.5" />
               {label}
             </button>
           ))}

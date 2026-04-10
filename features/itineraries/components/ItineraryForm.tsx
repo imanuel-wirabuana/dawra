@@ -166,19 +166,31 @@ export default function ItineraryForm({
         onValueChange={(v: string) => setItemType(v as ItemType)}
         className="w-full"
       >
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="bucket-list">Bucket List</TabsTrigger>
-          <TabsTrigger value="custom">Custom</TabsTrigger>
+        <TabsList className="grid h-9 w-full grid-cols-2 bg-muted/50 p-1">
+          <TabsTrigger
+            value="bucket-list"
+            className="text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm"
+          >
+            Bucket List
+          </TabsTrigger>
+          <TabsTrigger
+            value="custom"
+            className="text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm"
+          >
+            Custom
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="bucket-list" className="mt-4 space-y-2">
-          <Label htmlFor="bucketList">Select Bucket List Item</Label>
+        <TabsContent value="bucket-list" className="mt-3 space-y-2">
+          <Label htmlFor="bucketList" className="text-xs font-medium">
+            Select Bucket List Item
+          </Label>
           <Select
             value={selectedBucketListId}
             onValueChange={setSelectedBucketListId}
             disabled={addItineraryMutation.isPending}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="h-9 border-input/60 bg-background text-sm transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20">
               <SelectValue placeholder="Choose an item..." />
             </SelectTrigger>
             <SelectContent>
@@ -193,31 +205,45 @@ export default function ItineraryForm({
           </Select>
         </TabsContent>
 
-        <TabsContent value="custom" className="mt-4 space-y-3">
-          <div className="space-y-2">
-            <Label htmlFor="customTitle">Title *</Label>
+        <TabsContent value="custom" className="mt-3 space-y-3">
+          <div className="space-y-1.5">
+            <Label htmlFor="customTitle" className="text-xs font-medium">
+              Title *
+            </Label>
             <Input
               id="customTitle"
               placeholder="e.g., Lunch break, Travel time"
               value={customTitle}
               onChange={(e) => setCustomTitle(e.target.value)}
               disabled={addItineraryMutation.isPending}
+              className="h-9 border-input/60 bg-background text-sm transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label htmlFor="customLocation">Location (optional)</Label>
+            <div className="space-y-1.5">
+              <Label
+                htmlFor="customLocation"
+                className="text-xs font-medium text-muted-foreground"
+              >
+                Location
+              </Label>
               <Input
                 id="customLocation"
                 placeholder="e.g., Cafe Central"
                 value={customLocation}
                 onChange={(e) => setCustomLocation(e.target.value)}
                 disabled={addItineraryMutation.isPending}
+                className="h-9 border-input/60 bg-background text-sm transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="customCost">Cost (optional)</Label>
+            <div className="space-y-1.5">
+              <Label
+                htmlFor="customCost"
+                className="text-xs font-medium text-muted-foreground"
+              >
+                Cost (IDR)
+              </Label>
               <Input
                 id="customCost"
                 type="number"
@@ -225,23 +251,32 @@ export default function ItineraryForm({
                 value={customCost}
                 onChange={(e) => setCustomCost(e.target.value)}
                 disabled={addItineraryMutation.isPending}
+                className="h-9 border-input/60 bg-background text-sm transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="customDescription">Description (optional)</Label>
+          <div className="space-y-1.5">
+            <Label
+              htmlFor="customDescription"
+              className="text-xs font-medium text-muted-foreground"
+            >
+              Description
+            </Label>
             <Input
               id="customDescription"
               placeholder="Notes, booking ref, etc."
               value={customDescription}
               onChange={(e) => setCustomDescription(e.target.value)}
               disabled={addItineraryMutation.isPending}
+              className="h-9 border-input/60 bg-background text-sm transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="categories">Categories</Label>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium text-muted-foreground">
+              Categories
+            </Label>
             <CategorySelector
               selectedCategories={selectedCategories}
               onCategoriesChange={setSelectedCategories}
@@ -251,9 +286,11 @@ export default function ItineraryForm({
       </Tabs>
 
       {/* Time fields (always shown) */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="startTime">Start Time</Label>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1.5">
+          <Label htmlFor="startTime" className="text-xs font-medium">
+            Start Time
+          </Label>
           <Select
             value={startTime}
             onValueChange={(value) => {
@@ -265,8 +302,8 @@ export default function ItineraryForm({
             }}
             disabled={addItineraryMutation.isPending}
           >
-            <SelectTrigger>
-              <SelectValue placeholder="Select time..." />
+            <SelectTrigger className="h-9 border-input/60 bg-background text-sm transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20">
+              <SelectValue placeholder="Select..." />
             </SelectTrigger>
             <SelectContent className="max-h-60">
               {TIME_OPTIONS.map((time) => (
@@ -277,18 +314,18 @@ export default function ItineraryForm({
             </SelectContent>
           </Select>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="endTime">End Time</Label>
+        <div className="space-y-1.5">
+          <Label htmlFor="endTime" className="text-xs font-medium">
+            End Time
+          </Label>
           <Select
             value={endTime}
             onValueChange={setEndTime}
             disabled={addItineraryMutation.isPending || !startTime}
           >
-            <SelectTrigger>
+            <SelectTrigger className="h-9 border-input/60 bg-background text-sm transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20">
               <SelectValue
-                placeholder={
-                  startTime ? "Select end time..." : "Select start first"
-                }
+                placeholder={startTime ? "Select..." : "Start first"}
               />
             </SelectTrigger>
             <SelectContent className="max-h-60">
@@ -303,13 +340,42 @@ export default function ItineraryForm({
       </div>
 
       {addItineraryMutation.error && (
-        <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive">
+        <div className="rounded-lg border border-destructive/20 bg-destructive/10 px-3 py-2 text-xs text-destructive">
           {addItineraryMutation.error.message}
         </div>
       )}
 
-      <Button type="submit" disabled={isSubmitDisabled()} className="w-full">
-        {addItineraryMutation.isPending ? "Adding..." : "Add Item"}
+      <Button
+        type="submit"
+        disabled={isSubmitDisabled()}
+        className="h-9 w-full bg-primary font-medium text-primary-foreground transition-all duration-150 hover:bg-primary/90 active:scale-[0.98] disabled:opacity-50"
+      >
+        {addItineraryMutation.isPending ? (
+          <span className="flex items-center gap-2">
+            <svg
+              className="h-4 w-4 animate-spin"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              />
+            </svg>
+            Adding...
+          </span>
+        ) : (
+          "Add to Itinerary"
+        )}
       </Button>
     </form>
   )

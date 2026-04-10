@@ -2,6 +2,7 @@
 
 import { useState, useRef, forwardRef, useImperativeHandle } from "react"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 import PhotoCard from "./PhotoCard"
 import PhotoViewModeSelector, {
   type PhotoViewMode,
@@ -308,31 +309,39 @@ const PhotoGrid = forwardRef<PhotoGridRef, PhotoGridProps>(
             </div>
           </div>
         ) : (
-          <div className="mb-4 flex-row items-center justify-between gap-3 space-y-2 lg:flex lg:space-y-0">
-            <h2 className="text-xl font-medium">
-              Our Memories ({photos.length})
-            </h2>
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border/50 bg-card/50 p-2">
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={toggleSelectionMode}
-                className="h-7 text-xs"
+                className="h-8 gap-1.5 border-border/60 bg-background px-3 text-xs font-medium transition-all duration-150 hover:border-primary/50 hover:bg-primary/5"
               >
-                <CheckSquare className="mr-1 h-3 w-3" />
+                <CheckSquare className="h-3.5 w-3.5" />
                 Select
               </Button>
+              <span className="text-xs text-muted-foreground">
+                {photos.length} photos
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5">
               {onToggleFilter && (
                 <Button
-                  variant="outline"
+                  variant={showUnassignedOnly ? "default" : "outline"}
                   size="sm"
                   onClick={onToggleFilter}
-                  className={`h-7 text-xs ${showUnassignedOnly ? "border-primary text-primary" : ""}`}
+                  className={cn(
+                    "h-6 gap-1.5 px-2 text-xs font-medium transition-all duration-150",
+                    showUnassignedOnly
+                      ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                      : "border-border/60 text-muted-foreground hover:border-primary/50 hover:bg-primary/5"
+                  )}
                 >
-                  <Filter className="mr-1 h-3 w-3" />
-                  {showUnassignedOnly ? "Unassigned" : "All"}
+                  <Filter className="h-3 w-3" />
+                  {showUnassignedOnly ? "Unassigned" : "All Photos"}
                 </Button>
               )}
+              <div className="mx-1 h-6 w-px bg-border/50" />
               <PhotoViewModeSelector
                 viewMode={viewMode}
                 onViewModeChange={setViewMode}

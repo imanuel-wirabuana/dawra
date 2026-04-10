@@ -6,7 +6,6 @@ import {
   query,
   serverTimestamp,
   setDoc,
-  where,
 } from "firebase/firestore"
 import { db } from "@/lib/firebase/client"
 import type { TypingStatus } from "@/types"
@@ -14,21 +13,18 @@ import type { TypingStatus } from "@/types"
 const TYPING_COLLECTION = "typing"
 
 export function subscribeToTyping(
-  channelId: string,
   currentUserId: string,
   callback: (typingUsers: TypingStatus[]) => void
 ) {
   const typingRef = collection(db, TYPING_COLLECTION)
-  const q = query(typingRef, where("channelId", "==", channelId))
 
-  return onSnapshot(q, (snapshot) => {
+  return onSnapshot(query(typingRef), (snapshot) => {
     const typingUsers = snapshot.docs
       .map((doc) => {
         const data = doc.data()
         return {
           userId: data.userId,
           displayName: data.displayName,
-          channelId: data.channelId,
           isTyping: data.isTyping,
           timestamp: data.timestamp,
         } as TypingStatus
@@ -46,19 +42,16 @@ export function subscribeToTyping(
 }
 
 export async function setTypingStatus(
-  channelId: string,
   userId: string,
   displayName: string,
   isTyping: boolean
 ) {
-  const typingDocId = `${channelId}_${userId}`
-  const typingRef = doc(db, TYPING_COLLECTION, typingDocId)
+  const typingRef = doc(db, TYPING_COLLECTION, userId)
 
   if (isTyping) {
     await setDoc(typingRef, {
       userId,
       displayName,
-      channelId,
       isTyping,
       timestamp: serverTimestamp(),
     })
