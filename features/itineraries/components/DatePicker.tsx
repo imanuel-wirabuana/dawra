@@ -5,7 +5,11 @@ import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-export default function DatePicker() {
+interface DatePickerProps {
+  className?: string
+}
+
+export default function DatePicker({ className }: DatePickerProps) {
   const { selectedDate, setSelectedDate } = useItineraryStore()
 
   const goToPreviousDay = () => {
@@ -38,7 +42,7 @@ export default function DatePicker() {
   }
 
   return (
-    <div className="flex items-center gap-2 mb-6">
+    <div className={cn("mb-6 flex items-center gap-2", className)}>
       <Button
         variant="outline"
         size="icon"
@@ -47,12 +51,14 @@ export default function DatePicker() {
       >
         <ChevronLeft className="h-4 w-4" />
       </Button>
-      
+
       <div className="flex items-center gap-2">
-        <span className={cn(
-          "text-lg font-semibold",
-          isToday(selectedDate) && "text-primary"
-        )}>
+        <span
+          className={cn(
+            "text-lg font-semibold",
+            isToday(selectedDate) && "text-primary"
+          )}
+        >
           {formatDate(selectedDate)}
         </span>
         {!isToday(selectedDate) && (

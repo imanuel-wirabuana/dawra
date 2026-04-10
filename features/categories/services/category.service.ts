@@ -7,12 +7,19 @@ export async function getCategories(): Promise<{
 }> {
   try {
     const response = await fetch("/api/v1/categories")
-    
+
     if (!response.ok) {
-      const errorData = await response.json()
-      throw new Error(errorData.message || "Failed to fetch categories")
+      const errorText = await response.text()
+      let errorMessage = errorText || `HTTP ${response.status}`
+      try {
+        const errorData = JSON.parse(errorText)
+        errorMessage = errorData.message || errorText
+      } catch {
+        // Use raw text if not valid JSON
+      }
+      throw new Error(errorMessage || "Failed to fetch categories")
     }
-    
+
     const result = await response.json()
     return { success: true, data: result.data }
   } catch (error) {
@@ -24,9 +31,7 @@ export async function getCategories(): Promise<{
   }
 }
 
-export async function addCategory(
-  category: Omit<Category, "id">
-): Promise<{
+export async function addCategory(category: Omit<Category, "id">): Promise<{
   success: boolean
   id?: string
   error?: string
@@ -41,8 +46,15 @@ export async function addCategory(
     })
 
     if (!response.ok) {
-      const errorData = await response.json()
-      throw new Error(errorData.message || "Failed to add category")
+      const errorText = await response.text()
+      let errorMessage = errorText || `HTTP ${response.status}`
+      try {
+        const errorData = JSON.parse(errorText)
+        errorMessage = errorData.message || errorText
+      } catch {
+        // Use raw text if not valid JSON
+      }
+      throw new Error(errorMessage || "Failed to add category")
     }
 
     const data = await response.json()
@@ -56,14 +68,12 @@ export async function addCategory(
   }
 }
 
-export async function updateCategory(
-  category: Category
-): Promise<{
+export async function updateCategory(category: Category): Promise<{
   success: boolean
   error?: string
 }> {
   try {
-    const response = await fetch("/api/v1/categories", {
+    const response = await fetch(`/api/v1/categories/${category.id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -72,8 +82,15 @@ export async function updateCategory(
     })
 
     if (!response.ok) {
-      const errorData = await response.json()
-      throw new Error(errorData.message || "Failed to update category")
+      const errorText = await response.text()
+      let errorMessage = errorText || `HTTP ${response.status}`
+      try {
+        const errorData = JSON.parse(errorText)
+        errorMessage = errorData.message || errorText
+      } catch {
+        // Use raw text if not valid JSON
+      }
+      throw new Error(errorMessage || "Failed to update category")
     }
 
     return { success: true }
@@ -86,20 +103,25 @@ export async function updateCategory(
   }
 }
 
-export async function deleteCategory(
-  id: string
-): Promise<{
+export async function deleteCategory(id: string): Promise<{
   success: boolean
   error?: string
 }> {
   try {
-    const response = await fetch(`/api/v1/categories?id=${id}`, {
+    const response = await fetch(`/api/v1/categories/${id}`, {
       method: "DELETE",
     })
 
     if (!response.ok) {
-      const errorData = await response.json()
-      throw new Error(errorData.message || "Failed to delete category")
+      const errorText = await response.text()
+      let errorMessage = errorText || `HTTP ${response.status}`
+      try {
+        const errorData = JSON.parse(errorText)
+        errorMessage = errorData.message || errorText
+      } catch {
+        // Use raw text if not valid JSON
+      }
+      throw new Error(errorMessage || "Failed to delete category")
     }
 
     return { success: true }

@@ -117,7 +117,7 @@ export default function CategorySelector({
               disabled={disabled}
             />
           </ComboboxChips>
-          <ComboboxContent>
+          <ComboboxContent style={{ pointerEvents: "auto" }}>
             <ComboboxEmpty>No categories found.</ComboboxEmpty>
             <ComboboxList>
               {categories.map((category) => (

@@ -61,6 +61,7 @@ interface GridTimelineProps {
   selectedDate?: Date
   onDateChange?: (date: Date) => void
   debounceMs?: number
+  className?: string
 }
 
 export default function GridTimeline({
@@ -72,6 +73,7 @@ export default function GridTimeline({
   selectedDate: externalSelectedDate,
   onDateChange,
   debounceMs = 300,
+  className,
 }: GridTimelineProps) {
   const [isMobile, setIsMobile] = useState(false)
   const [draggedItem, setDraggedItem] = useState<Item | null>(null)
@@ -502,7 +504,7 @@ export default function GridTimeline({
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex h-full flex-col">
+      <div className={cn("flex h-full flex-col", className)}>
         {/* Toolbar */}
         <div className="flex items-center justify-between border-b bg-background p-3">
           <div className="flex items-center gap-2">

@@ -17,6 +17,7 @@ interface PhotoCardProps {
   isSelected?: boolean
   isSelectionMode?: boolean
   onSelect?: (e: React.MouseEvent, id: string) => void
+  className?: string
 }
 
 export default function PhotoCard({
@@ -27,6 +28,7 @@ export default function PhotoCard({
   isSelected,
   isSelectionMode,
   onSelect,
+  className,
 }: PhotoCardProps) {
   // Look up folder name if photo has folderId
   const folder = useMemo(() => {
@@ -44,7 +46,8 @@ export default function PhotoCard({
       className={cn(
         "group relative overflow-hidden transition-all",
         isSelectionMode && "cursor-pointer",
-        isSelected ? "ring-2 ring-primary ring-offset-2" : "hover:scale-105"
+        isSelected ? "ring-2 ring-primary ring-offset-2" : "hover:scale-105",
+        className
       )}
       onClick={handleClick}
     >

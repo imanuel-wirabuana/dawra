@@ -29,6 +29,7 @@ interface PhotoGridProps {
   currentFolderId?: string
   showUnassignedOnly?: boolean
   onToggleFilter?: () => void
+  className?: string
 }
 
 export interface PhotoGridRef {
@@ -44,6 +45,7 @@ const PhotoGrid = forwardRef<PhotoGridRef, PhotoGridProps>(
       currentFolderId,
       showUnassignedOnly,
       onToggleFilter,
+      className,
     },
     ref
   ) => {
@@ -228,7 +230,7 @@ const PhotoGrid = forwardRef<PhotoGridRef, PhotoGridProps>(
     }
 
     return (
-      <div>
+      <div className={className}>
         {/* Selection Mode Header */}
         {isSelectionMode ? (
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-primary/10 p-3">

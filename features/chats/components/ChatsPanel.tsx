@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react"
 import { formatDistanceToNow } from "date-fns"
+import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -51,7 +52,11 @@ const generateUserId = () => {
   return "guest"
 }
 
-export default function ChatsPanel() {
+interface ChatsPanelProps {
+  className?: string
+}
+
+export default function ChatsPanel({ className }: ChatsPanelProps) {
   const [currentUserId] = useState(generateUserId)
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null)
   const [displayName, setDisplayName] = useState("")
@@ -144,7 +149,12 @@ export default function ChatsPanel() {
   }
 
   return (
-    <div className="flex h-fit min-h-[500px] items-stretch overflow-hidden rounded-xl border border-border bg-card shadow-lg">
+    <div
+      className={cn(
+        "flex h-fit min-h-125 items-stretch overflow-hidden rounded-xl border border-border bg-card shadow-lg",
+        className
+      )}
+    >
       <div className="flex min-h-0 w-64 flex-col border-r border-border bg-muted/30">
         <div className="flex items-center justify-between border-b border-border p-4">
           <h2 className="text-lg font-semibold">Channels</h2>
@@ -290,7 +300,7 @@ export default function ChatsPanel() {
                   <Reply className="h-4 w-4" />
                   <span className="text-muted-foreground">Replying to</span>
                   <span className="font-medium">{replyTo.displayName}</span>
-                  <span className="max-w-[200px] truncate text-muted-foreground">
+                  <span className="max-w-50 truncate text-muted-foreground">
                     {replyTo.message}
                   </span>
                 </div>
@@ -345,7 +355,7 @@ export default function ChatsPanel() {
                     onChange={(e) => handleTyping(e.target.value)}
                     disabled={addChatMessage.isPending}
                     rows={1}
-                    className="min-h-[40px] resize-none"
+                    className="min-h-10 resize-none"
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && !e.shiftKey) {
                         e.preventDefault()

@@ -32,6 +32,7 @@ interface WeekGridProps {
   onDeleteItem?: (id: string) => void
   onSlotClick?: (date: Date, hour: number, minute: number) => void
   draggedItemId: string | null
+  className?: string
 }
 
 export default function WeekGrid({
@@ -42,6 +43,7 @@ export default function WeekGrid({
   onDeleteItem,
   onSlotClick,
   draggedItemId,
+  className,
 }: WeekGridProps) {
   const hours = generateHours()
   const totalHeight = (END_HOUR - START_HOUR) * HOUR_HEIGHT
@@ -60,7 +62,12 @@ export default function WeekGrid({
   }
 
   return (
-    <div className="relative flex w-full overflow-auto border bg-background">
+    <div
+      className={cn(
+        "relative flex w-full overflow-auto border bg-background",
+        className
+      )}
+    >
       {/* Time sidebar */}
       <div
         className="sticky left-0 z-20 shrink-0 border-r bg-background"

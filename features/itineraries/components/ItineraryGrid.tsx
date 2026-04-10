@@ -8,6 +8,18 @@ import { useAddItineraryItem } from "../hooks/useAddItineraryItem"
 import GridTimeline from "@/features/itineraries/components/GridTimeline"
 import DatePicker from "./DatePicker"
 import ItineraryForm from "./ItineraryForm"
+import { Plus } from "lucide-react"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
 import { deleteItineraryItem } from "../services/delete.service"
 import type { ItineraryItem, Category } from "@/types"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -77,24 +89,14 @@ export default function ItineraryGrid() {
     end: string
   } | null>(null)
 
-  // Create dialog state
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
-  const [createItemType, setCreateItemType] = useState<
-    "bucket-list" | "custom"
-  >("bucket-list")
-  const [createItem, setCreateItem] = useState<{
-    date: Date
-    start: string
-    end: string
-    selectedBucketListId: string
-    customTitle: string
-    customLocation: string
-    customCost: string
-    customDescription: string
-    selectedCategories: Category[]
-  } | null>(null)
+  // Add popover state for ItineraryForm
+  const [formOpen, setFormOpen] = useState(false)
 
-  const addMutation = useAddItineraryItem()
+  // Drawer state for slot click
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const [slotStartTime, setSlotStartTime] = useState("")
+  const [slotEndTime, setSlotEndTime] = useState("")
+  const [slotDate, setSlotDate] = useState<Date | null>(null)
 
   const handleDelete = async (id: string) => {
     await deleteItineraryItem(id)
@@ -169,7 +171,7 @@ export default function ItineraryGrid() {
     setEditingItem(null)
   }
 
-  // Slot click handler - opens create dialog with pre-populated time
+  // Slot click handler - opens drawer with pre-populated time
   const handleSlotClick = (date: Date, hour: number, minute: number) => {
     const startTime = `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`
     // Default end time is 1 hour later (or next available slot)
@@ -181,84 +183,17 @@ export default function ItineraryGrid() {
     }
     const endTime = `${endHour.toString().padStart(2, "0")}:${endMinute.toString().padStart(2, "0")}`
 
-    setCreateItem({
-      date,
-      start: startTime,
-      end: endTime,
-      selectedBucketListId: "",
-      customTitle: "",
-      customLocation: "",
-      customCost: "",
-      customDescription: "",
-      selectedCategories: [],
-    })
-    setCreateItemType("bucket-list")
-    setIsCreateDialogOpen(true)
+    setSlotStartTime(startTime)
+    setSlotEndTime(endTime)
+    setSlotDate(date)
+    setIsDrawerOpen(true)
   }
 
-  const resetCreateForm = () => {
-    setCreateItem(null)
-    setCreateItemType("bucket-list")
-  }
-
-  const handleCreateSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!createItem) return
-
-    if (!createItem.start || !createItem.end) {
-      return
-    }
-
-    const baseItem = {
-      date: format(createItem.date, "yyyy-MM-dd"),
-      start: createItem.start,
-      end: createItem.end,
-    }
-
-    if (createItemType === "bucket-list") {
-      if (!createItem.selectedBucketListId) return
-
-      addMutation.mutate({
-        ...baseItem,
-        itemType: "bucket-list",
-        completed: false,
-        bucketList: createItem.selectedBucketListId,
-      })
-    } else {
-      if (!createItem.customTitle.trim()) return
-
-      addMutation.mutate({
-        ...baseItem,
-        itemType: "custom",
-        completed: false,
-        customItem: {
-          title: createItem.customTitle.trim(),
-          location: createItem.customLocation.trim() || undefined,
-          cost: createItem.customCost
-            ? Number(createItem.customCost)
-            : undefined,
-          description: createItem.customDescription.trim() || undefined,
-          categories: createItem.selectedCategories,
-        },
-      })
-    }
-  }
-
-  // Reset form on successful submission
-  if (addMutation.isSuccess) {
-    resetCreateForm()
-    setIsCreateDialogOpen(false)
-    addMutation.reset()
-  }
-
-  const isCreateSubmitDisabled = () => {
-    if (!createItem) return true
-    if (!createItem.start || !createItem.end) return true
-    if (createItemType === "bucket-list" && !createItem.selectedBucketListId)
-      return true
-    if (createItemType === "custom" && !createItem.customTitle.trim())
-      return true
-    return addMutation.isPending
+  const handleDrawerClose = () => {
+    setIsDrawerOpen(false)
+    setSlotStartTime("")
+    setSlotEndTime("")
+    setSlotDate(null)
   }
 
   // Transform ItineraryItem to the format expected by GridTimeline
@@ -315,7 +250,22 @@ export default function ItineraryGrid() {
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="flex flex-wrap items-center gap-3">
               <DatePicker />
-              <ItineraryForm className="w-fit" />
+              <Popover open={formOpen} onOpenChange={setFormOpen}>
+                <PopoverTrigger asChild>
+                  <Button className="w-fit">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Itinerary Item
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="sm:max-w-96" align="end">
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">
+                      Add New Itinerary Item
+                    </h3>
+                    <ItineraryForm onSuccess={() => setFormOpen(false)} />
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
             <div className="flex items-center gap-4">
               <span className="text-sm font-normal text-muted-foreground">
@@ -513,244 +463,31 @@ export default function ItineraryGrid() {
         </DialogContent>
       </Dialog>
 
-      {/* Create Dialog for Slot Click */}
-      <Dialog
-        open={isCreateDialogOpen}
+      {/* Create Sheet for Slot Click */}
+      <Sheet
+        open={isDrawerOpen}
         onOpenChange={(open) => {
           if (!open) {
-            resetCreateForm()
+            handleDrawerClose()
           }
-          setIsCreateDialogOpen(open)
+          setIsDrawerOpen(open)
         }}
       >
-        <DialogContent className="sm:max-w-96">
-          <DialogHeader>
-            <DialogTitle>Add Itinerary Item</DialogTitle>
-          </DialogHeader>
-          {createItem && (
-            <form onSubmit={handleCreateSubmit} className="space-y-4">
-              <Tabs
-                value={createItemType}
-                onValueChange={(v) =>
-                  setCreateItemType(v as "bucket-list" | "custom")
-                }
-              >
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="bucket-list">Bucket List</TabsTrigger>
-                  <TabsTrigger value="custom">Custom</TabsTrigger>
-                </TabsList>
-              </Tabs>
-
-              {/* Bucket List Mode */}
-              {createItemType === "bucket-list" && (
-                <div className="space-y-2">
-                  <Label htmlFor="bucketList">Select Bucket List Item</Label>
-                  <Select
-                    value={createItem.selectedBucketListId}
-                    onValueChange={(value) =>
-                      setCreateItem({
-                        ...createItem,
-                        selectedBucketListId: value,
-                      })
-                    }
-                    disabled={addMutation.isPending}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Choose an item..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {bucketListItems
-                        .filter((item) => !item.completed)
-                        .map((item) => (
-                          <SelectItem key={item.id} value={item.id!}>
-                            {item.title}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
-              {/* Custom Item Mode */}
-              {createItemType === "custom" && (
-                <div className="space-y-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="customTitle">Title *</Label>
-                    <Input
-                      id="customTitle"
-                      placeholder="e.g., Lunch break, Travel time"
-                      value={createItem.customTitle}
-                      onChange={(e) =>
-                        setCreateItem({
-                          ...createItem,
-                          customTitle: e.target.value,
-                        })
-                      }
-                      disabled={addMutation.isPending}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-2">
-                      <Label htmlFor="customLocation">
-                        Location (optional)
-                      </Label>
-                      <Input
-                        id="customLocation"
-                        placeholder="e.g., Cafe Central"
-                        value={createItem.customLocation}
-                        onChange={(e) =>
-                          setCreateItem({
-                            ...createItem,
-                            customLocation: e.target.value,
-                          })
-                        }
-                        disabled={addMutation.isPending}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="customCost">Cost (optional)</Label>
-                      <Input
-                        id="customCost"
-                        type="number"
-                        placeholder="0"
-                        value={createItem.customCost}
-                        onChange={(e) =>
-                          setCreateItem({
-                            ...createItem,
-                            customCost: e.target.value,
-                          })
-                        }
-                        disabled={addMutation.isPending}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="customDescription">
-                      Description (optional)
-                    </Label>
-                    <Input
-                      id="customDescription"
-                      placeholder="Notes, booking ref, etc."
-                      value={createItem.customDescription}
-                      onChange={(e) =>
-                        setCreateItem({
-                          ...createItem,
-                          customDescription: e.target.value,
-                        })
-                      }
-                      disabled={addMutation.isPending}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="categories">Categories</Label>
-                    <CategorySelector
-                      selectedCategories={createItem.selectedCategories}
-                      onCategoriesChange={(categories) =>
-                        setCreateItem({
-                          ...createItem,
-                          selectedCategories: categories,
-                        })
-                      }
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Time fields (always shown) */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="startTime">Start Time</Label>
-                  <Select
-                    value={createItem.start}
-                    onValueChange={(value) => {
-                      setCreateItem({ ...createItem, start: value })
-                      // Reset end time if it's now invalid
-                      if (
-                        createItem.end &&
-                        timeToMinutes(createItem.end) <= timeToMinutes(value)
-                      ) {
-                        setCreateItem((prev) =>
-                          prev ? { ...prev, end: "" } : null
-                        )
-                      }
-                    }}
-                    disabled={addMutation.isPending}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select time..." />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-60">
-                      {TIME_OPTIONS.map((time) => (
-                        <SelectItem key={time} value={time}>
-                          {time}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="endTime">End Time</Label>
-                  <Select
-                    value={createItem.end}
-                    onValueChange={(value) =>
-                      setCreateItem({ ...createItem, end: value })
-                    }
-                    disabled={addMutation.isPending || !createItem.start}
-                  >
-                    <SelectTrigger>
-                      <SelectValue
-                        placeholder={
-                          createItem.start
-                            ? "Select end time..."
-                            : "Select start first"
-                        }
-                      />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-60">
-                      {getValidEndTimes(createItem.start).map((time) => (
-                        <SelectItem key={time} value={time}>
-                          {time}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {addMutation.error && (
-                <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive">
-                  {addMutation.error.message}
-                </div>
-              )}
-
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    resetCreateForm()
-                    setIsCreateDialogOpen(false)
-                  }}
-                  className="flex-1"
-                  disabled={addMutation.isPending}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={isCreateSubmitDisabled()}
-                  className="flex-1"
-                >
-                  {addMutation.isPending ? "Adding..." : "Add Item"}
-                </Button>
-              </div>
-            </form>
-          )}
-        </DialogContent>
-      </Dialog>
+        <SheetContent className="sm:max-w-md">
+          <SheetHeader>
+            <SheetTitle>Add Itinerary Item</SheetTitle>
+          </SheetHeader>
+          <div className="flex justify-center px-4 pt-4 pb-4">
+            <ItineraryForm
+              className="mx-auto w-full"
+              initialStartTime={slotStartTime}
+              initialEndTime={slotEndTime}
+              initialDate={slotDate}
+              onSuccess={handleDrawerClose}
+            />
+          </div>
+        </SheetContent>
+      </Sheet>
     </>
   )
 }

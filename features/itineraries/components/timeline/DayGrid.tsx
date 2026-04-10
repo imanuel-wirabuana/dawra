@@ -24,6 +24,7 @@ interface DayGridProps {
   onDeleteItem?: (id: string) => void
   onSlotClick?: (date: Date, hour: number, minute: number) => void
   draggedItemId: string | null
+  className?: string
 }
 
 export default function DayGrid({
@@ -34,6 +35,7 @@ export default function DayGrid({
   onDeleteItem,
   onSlotClick,
   draggedItemId,
+  className,
 }: DayGridProps) {
   const hours = generateHours()
   const totalHeight = (END_HOUR - START_HOUR) * HOUR_HEIGHT
@@ -47,7 +49,12 @@ export default function DayGrid({
   const eventPositions = calculateEventPositions(dayItems)
 
   return (
-    <div className="relative flex w-full overflow-auto border bg-background">
+    <div
+      className={cn(
+        "relative flex w-full overflow-auto border bg-background",
+        className
+      )}
+    >
       {/* Time sidebar */}
       <div
         className="sticky left-0 z-20 shrink-0 border-r bg-background"

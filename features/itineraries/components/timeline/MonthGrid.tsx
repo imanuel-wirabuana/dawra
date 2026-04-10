@@ -16,12 +16,14 @@ interface MonthGridProps {
   items: Item[]
   selectedDate: Date
   onDateChange: (date: Date) => void
+  className?: string
 }
 
 export default function MonthGrid({
   items,
   selectedDate,
   onDateChange,
+  className,
 }: MonthGridProps) {
   const weekStartsOn = 1 // Monday
   const firstDayOfMonth = startOfMonth(selectedDate)
@@ -49,7 +51,7 @@ export default function MonthGrid({
   }
 
   return (
-    <div className="flex h-full flex-col border bg-background">
+    <div className={cn("flex h-full flex-col border bg-background", className)}>
       {/* Week day headers */}
       <div className="grid grid-cols-7 border-b bg-muted/30">
         {weekDayNames.map((name) => (
