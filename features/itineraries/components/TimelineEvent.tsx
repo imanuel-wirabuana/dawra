@@ -16,6 +16,7 @@ import {
   X,
 } from "lucide-react"
 import type { Category } from "@/types"
+import { getDurationMinutes } from "./timeline/shared"
 import {
   Dialog,
   DialogContent,
@@ -115,6 +116,10 @@ export default function TimelineEvent({
 
   const isBucketList = item.itemType === "bucket-list"
 
+  // Check if event fits in one 15-minute slot (15 min or less)
+  const durationMinutes = getDurationMinutes(item.start, item.end)
+  const isShortEvent = durationMinutes <= 15
+
   return (
     <>
       {/* Grid Event Card - Minimal Info - Entire card is draggable handle */}
@@ -123,8 +128,9 @@ export default function TimelineEvent({
         onClick={handleClick}
         {...(draggable ? { ...listeners, ...attributes } : {})}
         className={cn(
-          "group flex cursor-pointer flex-col justify-start gap-1 overflow-hidden rounded-lg border p-2 shadow-sm transition-all duration-200",
+          "group flex cursor-pointer flex-col gap-1 overflow-hidden rounded-lg border p-2 shadow-sm transition-all duration-200",
           compact && "p-1.5",
+          isShortEvent && "justify-center",
           draggable && "cursor-grab active:cursor-grabbing",
           isDragging && "opacity-50 scale-[1.02] shadow-lg",
           item.completed && "opacity-60 grayscale-[0.3]",
@@ -147,56 +153,72 @@ export default function TimelineEvent({
           {item.title}
         </h3>
 
-        {/* Time Row - Start - End (Duration) */}
-        <div
-          className={cn(
-            "flex items-center gap-1 font-medium",
-            compact ? "text-[9px]" : "text-[10px]",
-            isBucketList
-              ? "text-primary-foreground/90"
-              : "text-muted-foreground/80"
-          )}
-        >
-          <Clock
+        {/* Time Row - Hidden for short 15-min events */}
+        {!isShortEvent && (
+          <div
             className={cn(
-              "shrink-0 opacity-50",
-              compact ? "h-2.5 w-2.5" : "h-3 w-3"
-            )}
-          />
-          <span className="tabular-nums font-semibold">{item.start}</span>
-          <span className="opacity-50">-</span>
-          <span className="tabular-nums">{item.end}</span>
-          <span
-            className={cn(
-              "ml-1 rounded-full px-1.5 py-0 text-[9px] font-medium opacity-80",
-              isBucketList ? "bg-primary-foreground/20" : "bg-muted-foreground/20"
+              "flex items-center gap-1 font-medium",
+              compact ? "text-[9px]" : "text-[10px]",
+              isBucketList
+                ? "text-primary-foreground/90"
+                : "text-muted-foreground/80"
             )}
           >
-            ({formatDuration(item.start, item.end)})
-          </span>
-        </div>
+            <Clock
+              className={cn(
+                "shrink-0 opacity-50",
+                compact ? "h-2.5 w-2.5" : "h-3 w-3"
+              )}
+            />
+            <span className="tabular-nums font-semibold">{item.start}</span>
+            <span className="opacity-50">-</span>
+            <span className="tabular-nums">{item.end}</span>
+            <span
+              className={cn(
+                "ml-1 rounded-full px-1.5 py-0 text-[9px] font-medium opacity-80",
+                isBucketList ? "bg-primary-foreground/20" : "bg-muted-foreground/20"
+              )}
+            >
+              ({formatDuration(item.start, item.end)})
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Full Details Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <span
-                className={cn(
-                  "shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-bold tracking-wider uppercase",
-                  isBucketList
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground"
-                )}
-              >
-                {isBucketList ? "Bucket List" : "Custom"}
-              </span>
-              <span className="truncate">{item.title}</span>
-            </DialogTitle>
-          </DialogHeader>
+        <DialogContent className="sm:max-w-md overflow-hidden">
+          {/* Category-colored header */}
+          <div
+            className="-mt-6 -mx-6 mb-4 px-6 py-4"
+            style={
+              item.categories && item.categories.length >= 2
+                ? {
+                    background: `linear-gradient(135deg, ${item.categories[0].color} 0%, ${item.categories[1].color} 100%)`,
+                  }
+                : item.categories && item.categories.length === 1
+                  ? { backgroundColor: item.categories[0].color }
+                  : isBucketList
+                    ? { backgroundColor: "hsl(var(--primary))" }
+                    : { backgroundColor: "hsl(var(--muted))" }
+            }
+          >
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-white">
+                <span
+                  className={cn(
+                    "shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-bold tracking-wider uppercase",
+                    "bg-white/20 text-white backdrop-blur-sm"
+                  )}
+                >
+                  {isBucketList ? "Bucket List" : "Custom"}
+                </span>
+                <span className="truncate text-white drop-shadow-sm">{item.title}</span>
+              </DialogTitle>
+            </DialogHeader>
+          </div>
 
-          <div className="space-y-4 pt-2">
+          <div className="space-y-4">
             {/* Time */}
             <div className="flex items-center gap-3 rounded-lg bg-muted p-3">
               <Clock className="h-4 w-4 text-muted-foreground" />
