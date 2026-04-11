@@ -74,9 +74,9 @@ export default function MonthGrid({
       </div>
 
       {/* Calendar grid */}
-      <div className="flex-1">
+      <div className="flex-1 overflow-auto">
         {weeks.map((week, weekIndex) => (
-          <div key={weekIndex} className="grid grid-cols-7 border-b last:border-b-0">
+          <div key={weekIndex} className="grid grid-cols-7 border-b last:border-b-0 min-h-[80px]">
             {week.map((day) => {
               const dayItems = getItemsForDay(day)
               const isCurrentMonth = day.getMonth() === safeSelectedDate.getMonth()
@@ -89,7 +89,7 @@ export default function MonthGrid({
                 <div
                   key={day.toISOString()}
                   className={cn(
-                    "min-h-[100px] cursor-pointer border-r last:border-r-0 p-2 transition-all duration-200",
+                    "h-full min-h-[60px] cursor-pointer border-r last:border-r-0 p-2 transition-all duration-200 flex flex-col",
                     !isCurrentMonth && "bg-muted/10 text-muted-foreground/60",
                     isCurrentMonth && "bg-background hover:bg-muted/30",
                     isSelected && "bg-primary/5 ring-2 ring-primary ring-inset relative z-10"

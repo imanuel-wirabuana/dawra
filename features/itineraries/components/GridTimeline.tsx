@@ -45,6 +45,7 @@ import WeekGrid from "./timeline/WeekGrid"
 import MonthGrid from "./timeline/MonthGrid"
 import ItineraryForm from "./ItineraryForm"
 import SidebarItem from "./SidebarItem"
+import FullscreenMode from "./FullscreenMode"
 import {
   formatDuration,
   getDurationMinutes,
@@ -94,8 +95,8 @@ export default function GridTimeline({
   } | null>(null)
   const [viewMode, setViewMode] = useState<ViewMode>("week")
   const [internalDate, setInternalDate] = useState<Date>(new Date())
-  const [isFullscreen, setIsFullscreen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const [isFullscreen, setIsFullscreen] = useState(false)
 
   // Sheet state for slot click form
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
@@ -147,17 +148,6 @@ export default function GridTimeline({
   const toggleFullscreen = () => {
     setIsFullscreen((prev) => !prev)
   }
-
-  // Handle Escape key to exit fullscreen
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isFullscreen) {
-        setIsFullscreen(false)
-      }
-    }
-    window.addEventListener("keydown", handleKeyDown)
-    return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [isFullscreen])
 
   // Slot click handler - opens drawer with pre-populated time
   const handleSlotClick = (date: Date, hour: number, minute: number) => {
@@ -415,7 +405,7 @@ export default function GridTimeline({
               </span>
             )}
           </div>
-          <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
+          <div className="min-h-72 space-y-2 overflow-y-auto pr-1">
             {sidebarItems.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-6 text-center">
                 <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center mb-2">
@@ -822,147 +812,27 @@ export default function GridTimeline({
         ) : null}
       </DragOverlay>
 
-      {/* Fullscreen Overlay */}
-      {isFullscreen && (
-        <div className="fixed inset-0 z-50 bg-background flex flex-col">
-          {/* Toolbar */}
-          <div className="flex items-center justify-between border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-3 sticky top-0 z-30">
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1 rounded-lg border border-border/50 bg-muted/30 p-1">
-                <DatePicker/>
-              </div>
-              <div className="ml-2 flex flex-col">
-                <span className="text-base font-semibold leading-tight">
-                  {viewMode === "day" && format(selectedDate, "EEEE, MMMM d, yyyy")}
-                  {viewMode === "week" &&
-                    `${format(weekDays[0], "MMM d")} - ${format(weekDays[6], "MMM d, yyyy")}`}
-                  {viewMode === "month" && format(selectedDate, "MMMM yyyy")}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  {viewMode === "week" && `${weekDays.length} days selected`}
-                </span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1 rounded-lg border border-border/50 bg-muted/30 p-1">
-                <Button
-                  variant={viewMode === "day" ? "secondary" : "ghost"}
-                  size="sm"
-                  onClick={() => setViewMode("day")}
-                  className="h-8 text-xs"
-                >
-                  Day
-                </Button>
-                <Button
-                  variant={viewMode === "week" ? "secondary" : "ghost"}
-                  size="sm"
-                  onClick={() => setViewMode("week")}
-                  className="h-8 text-xs"
-                >
-                  Week
-                </Button>
-                <Button
-                  variant={viewMode === "month" ? "secondary" : "ghost"}
-                  size="sm"
-                  onClick={() => setViewMode("month")}
-                  className="h-8 text-xs"
-                >
-                  Month
-                </Button>
-              </div>
-
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={toggleFullscreen}
-                className="h-8 w-8 ml-2"
-                title="Exit fullscreen"
-              >
-                <Minimize2 className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Main content */}
-          <div className="flex flex-1 overflow-hidden">
-            {renderSidebar()}
-
-            <div className="flex-1 overflow-auto">
-              {viewMode === "day" && (
-                <DayGrid
-                  items={displayItems}
-                  selectedDate={selectedDate}
-                  onReschedule={onReschedule}
-                  onEditItem={onEditItem}
-                  onDeleteItem={onDeleteItem}
-                  onToggleComplete={onToggleComplete}
-                  onSlotClick={handleSlotClick}
-                  draggedItemId={draggedItem?.id || null}
-                />
-              )}
-              {viewMode === "week" && (
-                <WeekGrid
-                  items={displayItems}
-                  selectedDate={selectedDate}
-                  onReschedule={onReschedule}
-                  onEditItem={onEditItem}
-                  onDeleteItem={onDeleteItem}
-                  onToggleComplete={onToggleComplete}
-                  onSlotClick={handleSlotClick}
-                  onDateSelect={(date) => {
-                    setSelectedDate(date)
-                  }}
-                  draggedItemId={draggedItem?.id || null}
-                />
-              )}
-              {viewMode === "month" && (
-                <MonthGrid
-                  items={displayItems}
-                  selectedDate={selectedDate}
-                  onDateChange={setSelectedDate}
-                />
-              )}
-            </div>
-          </div>
-
-          {/* Sheet for Slot Click - Inside Fullscreen Overlay */}
-          <Sheet
-            open={isDrawerOpen}
-            onOpenChange={(open) => {
-              if (!open) {
-                handleDrawerClose()
-              }
-              setIsDrawerOpen(open)
-            }}
-          >
-            <SheetContent className="sm:max-w-md">
-              <SheetHeader>
-                <SheetTitle>Add Itinerary Item</SheetTitle>
-              </SheetHeader>
-              <div className="flex justify-center px-4 pt-4 pb-4">
-                <ItineraryForm
-                  className="mx-auto w-full"
-                  initialStartTime={slotStartTime}
-                  initialEndTime={slotEndTime}
-                  initialDate={slotDate}
-                  onSuccess={() => {
-                    handleDrawerClose()
-                    onSuccess?.()
-                  }}
-                />
-              </div>
-            </SheetContent>
-          </Sheet>
-
-          {/* Floating Fullscreen Indicator */}
-          <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-full bg-primary/90 px-3 py-1.5 text-xs font-medium text-primary-foreground shadow-lg backdrop-blur-sm">
-            <Maximize2 className="h-3 w-3" />
-            <span>Fullscreen Mode</span>
-            <span className="ml-1 rounded bg-primary-foreground/20 px-1.5 py-0.5 text-[10px]">ESC to exit</span>
-          </div>
-        </div>
-      )}
+      <FullscreenMode
+        isOpen={isFullscreen}
+        onClose={() => setIsFullscreen(false)}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        selectedDate={selectedDate}
+        onDateChange={setSelectedDate}
+        displayItems={displayItems}
+        onReschedule={onReschedule}
+        onEditItem={onEditItem}
+        onDeleteItem={onDeleteItem}
+        onToggleComplete={onToggleComplete}
+        onSlotClick={handleSlotClick}
+        isDrawerOpen={isDrawerOpen}
+        onDrawerOpenChange={setIsDrawerOpen}
+        onDrawerClose={handleDrawerClose}
+        slotStartTime={slotStartTime}
+        slotEndTime={slotEndTime}
+        slotDate={slotDate}
+        onSuccess={onSuccess}
+      />
 
       {/* Sheet for Slot Click - Normal Mode */}
       <Sheet

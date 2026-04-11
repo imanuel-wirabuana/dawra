@@ -123,7 +123,7 @@ export default function TimelineEvent({
         onClick={handleClick}
         {...(draggable ? { ...listeners, ...attributes } : {})}
         className={cn(
-          "group flex cursor-pointer flex-col gap-1 overflow-hidden rounded-lg border p-2 shadow-sm transition-all duration-200",
+          "group flex cursor-pointer flex-col justify-start gap-1 overflow-hidden rounded-lg border p-2 shadow-sm transition-all duration-200",
           compact && "p-1.5",
           draggable && "cursor-grab active:cursor-grabbing",
           isDragging && "opacity-50 scale-[1.02] shadow-lg",
