@@ -1,6 +1,7 @@
 import BucketListGrid from "@/features/bucket-lists/components/BucketListGrid"
 import BucketListForm from "@/features/bucket-lists/components/BucketListForm"
 import MobileAddButton from "@/features/bucket-lists/components/MobileAddButton"
+import BucketListGridSkeleton from "@/features/bucket-lists/components/BucketListGridSkeleton"
 import { Suspense } from "react"
 import { Target, CheckCircle } from "lucide-react"
 
@@ -21,7 +22,7 @@ export default function Page() {
       </div>
       <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
         <div className="order-2 w-full lg:order-1 lg:w-[70%]">
-          <Suspense fallback={<p>Loading...</p>}>
+          <Suspense fallback={<BucketListGridSkeleton />}>
             <BucketListGrid />
           </Suspense>
         </div>

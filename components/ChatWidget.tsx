@@ -36,6 +36,7 @@ import { useTyping } from "@/features/chats/hooks/useTyping"
 import { useReactions } from "@/features/chats/hooks/useReactions"
 import { useEditDelete } from "@/features/chats/hooks/useEditDelete"
 import { editMessage } from "@/features/chats/services/edit-delete.service"
+import ChatsPanelSkeleton from "@/features/chats/components/ChatsPanelSkeleton"
 import type { ChatMessage } from "@/types"
 import {
   Dialog,
@@ -181,9 +182,7 @@ export default function ChatWidget() {
               <ScrollArea className="h-full p-2">
                 <div className="space-y-2">
                   {messagesLoading ? (
-                    <p className="py-2 text-center text-xs text-muted-foreground">
-                      Loading...
-                    </p>
+                    <ChatsPanelSkeleton className="h-full border-0 shadow-none" />
                   ) : messages.length === 0 ? (
                     <p className="py-4 text-center text-xs text-muted-foreground">
                       No messages yet. Say hello!

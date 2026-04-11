@@ -46,6 +46,7 @@ import {
   type Item,
   type ViewMode,
 } from "./timeline/shared"
+import DatePicker from "./DatePicker"
 
 interface GridTimelineProps {
   items: Item[]
@@ -333,7 +334,7 @@ export default function GridTimeline({
               mode="single"
               selected={selectedDate}
               onSelect={(date) => date && setSelectedDate(date)}
-              className="rounded-md"
+              className="rounded-md w-full"
             />
           </div>
         </div>
@@ -547,30 +548,7 @@ export default function GridTimeline({
         <div className="flex items-center justify-between border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-3 sticky top-0 z-30">
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1 rounded-lg border border-border/50 bg-muted/30 p-1">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={goToPrevious}
-                className="h-8 w-8 hover:bg-background"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <Button 
-                variant="ghost" 
-                onClick={goToToday} 
-                className="h-8 gap-1.5 px-3 text-sm font-medium hover:bg-background"
-              >
-                <CalendarIcon className="h-4 w-4 text-primary" />
-                Today
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={goToNext}
-                className="h-8 w-8 hover:bg-background"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
+              <DatePicker/>
             </div>
             <div className="ml-2 flex flex-col">
               <span className="text-base font-semibold leading-tight">

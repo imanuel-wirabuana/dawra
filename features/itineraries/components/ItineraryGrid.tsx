@@ -249,7 +249,7 @@ export default function ItineraryGrid() {
         <CardHeader className="border-b border-border/50 bg-gradient-to-b from-muted/50 to-muted/20 px-5 py-4">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-wrap items-center gap-3">
-              <DatePicker />
+              
               <Popover open={formOpen} onOpenChange={setFormOpen}>
                 <PopoverTrigger asChild>
                   <Button
@@ -306,15 +306,15 @@ export default function ItineraryGrid() {
         </CardContent>
       </Card>
 
-      {/* Edit Dialog for Custom Items */}
-      <Dialog
+      {/* Edit Sheet for Custom Items */}
+      <Sheet
         open={!!editingItem}
         onOpenChange={(open) => !open && setEditingItem(null)}
       >
-        <DialogContent className="sm:max-w-96">
-          <DialogHeader>
-            <DialogTitle>Edit Itinerary Item</DialogTitle>
-          </DialogHeader>
+        <SheetContent className="sm:max-w-md">
+          <SheetHeader>
+            <SheetTitle>Edit Itinerary Item</SheetTitle>
+          </SheetHeader>
           {editingItem && (
             <form onSubmit={handleUpdate} className="space-y-4">
               <div className="space-y-2">
@@ -480,8 +480,8 @@ export default function ItineraryGrid() {
               </div>
             </form>
           )}
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
 
       {/* Create Sheet for Slot Click */}
       <Sheet

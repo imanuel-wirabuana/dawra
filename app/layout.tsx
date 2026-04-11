@@ -69,7 +69,7 @@ export default function RootLayout({
               <Footer />
               <FloatingNav />
               <ChatWidget />
-              <Toaster position="bottom-right" />
+              <Toaster position="top-center" />
             </ThemeProvider>
           </TooltipProvider>
         </Providers>

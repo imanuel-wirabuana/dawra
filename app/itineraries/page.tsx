@@ -1,6 +1,7 @@
 "use client"
 
 import ItineraryGrid from "@/features/itineraries/components/ItineraryGrid"
+import ItineraryGridSkeleton from "@/features/itineraries/components/ItineraryGridSkeleton"
 import { Suspense } from "react"
 import { Calendar } from "lucide-react"
 
@@ -18,7 +19,7 @@ export default function Page() {
           Plan your daily activities and schedule your travel adventures.
         </p>
       </div>
-      <Suspense fallback={<p>Loading...</p>}>
+      <Suspense fallback={<ItineraryGridSkeleton />}>
         <ItineraryGrid />
       </Suspense>
     </div>

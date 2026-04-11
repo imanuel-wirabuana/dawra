@@ -16,6 +16,7 @@ import { Smile, X, Pencil, Send, Loader2, Search } from "lucide-react"
 import { useAddChatMessage } from "../hooks/useAddChatMessage"
 import { useRealtimeChats } from "../hooks/useRealtimeChats"
 import { useSearchMessages } from "../hooks/useSearchMessages"
+import ChatsPanelSkeleton from "./ChatsPanelSkeleton"
 import { useTyping } from "../hooks/useTyping"
 import { useReactions } from "../hooks/useReactions"
 import { useEditDelete } from "../hooks/useEditDelete"
@@ -142,7 +143,7 @@ export default function ChatsPanel({ className }: ChatsPanelProps) {
         <ScrollArea className="h-full flex-1 p-3">
           <div className="space-y-2">
             {messagesLoading ? (
-              <p className="text-xs text-muted-foreground">Loading...</p>
+              <ChatsPanelSkeleton className="h-full border-0 shadow-none" />
             ) : filteredMessages.length === 0 ? (
               <p className="py-6 text-center text-xs text-muted-foreground">
                 {searchQuery

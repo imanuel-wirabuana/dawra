@@ -1,11 +1,14 @@
+import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 interface BucketListGridSkeletonProps {
   className?: string
+  count?: number
 }
 
 export default function BucketListGridSkeleton({
   className,
+  count = 6,
 }: BucketListGridSkeletonProps) {
   return (
     <div
@@ -14,14 +17,14 @@ export default function BucketListGridSkeleton({
         className
       )}
     >
-      {Array.from({ length: 6 }).map((_, index) => (
-        <div key={index} className="rounded-lg border p-4 shadow-sm">
-          <div className="mb-2 h-6 w-3/4 animate-pulse rounded bg-gray-200"></div>
-          <div className="mb-3 h-4 w-full animate-pulse rounded bg-gray-200"></div>
-          <div className="mb-2 h-4 w-2/3 animate-pulse rounded bg-gray-200"></div>
+      {Array.from({ length: count }).map((_, index) => (
+        <div key={index} className="rounded-lg border border-border/50 bg-card p-4 shadow-sm">
+          <Skeleton className="mb-2 h-6 w-3/4" />
+          <Skeleton className="mb-3 h-4 w-full" />
+          <Skeleton className="mb-2 h-4 w-2/3" />
           <div className="flex items-center justify-between">
-            <div className="h-6 w-20 animate-pulse rounded-full bg-gray-200"></div>
-            <div className="h-4 w-16 animate-pulse rounded bg-gray-200"></div>
+            <Skeleton className="h-6 w-20 rounded-full" />
+            <Skeleton className="h-4 w-16" />
           </div>
         </div>
       ))}
