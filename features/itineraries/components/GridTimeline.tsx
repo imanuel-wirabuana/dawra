@@ -376,10 +376,12 @@ export default function GridTimeline({
   const renderSidebar = () => {
     if (isMobile) return null
 
-    const sidebarItems = displayItems.filter((item) => {
-      if (!item.date) return false
-      return isSameDay(item.date, selectedDate)
-    })
+    const sidebarItems = displayItems
+      .filter((item) => {
+        if (!item.date) return false
+        return isSameDay(item.date, selectedDate)
+      })
+      .sort((a, b) => a.start.localeCompare(b.start))
 
     const completedCount = sidebarItems.filter((item) => item.completed).length
 
