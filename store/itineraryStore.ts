@@ -15,7 +15,7 @@ export const useItineraryStore = create<ItineraryStore>()(
     {
       name: 'itinerary-storage',
       // Serialize/deserialize dates properly
-      serialize: (state) => {
+      serialize: (state: { state: ItineraryStore }) => {
         return JSON.stringify({
           ...state,
           state: {
@@ -24,8 +24,8 @@ export const useItineraryStore = create<ItineraryStore>()(
           },
         })
       },
-      deserialize: (str) => {
-        const parsed = JSON.parse(str as string)
+      deserialize: (str: string) => {
+        const parsed = JSON.parse(str)
         return {
           ...parsed,
           state: {
