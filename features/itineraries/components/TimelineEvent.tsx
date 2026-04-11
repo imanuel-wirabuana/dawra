@@ -120,6 +120,17 @@ export default function TimelineEvent({
   const durationMinutes = getDurationMinutes(item.start, item.end)
   const isShortEvent = durationMinutes <= 15
 
+  // Determine card background based on categories
+  const categories = item.categories || []
+  const hasCategories = categories.length > 0
+  const cardBgStyle = hasCategories
+    ? categories.length >= 2
+      ? {
+          background: `linear-gradient(135deg, ${categories[0].color} 0%, ${categories[1].color} 100%)`,
+        }
+      : { backgroundColor: categories[0].color }
+    : undefined
+
   return (
     <>
       {/* Grid Event Card - Minimal Info - Entire card is draggable handle */}
@@ -134,18 +145,20 @@ export default function TimelineEvent({
           draggable && "cursor-grab active:cursor-grabbing",
           isDragging && "opacity-50 scale-[1.02] shadow-lg",
           item.completed && "opacity-60 grayscale-[0.3]",
-          isBucketList
+          !hasCategories && isBucketList
             ? "border-primary/30 bg-gradient-to-br from-primary to-primary/90 shadow-primary/20 hover:shadow-md hover:from-primary/95 hover:to-primary/85"
-            : "border-border/60 bg-gradient-to-br from-muted to-muted/80 hover:shadow-md hover:from-muted/90 hover:to-muted/70",
+            : !hasCategories
+              ? "border-border/60 bg-gradient-to-br from-muted to-muted/80 hover:shadow-md hover:from-muted/90 hover:to-muted/70"
+              : "border-white/30 shadow-lg hover:shadow-xl hover:brightness-110",
           className
         )}
-        style={{ ...style, ...dragStyle }}
+        style={cardBgStyle ? { ...style, ...dragStyle, ...cardBgStyle } : { ...style, ...dragStyle }}
       >
         {/* Title Row */}
         <h3
           className={cn(
             "truncate text-xs font-semibold tracking-tight leading-tight",
-            isBucketList ? "text-primary-foreground" : "text-foreground",
+            hasCategories ? "text-white drop-shadow-sm" : isBucketList ? "text-primary-foreground" : "text-foreground",
             compact && "text-[10px]",
             item.completed && "line-through opacity-60"
           )}
@@ -159,15 +172,18 @@ export default function TimelineEvent({
             className={cn(
               "flex items-center gap-1 font-medium",
               compact ? "text-[9px]" : "text-[10px]",
-              isBucketList
-                ? "text-primary-foreground/90"
-                : "text-muted-foreground/80"
+              hasCategories
+                ? "text-white/90"
+                : isBucketList
+                  ? "text-primary-foreground/90"
+                  : "text-muted-foreground/80"
             )}
           >
             <Clock
               className={cn(
                 "shrink-0 opacity-50",
-                compact ? "h-2.5 w-2.5" : "h-3 w-3"
+                compact ? "h-2.5 w-2.5" : "h-3 w-3",
+                hasCategories && "text-white/70"
               )}
             />
             <span className="tabular-nums font-semibold">{item.start}</span>
@@ -176,7 +192,11 @@ export default function TimelineEvent({
             <span
               className={cn(
                 "ml-1 rounded-full px-1.5 py-0 text-[9px] font-medium opacity-80",
-                isBucketList ? "bg-primary-foreground/20" : "bg-muted-foreground/20"
+                hasCategories
+                  ? "bg-white/20 text-white"
+                  : isBucketList
+                    ? "bg-primary-foreground/20"
+                    : "bg-muted-foreground/20"
               )}
             >
               ({formatDuration(item.start, item.end)})

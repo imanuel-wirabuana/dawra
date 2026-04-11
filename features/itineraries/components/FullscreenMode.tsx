@@ -2,7 +2,16 @@
 
 import { Maximize2, Minimize2 } from "lucide-react"
 import { format, isSameDay, startOfWeek, endOfWeek, eachDayOfInterval } from "date-fns"
-import { useMemo, useEffect } from "react"
+import { useMemo, useEffect, useState } from "react"
+import {
+  DndContext,
+  DragOverlay,
+  useSensor,
+  useSensors,
+  PointerSensor,
+  type DragEndEvent,
+  type DragStartEvent,
+} from "@dnd-kit/core"
 import { Button } from "@/components/ui/button"
 import {
   Sheet,
@@ -18,7 +27,8 @@ import ItineraryForm from "./ItineraryForm"
 import DatePicker from "./DatePicker"
 import SidebarItem from "./SidebarItem"
 import { Calendar } from "@/components/ui/calendar"
-import { Calendar as CalendarIcon } from "lucide-react"
+import { Calendar as CalendarIcon, Clock, MapPin, GripVertical } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 interface FullscreenModeProps {
   isOpen: boolean
@@ -68,6 +78,16 @@ export default function FullscreenMode({
   slotDate,
   onSuccess,
 }: FullscreenModeProps) {
+  const [draggedItem, setDraggedItem] = useState<Item | null>(null)
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    })
+  )
+
   const weekDays = useMemo(() => {
     const start = startOfWeek(selectedDate, { weekStartsOn: 1 })
     const end = endOfWeek(selectedDate, { weekStartsOn: 1 })
@@ -84,6 +104,54 @@ export default function FullscreenMode({
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [isOpen, onClose])
+
+  const handleDragStart = (event: DragStartEvent) => {
+    const item = displayItems.find((i) => i.id === event.active.id)
+    if (item) {
+      setDraggedItem(item)
+    }
+  }
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    setDraggedItem(null)
+
+    if (!over || !onReschedule) return
+
+    const itemId = active.id as string
+    const overData = over.data.current as {
+      time?: string
+      date?: Date
+      dayIndex?: number
+    } | null
+
+    if (!overData?.time || !overData?.date) return
+
+    const item = displayItems.find((i) => i.id === itemId)
+    if (!item) return
+
+    const newStartTime = overData.time
+    const durationMinutes =
+      parseInt(item.end.split(":")[0]) * 60 +
+      parseInt(item.end.split(":")[1]) -
+      (parseInt(item.start.split(":")[0]) * 60 + parseInt(item.start.split(":")[1]))
+
+    const [newStartH, newStartM] = newStartTime.split(":").map(Number)
+    const newEndMinutes = newStartH * 60 + newStartM + durationMinutes
+    const newEndH = Math.floor(newEndMinutes / 60)
+    const newEndM = newEndMinutes % 60
+    const newEndTime = `${String(newEndH).padStart(2, "0")}:${String(newEndM).padStart(2, "0")}`
+
+    // Calculate target date based on dayIndex (for week view)
+    let targetDate = overData.date
+    if (viewMode === "week" && overData.dayIndex !== undefined && overData.dayIndex >= 0) {
+      const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 })
+      targetDate = new Date(weekStart)
+      targetDate.setDate(weekStart.getDate() + overData.dayIndex)
+    }
+
+    onReschedule(itemId, newStartTime, newEndTime, targetDate)
+  }
 
   // Filter and sort items for sidebar
   const sidebarItems = displayItems
@@ -217,42 +285,78 @@ export default function FullscreenMode({
           </div>
         </div>
 
-        <div className="flex-1 overflow-auto h-full">
-          <div className="h-full min-h-full">
-            {viewMode === "day" && (
-              <DayGrid
-                items={displayItems}
-                selectedDate={selectedDate}
-                onReschedule={onReschedule}
-                onEditItem={onEditItem}
-                onDeleteItem={onDeleteItem}
-                onToggleComplete={onToggleComplete}
-                onSlotClick={onSlotClick}
-                draggedItemId={null}
-              />
-            )}
-            {viewMode === "week" && (
-              <WeekGrid
-                items={displayItems}
-                selectedDate={selectedDate}
-                onReschedule={onReschedule}
-                onEditItem={onEditItem}
-                onDeleteItem={onDeleteItem}
-                onToggleComplete={onToggleComplete}
-                onSlotClick={onSlotClick}
-                onDateSelect={onDateChange}
-                draggedItemId={null}
-              />
-            )}
-            {viewMode === "month" && (
-              <MonthGrid
-                items={displayItems}
-                selectedDate={selectedDate}
-                onDateChange={onDateChange}
-              />
-            )}
+        <DndContext
+          sensors={sensors}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+        >
+          <div className="flex-1 overflow-auto h-full">
+            <div className="h-full min-h-full">
+              {viewMode === "day" && (
+                <DayGrid
+                  items={displayItems}
+                  selectedDate={selectedDate}
+                  onReschedule={onReschedule}
+                  onEditItem={onEditItem}
+                  onDeleteItem={onDeleteItem}
+                  onToggleComplete={onToggleComplete}
+                  onSlotClick={onSlotClick}
+                  draggedItemId={draggedItem?.id || null}
+                />
+              )}
+              {viewMode === "week" && (
+                <WeekGrid
+                  items={displayItems}
+                  selectedDate={selectedDate}
+                  onReschedule={onReschedule}
+                  onEditItem={onEditItem}
+                  onDeleteItem={onDeleteItem}
+                  onToggleComplete={onToggleComplete}
+                  onSlotClick={onSlotClick}
+                  onDateSelect={onDateChange}
+                  draggedItemId={draggedItem?.id || null}
+                />
+              )}
+              {viewMode === "month" && (
+                <MonthGrid
+                  items={displayItems}
+                  selectedDate={selectedDate}
+                  onDateChange={onDateChange}
+                />
+              )}
+            </div>
           </div>
-        </div>
+
+          <DragOverlay>
+            {draggedItem ? (
+              <div
+                className={cn(
+                  "w-48 rounded-lg border p-3 shadow-lg",
+                  draggedItem.itemType === "bucket-list"
+                    ? "border-primary/30 bg-gradient-to-br from-primary to-primary/90 text-primary-foreground"
+                    : "border-border/60 bg-gradient-to-br from-muted to-muted/80 text-foreground"
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <GripVertical className="h-4 w-4 opacity-50" />
+                  <span className="truncate text-sm font-semibold">
+                    {draggedItem.title}
+                  </span>
+                </div>
+                <div className="mt-2 flex items-center gap-1 text-xs opacity-80">
+                  <Clock className="h-3 w-3" />
+                  <span>{draggedItem.start} - {draggedItem.end}</span>
+                </div>
+                {draggedItem.location && (
+                  <div className="mt-1 flex items-center gap-1 text-xs opacity-70">
+                    <MapPin className="h-3 w-3" />
+                    <span className="truncate">{draggedItem.location}</span>
+                  </div>
+                )}
+              </div>
+            ) : null}
+          </DragOverlay>
+        </DndContext>
       </div>
 
       {/* Sheet for Slot Click */}
