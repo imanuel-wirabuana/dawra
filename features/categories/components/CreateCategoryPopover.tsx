@@ -3,7 +3,7 @@
 import { useState } from "react"
 import type { Category } from "@/types"
 import { Label } from "@/components/ui/label"
-import { Loader2, Plus, Trash2, X } from "lucide-react"
+import { Loader2, Plus, Trash2, X, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -36,6 +36,18 @@ export default function CreateCategoryPopover({
   const [open, setOpen] = useState(false)
   const [name, setName] = useState("")
   const [color, setColor] = useState("#a21caf")
+
+  // Tailwind color presets
+  const colorPresets = [
+    { name: "Red", value: "#ef4444", bg: "bg-red-500" },
+    { name: "Orange", value: "#f97316", bg: "bg-orange-500" },
+    { name: "Amber", value: "#f59e0b", bg: "bg-amber-500" },
+    { name: "Green", value: "#22c55e", bg: "bg-green-500" },
+    { name: "Blue", value: "#3b82f6", bg: "bg-blue-500" },
+    { name: "Purple", value: "#a855f7", bg: "bg-purple-500" },
+    { name: "Indigo", value: "#6366f1", bg: "bg-indigo-500" },
+    { name: "Teal", value: "#14b8a6", bg: "bg-teal-500" },
+  ]
 
   const { categories, deleteCategory, isDeleting, createCategoryMutation } =
     useCategories()
@@ -112,6 +124,27 @@ export default function CreateCategoryPopover({
             <Label htmlFor="category-color" className="text-xs">
               Color
             </Label>
+            {/* Color Presets */}
+            <div className="grid grid-cols-4 gap-1.5">
+              {colorPresets.map((preset) => (
+                <button
+                  key={preset.value}
+                  type="button"
+                  onClick={() => setColor(preset.value)}
+                  disabled={isCreating}
+                  className={`h-8 w-full rounded-md ${preset.bg} flex items-center justify-center transition-all hover:scale-105 disabled:opacity-50 ${
+                    color.toLowerCase() === preset.value.toLowerCase()
+                      ? "ring-2 ring-offset-1 ring-foreground"
+                      : ""
+                  }`}
+                  title={preset.name}
+                >
+                  {color.toLowerCase() === preset.value.toLowerCase() && (
+                    <Check className="h-3.5 w-3.5 text-white" />
+                  )}
+                </button>
+              ))}
+            </div>
             <div className="flex gap-2">
               <Input
                 id="category-color"

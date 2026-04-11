@@ -96,7 +96,7 @@ export default function EditItineraryItemSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-md h-[90vh] flex flex-col overflow-hidden">
+      <SheetContent className="sm:max-w-md h-[90vh] flex flex-col overflow-hidden px-4">
         <SheetHeader className="px-1 pb-4">
           <SheetTitle>Edit Itinerary Item</SheetTitle>
         </SheetHeader>

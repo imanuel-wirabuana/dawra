@@ -120,30 +120,33 @@ export default function FullscreenMode({
 
     const itemId = active.id as string
     const overData = over.data.current as {
-      time?: string
-      date?: Date
+      hour?: number
+      minute?: number
       dayIndex?: number
     } | null
 
-    if (!overData?.time || !overData?.date) return
+    if (overData?.hour === undefined || overData?.minute === undefined) return
 
     const item = displayItems.find((i) => i.id === itemId)
     if (!item) return
 
-    const newStartTime = overData.time
+    // Format new start time from hour and minute
+    const newStartTime = `${String(overData.hour).padStart(2, "0")}:${String(overData.minute).padStart(2, "0")}`
+
+    // Calculate duration of original item
     const durationMinutes =
       parseInt(item.end.split(":")[0]) * 60 +
       parseInt(item.end.split(":")[1]) -
       (parseInt(item.start.split(":")[0]) * 60 + parseInt(item.start.split(":")[1]))
 
-    const [newStartH, newStartM] = newStartTime.split(":").map(Number)
-    const newEndMinutes = newStartH * 60 + newStartM + durationMinutes
+    // Calculate new end time
+    const newEndMinutes = overData.hour * 60 + overData.minute + durationMinutes
     const newEndH = Math.floor(newEndMinutes / 60)
     const newEndM = newEndMinutes % 60
     const newEndTime = `${String(newEndH).padStart(2, "0")}:${String(newEndM).padStart(2, "0")}`
 
     // Calculate target date based on dayIndex (for week view)
-    let targetDate = overData.date
+    let targetDate = selectedDate
     if (viewMode === "week" && overData.dayIndex !== undefined && overData.dayIndex >= 0) {
       const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 })
       targetDate = new Date(weekStart)
