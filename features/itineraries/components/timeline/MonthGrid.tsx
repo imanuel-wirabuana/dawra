@@ -27,9 +27,12 @@ export default function MonthGrid({
   onDateChange,
   className,
 }: MonthGridProps) {
+  // Ensure selectedDate is a valid Date object
+  const safeSelectedDate = selectedDate instanceof Date ? selectedDate : new Date(selectedDate)
+
   const weekStartsOn = 1 // Monday
-  const firstDayOfMonth = startOfMonth(selectedDate)
-  const lastDayOfMonth = endOfMonth(selectedDate)
+  const firstDayOfMonth = startOfMonth(safeSelectedDate)
+  const lastDayOfMonth = endOfMonth(safeSelectedDate)
   const startOfCalendar = startOfWeek(firstDayOfMonth, { weekStartsOn })
   const endOfCalendar = endOfWeek(lastDayOfMonth, { weekStartsOn })
   const calendarDays = eachDayOfInterval({
@@ -76,9 +79,9 @@ export default function MonthGrid({
           <div key={weekIndex} className="grid grid-cols-7 border-b last:border-b-0">
             {week.map((day) => {
               const dayItems = getItemsForDay(day)
-              const isCurrentMonth = day.getMonth() === selectedDate.getMonth()
+              const isCurrentMonth = day.getMonth() === safeSelectedDate.getMonth()
               const isToday = isDateToday(day)
-              const isSelected = isSameDay(day, selectedDate)
+              const isSelected = isSameDay(day, safeSelectedDate)
               const completed = completedCount(day)
               const total = dayItems.length
 

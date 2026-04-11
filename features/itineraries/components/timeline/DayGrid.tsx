@@ -23,6 +23,7 @@ interface DayGridProps {
   onReschedule?: (id: string, newStartTime: string, newEndTime: string) => void
   onEditItem?: (item: Item) => void
   onDeleteItem?: (id: string) => void
+  onToggleComplete?: (id: string, completed: boolean) => void
   onSlotClick?: (date: Date, hour: number, minute: number) => void
   draggedItemId: string | null
   className?: string
@@ -34,6 +35,7 @@ export default function DayGrid({
   onReschedule,
   onEditItem,
   onDeleteItem,
+  onToggleComplete,
   onSlotClick,
   draggedItemId,
   className,
@@ -168,6 +170,7 @@ export default function DayGrid({
                   onDelete={
                     onDeleteItem ? () => onDeleteItem(item.id) : undefined
                   }
+                  onToggleComplete={onToggleComplete}
                   style={{
                     height: "100%",
                     width: "100%",

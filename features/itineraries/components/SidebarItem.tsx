@@ -1,21 +1,23 @@
 "use client"
 
 import { useState } from "react"
-import { useDraggable } from "@dnd-kit/core"
-import { cn } from "@/lib/utils"
 import {
-  Trash2,
-  MapPin,
-  DollarSign,
-  ArrowRight,
   Clock,
+  MapPin,
+  Check,
+  Tag,
+  Banknote,
+  ArrowRight,
+  DollarSign,
   FileText,
   Pencil,
-  Tag,
+  Trash2,
   CheckCircle2,
   X,
 } from "lucide-react"
-import type { Category } from "@/types"
+import { cn } from "@/lib/utils"
+import type { Item } from "./timeline/shared"
+import { formatDuration, getDurationMinutes } from "./timeline/shared"
 import {
   Dialog,
   DialogContent,
@@ -23,81 +25,27 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 
-// Calculate and format duration from start and end times
-const formatDuration = (start: string, end: string): string => {
-  const [startH, startM] = start.split(":").map(Number)
-  const [endH, endM] = end.split(":").map(Number)
-  const totalMinutes = endH * 60 + endM - (startH * 60 + startM)
-
-  const hours = Math.floor(totalMinutes / 60)
-  const minutes = totalMinutes % 60
-
-  if (hours === 0) return `${minutes}m`
-  if (minutes === 0) return `${hours}h`
-  return `${hours}h ${minutes}m`
-}
-
-interface TimelineEventProps {
-  item: {
-    id: string
-    itemType: "bucket-list" | "custom"
-    title: string
-    start: string
-    end: string
-    location?: string
-    cost?: number
-    description?: string
-    completed?: boolean
-    categories?: Category[]
-  }
-  className?: string
-  style?: React.CSSProperties
-  draggable?: boolean
-  compact?: boolean
-  onEdit?: (item: TimelineEventProps["item"]) => void
-  onDelete?: () => void
+interface SidebarItemProps {
+  item: Item
   onToggleComplete?: (id: string, completed: boolean) => void
+  onEdit?: (item: Item) => void
+  onDelete?: (id: string) => void
 }
 
-export default function TimelineEvent({
+export default function SidebarItem({
   item,
-  className,
-  style,
-  draggable = false,
-  compact = false,
+  onToggleComplete,
   onEdit,
   onDelete,
-  onToggleComplete,
-}: TimelineEventProps) {
+}: SidebarItemProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-
-  const { attributes, listeners, setNodeRef, transform, isDragging } =
-    useDraggable({
-      id: item.id,
-      data: item,
-      disabled: !draggable,
-    })
-
   const [isPendingToggle, setIsPendingToggle] = useState(false)
 
-  const dragStyle = transform
-    ? {
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-      }
-    : undefined
-
-  const handleClick = () => {
-    if (!isDragging) {
-      setIsDialogOpen(true)
-    }
-  }
-
-  const handleDelete = () => {
-    if (onDelete) {
-      onDelete()
-    }
-  }
+  const durationMinutes = getDurationMinutes(item.start, item.end)
+  const hasDetails = item.location || item.cost || (item.categories && item.categories.length > 0)
+  const isBucketList = item.itemType === "bucket-list"
 
   const handleToggleComplete = async () => {
     if (!onToggleComplete) return
@@ -113,68 +61,144 @@ export default function TimelineEvent({
     }
   }
 
-  const isBucketList = item.itemType === "bucket-list"
+  const handleDelete = () => {
+    setIsDialogOpen(false)
+    if (onDelete) {
+      onDelete(item.id)
+    }
+  }
+
+  const handleClick = () => {
+    setIsDialogOpen(true)
+  }
 
   return (
     <>
-      {/* Grid Event Card - Minimal Info - Entire card is draggable handle */}
       <div
-        ref={setNodeRef}
         onClick={handleClick}
-        {...(draggable ? { ...listeners, ...attributes } : {})}
         className={cn(
-          "group flex cursor-pointer flex-col gap-1 overflow-hidden rounded-lg border p-2 shadow-sm transition-all duration-200",
-          compact && "p-1.5",
-          draggable && "cursor-grab active:cursor-grabbing",
-          isDragging && "opacity-50 scale-[1.02] shadow-lg",
-          item.completed && "opacity-60 grayscale-[0.3]",
+          "flex flex-col gap-1.5 rounded-lg border p-3 text-xs transition-all duration-150 hover:shadow-md cursor-pointer",
           isBucketList
-            ? "border-primary/30 bg-gradient-to-br from-primary to-primary/90 shadow-primary/20 hover:shadow-md hover:from-primary/95 hover:to-primary/85"
-            : "border-border/60 bg-gradient-to-br from-muted to-muted/80 hover:shadow-md hover:from-muted/90 hover:to-muted/70",
-          className
+            ? "border-primary/20 bg-gradient-to-r from-primary/5 to-transparent"
+            : "border-border/50 bg-muted/30",
+          item.completed && "opacity-60 grayscale"
         )}
-        style={{ ...style, ...dragStyle }}
       >
-        {/* Title Row */}
-        <h3
-          className={cn(
-            "truncate text-xs font-semibold tracking-tight leading-tight",
-            isBucketList ? "text-primary-foreground" : "text-foreground",
-            compact && "text-[10px]",
-            item.completed && "line-through opacity-60"
+        {/* Header Row */}
+        <div className="flex items-start gap-2">
+          {/* Checkbox for toggle complete */}
+          {onToggleComplete && (
+            <div
+              onClick={(e) => {
+                e.stopPropagation()
+                handleToggleComplete()
+              }}
+              className="shrink-0"
+            >
+              <Checkbox
+                checked={item.completed}
+                disabled={isPendingToggle}
+                className={cn(
+                  "h-4 w-4 border-2",
+                  item.completed
+                    ? "border-emerald-500 bg-emerald-500 data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
+                    : "border-muted-foreground/30"
+                )}
+              />
+            </div>
           )}
-        >
-          {item.title}
-        </h3>
-
-        {/* Time Row - Start - End (Duration) */}
-        <div
-          className={cn(
-            "flex items-center gap-1 font-medium",
-            compact ? "text-[9px]" : "text-[10px]",
-            isBucketList
-              ? "text-primary-foreground/90"
-              : "text-muted-foreground/80"
-          )}
-        >
-          <Clock
-            className={cn(
-              "shrink-0 opacity-50",
-              compact ? "h-2.5 w-2.5" : "h-3 w-3"
-            )}
-          />
-          <span className="tabular-nums font-semibold">{item.start}</span>
-          <span className="opacity-50">-</span>
-          <span className="tabular-nums">{item.end}</span>
           <span
             className={cn(
-              "ml-1 rounded-full px-1.5 py-0 text-[9px] font-medium opacity-80",
-              isBucketList ? "bg-primary-foreground/20" : "bg-muted-foreground/20"
+              "shrink-0 rounded-md px-1.5 py-0.5 text-[8px] font-bold uppercase shadow-sm",
+              isBucketList
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted-foreground/20 text-muted-foreground"
             )}
           >
-            ({formatDuration(item.start, item.end)})
+            {isBucketList ? "BL" : "CS"}
+          </span>
+          <div className="flex-1 min-w-0">
+            <div
+              className={cn(
+                "font-medium text-sm leading-tight",
+                item.completed && "line-through"
+              )}
+            >
+              {item.title}
+            </div>
+          </div>
+          {item.completed && !onToggleComplete && (
+            <div className="shrink-0 h-4 w-4 rounded-full bg-emerald-500 flex items-center justify-center">
+              <Check className="h-2.5 w-2.5 text-white" />
+            </div>
+          )}
+        </div>
+
+        {/* Time & Duration */}
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <div className="flex items-center gap-1">
+            <Clock className="h-3 w-3" />
+            <span>{item.start} - {item.end}</span>
+          </div>
+          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-muted font-medium">
+            {formatDuration(item.start, item.end)}
           </span>
         </div>
+
+        {/* Location */}
+        {item.location && (
+          <div className="flex items-center gap-1.5 text-muted-foreground">
+            <MapPin className="h-3 w-3 shrink-0" />
+            <span className="truncate">{item.location}</span>
+          </div>
+        )}
+
+        {/* Cost */}
+        {item.cost !== undefined && item.cost > 0 && (
+          <div className="flex items-center gap-1.5 text-muted-foreground">
+            <Banknote className="h-3 w-3 shrink-0" />
+            <span className="font-medium text-foreground">
+              Rp {item.cost.toLocaleString("id-ID")}
+            </span>
+          </div>
+        )}
+
+        {/* Categories */}
+        {item.categories && item.categories.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-0.5">
+            {item.categories.map((category) => (
+              <span
+                key={category.id}
+                className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[9px]"
+                style={{
+                  backgroundColor: `${category.color}20`,
+                  color: category.color,
+                }}
+              >
+                <span
+                  className="h-1.5 w-1.5 rounded-full"
+                  style={{ backgroundColor: category.color }}
+                />
+                {category.name}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Description - truncated */}
+        {item.description && (
+          <div className="text-[10px] text-muted-foreground/80 line-clamp-2 mt-0.5 leading-relaxed">
+            {item.description}
+          </div>
+        )}
+
+        {/* Compact indicator for items with no extra details */}
+        {!hasDetails && !item.description && (
+          <div className="flex items-center gap-1 text-[10px] text-muted-foreground/50">
+            <Tag className="h-2.5 w-2.5" />
+            <span>No additional details</span>
+          </div>
+        )}
       </div>
 
       {/* Full Details Dialog */}
@@ -322,7 +346,6 @@ export default function TimelineEvent({
           </div>
         </DialogContent>
       </Dialog>
-
     </>
   )
 }

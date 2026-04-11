@@ -32,6 +32,7 @@ interface WeekGridProps {
   onReschedule?: (id: string, newStartTime: string, newEndTime: string) => void
   onEditItem?: (item: Item) => void
   onDeleteItem?: (id: string) => void
+  onToggleComplete?: (id: string, completed: boolean) => void
   onSlotClick?: (date: Date, hour: number, minute: number) => void
   onDateSelect?: (date: Date) => void
   draggedItemId: string | null
@@ -44,6 +45,7 @@ export default function WeekGrid({
   onReschedule,
   onEditItem,
   onDeleteItem,
+  onToggleComplete,
   onSlotClick,
   onDateSelect,
   draggedItemId,
@@ -209,6 +211,7 @@ export default function WeekGrid({
                         onDelete={
                           onDeleteItem ? () => onDeleteItem(item.id) : undefined
                         }
+                        onToggleComplete={onToggleComplete}
                         style={{
                           height: "100%",
                           width: "100%",

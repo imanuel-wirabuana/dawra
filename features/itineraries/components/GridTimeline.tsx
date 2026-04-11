@@ -10,7 +10,7 @@ import {
   type DragStartEvent,
   type DragOverEvent,
 } from "@dnd-kit/core"
-import { Trash2, Pencil, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, MapPin, GripVertical, Check } from "lucide-react"
+import { Trash2, Pencil, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, MapPin, GripVertical, Check, Maximize2, Minimize2 } from "lucide-react"
 import { useState, useEffect, useMemo, useCallback, useRef } from "react"
 import { cn } from "@/lib/utils"
 import { useDebounce } from "@/hooks/useDebounce"
@@ -23,6 +23,12 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
 import {
   format,
   isSameDay,
@@ -37,6 +43,8 @@ import {
 import DayGrid from "./timeline/DayGrid"
 import WeekGrid from "./timeline/WeekGrid"
 import MonthGrid from "./timeline/MonthGrid"
+import ItineraryForm from "./ItineraryForm"
+import SidebarItem from "./SidebarItem"
 import {
   formatDuration,
   getDurationMinutes,
@@ -52,29 +60,31 @@ interface GridTimelineProps {
   items: Item[]
   onDeleteItem: (id: string) => void
   onEditItem?: (item: Item) => void
+  onToggleComplete?: (id: string, completed: boolean) => void
   onReschedule?: (
     id: string,
     newStartTime: string,
     newEndTime: string,
     targetDate?: Date
   ) => Promise<void> | void
-  onSlotClick?: (date: Date, hour: number, minute: number) => void
   selectedDate?: Date
   onDateChange?: (date: Date) => void
   debounceMs?: number
   className?: string
+  onSuccess?: () => void
 }
 
 export default function GridTimeline({
   items,
   onDeleteItem,
   onEditItem,
+  onToggleComplete,
   onReschedule,
-  onSlotClick,
   selectedDate: externalSelectedDate,
   onDateChange,
   debounceMs = 300,
   className,
+  onSuccess,
 }: GridTimelineProps) {
   const [isMobile, setIsMobile] = useState(false)
   const [draggedItem, setDraggedItem] = useState<Item | null>(null)
@@ -84,6 +94,14 @@ export default function GridTimeline({
   } | null>(null)
   const [viewMode, setViewMode] = useState<ViewMode>("week")
   const [internalDate, setInternalDate] = useState<Date>(new Date())
+  const [isFullscreen, setIsFullscreen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  // Sheet state for slot click form
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const [slotStartTime, setSlotStartTime] = useState("")
+  const [slotEndTime, setSlotEndTime] = useState("")
+  const [slotDate, setSlotDate] = useState<Date | null>(null)
 
   // Optimistic items state for smooth drag/drop visual feedback
   const [optimisticItems, setOptimisticItems] = useState<Map<string, Item>>(
@@ -125,6 +143,45 @@ export default function GridTimeline({
     window.addEventListener("resize", checkMobile)
     return () => window.removeEventListener("resize", checkMobile)
   }, [])
+
+  const toggleFullscreen = () => {
+    setIsFullscreen((prev) => !prev)
+  }
+
+  // Handle Escape key to exit fullscreen
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isFullscreen) {
+        setIsFullscreen(false)
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [isFullscreen])
+
+  // Slot click handler - opens drawer with pre-populated time
+  const handleSlotClick = (date: Date, hour: number, minute: number) => {
+    const startTime = `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`
+    let endHour = hour + 1
+    let endMinute = minute
+    if (endHour >= 24) {
+      endHour = 23
+      endMinute = 45
+    }
+    const endTime = `${endHour.toString().padStart(2, "0")}:${endMinute.toString().padStart(2, "0")}`
+
+    setSlotStartTime(startTime)
+    setSlotEndTime(endTime)
+    setSlotDate(date)
+    setIsDrawerOpen(true)
+  }
+
+  const handleDrawerClose = () => {
+    setIsDrawerOpen(false)
+    setSlotStartTime("")
+    setSlotEndTime("")
+    setSlotDate(null)
+  }
 
   const weekDays = useMemo(() => {
     const start = startOfWeek(selectedDate, { weekStartsOn: 1 })
@@ -367,42 +424,13 @@ export default function GridTimeline({
               </div>
             ) : (
               sidebarItems.map((item) => (
-                <div
+                <SidebarItem
                   key={item.id}
-                  className={cn(
-                    "flex items-center gap-2 rounded-lg border p-2.5 text-xs transition-all duration-150 hover:shadow-sm",
-                    item.itemType === "bucket-list"
-                      ? "border-primary/20 bg-gradient-to-r from-primary/5 to-transparent"
-                      : "border-border/50 bg-muted/30",
-                    item.completed && "opacity-60 grayscale"
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "shrink-0 rounded-md px-1.5 py-0.5 text-[8px] font-bold uppercase shadow-sm",
-                      item.itemType === "bucket-list"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted-foreground/20 text-muted-foreground"
-                    )}
-                  >
-                    {item.itemType === "bucket-list" ? "BL" : "CS"}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <div className={cn(
-                      "font-medium truncate",
-                      item.completed && "line-through"
-                    )}>{item.title}</div>
-                    <div className="text-muted-foreground flex items-center gap-1">
-                      <Clock className="h-2.5 w-2.5" />
-                      {item.start} - {item.end}
-                    </div>
-                  </div>
-                  {item.completed && (
-                    <div className="shrink-0 h-4 w-4 rounded-full bg-emerald-500 flex items-center justify-center">
-                      <Check className="h-2.5 w-2.5 text-white" />
-                    </div>
-                  )}
-                </div>
+                  item={item}
+                  onToggleComplete={onToggleComplete}
+                  onEdit={onEditItem}
+                  onDelete={onDeleteItem}
+                />
               ))
             )}
           </div>
@@ -419,7 +447,6 @@ export default function GridTimeline({
 
     return (
       <div className="space-y-4 p-4">
-        {/* Mobile view switcher */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Button variant="outline" size="icon" onClick={goToPrevious}>
@@ -435,19 +462,63 @@ export default function GridTimeline({
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
-          <Select
-            value={viewMode}
-            onValueChange={(v) => setViewMode(v as ViewMode)}
-          >
-            <SelectTrigger className="w-24">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="day">Day</SelectItem>
-              <SelectItem value="week">Week</SelectItem>
-              <SelectItem value="month">Month</SelectItem>
-            </SelectContent>
-          </Select>
+          {/* Mobile: Select dropdown */}
+          <div className="lg:hidden flex items-center gap-2">
+            <Select
+              value={viewMode}
+              onValueChange={(v) => setViewMode(v as ViewMode)}
+            >
+              <SelectTrigger className="w-24">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="day">Day</SelectItem>
+                <SelectItem value="week">Week</SelectItem>
+                <SelectItem value="month">Month</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={toggleFullscreen}
+              className="h-9 w-9"
+              title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+            >
+              {isFullscreen ? (
+                <Minimize2 className="h-4 w-4" />
+              ) : (
+                <Maximize2 className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
+
+          {/* Desktop: Button group */}
+          <div className="hidden lg:flex items-center gap-1 rounded-lg border border-border/50 bg-muted/30 p-1">
+            <Button
+              variant={viewMode === "day" ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("day")}
+              className="h-7 text-xs"
+            >
+              Day
+            </Button>
+            <Button
+              variant={viewMode === "week" ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("week")}
+              className="h-7 text-xs"
+            >
+              Week
+            </Button>
+            <Button
+              variant={viewMode === "month" ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("month")}
+              className="h-7 text-xs"
+            >
+              Month
+            </Button>
+          </div>
         </div>
 
         {sortedItems.map((item, index) => (
@@ -543,7 +614,13 @@ export default function GridTimeline({
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className={cn("flex h-full flex-col", className)}>
+      <div
+        ref={containerRef}
+        className={cn(
+          "flex h-full flex-col",
+          className
+        )}
+      >
         {/* Toolbar */}
         <div className="flex items-center justify-between border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-3 sticky top-0 z-30">
           <div className="flex items-center gap-2">
@@ -563,19 +640,46 @@ export default function GridTimeline({
             </div>
           </div>
 
-          <Select
-            value={viewMode}
-            onValueChange={(v) => setViewMode(v as ViewMode)}
+          <div className="flex items-center gap-1 rounded-lg border border-border/50 bg-muted/30 p-1">
+            <Button
+              variant={viewMode === "day" ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("day")}
+              className="h-8 text-xs"
+            >
+              Day
+            </Button>
+            <Button
+              variant={viewMode === "week" ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("week")}
+              className="h-8 text-xs"
+            >
+              Week
+            </Button>
+            <Button
+              variant={viewMode === "month" ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("month")}
+              className="h-8 text-xs"
+            >
+              Month
+            </Button>
+          </div>
+
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={toggleFullscreen}
+            className="h-8 w-8 ml-2"
+            title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
           >
-            <SelectTrigger className="w-28 h-9 bg-background border-border/50">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="day">Day</SelectItem>
-              <SelectItem value="week">Week</SelectItem>
-              <SelectItem value="month">Month</SelectItem>
-            </SelectContent>
-          </Select>
+            {isFullscreen ? (
+              <Minimize2 className="h-4 w-4" />
+            ) : (
+              <Maximize2 className="h-4 w-4" />
+            )}
+          </Button>
         </div>
 
         {/* Main content */}
@@ -590,7 +694,8 @@ export default function GridTimeline({
                 onReschedule={onReschedule}
                 onEditItem={onEditItem}
                 onDeleteItem={onDeleteItem}
-                onSlotClick={onSlotClick}
+                onToggleComplete={onToggleComplete}
+                onSlotClick={handleSlotClick}
                 draggedItemId={draggedItem?.id || null}
               />
             )}
@@ -601,7 +706,8 @@ export default function GridTimeline({
                 onReschedule={onReschedule}
                 onEditItem={onEditItem}
                 onDeleteItem={onDeleteItem}
-                onSlotClick={onSlotClick}
+                onToggleComplete={onToggleComplete}
+                onSlotClick={handleSlotClick}
                 onDateSelect={(date) => {
                   setSelectedDate(date)
                 }}
@@ -713,6 +819,177 @@ export default function GridTimeline({
           </div>
         ) : null}
       </DragOverlay>
+
+      {/* Fullscreen Overlay */}
+      {isFullscreen && (
+        <div className="fixed inset-0 z-50 bg-background flex flex-col">
+          {/* Toolbar */}
+          <div className="flex items-center justify-between border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-3 sticky top-0 z-30">
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 rounded-lg border border-border/50 bg-muted/30 p-1">
+                <DatePicker/>
+              </div>
+              <div className="ml-2 flex flex-col">
+                <span className="text-base font-semibold leading-tight">
+                  {viewMode === "day" && format(selectedDate, "EEEE, MMMM d, yyyy")}
+                  {viewMode === "week" &&
+                    `${format(weekDays[0], "MMM d")} - ${format(weekDays[6], "MMM d, yyyy")}`}
+                  {viewMode === "month" && format(selectedDate, "MMMM yyyy")}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {viewMode === "week" && `${weekDays.length} days selected`}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 rounded-lg border border-border/50 bg-muted/30 p-1">
+                <Button
+                  variant={viewMode === "day" ? "secondary" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("day")}
+                  className="h-8 text-xs"
+                >
+                  Day
+                </Button>
+                <Button
+                  variant={viewMode === "week" ? "secondary" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("week")}
+                  className="h-8 text-xs"
+                >
+                  Week
+                </Button>
+                <Button
+                  variant={viewMode === "month" ? "secondary" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("month")}
+                  className="h-8 text-xs"
+                >
+                  Month
+                </Button>
+              </div>
+
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={toggleFullscreen}
+                className="h-8 w-8 ml-2"
+                title="Exit fullscreen"
+              >
+                <Minimize2 className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Main content */}
+          <div className="flex flex-1 overflow-hidden">
+            {renderSidebar()}
+
+            <div className="flex-1 overflow-auto">
+              {viewMode === "day" && (
+                <DayGrid
+                  items={displayItems}
+                  selectedDate={selectedDate}
+                  onReschedule={onReschedule}
+                  onEditItem={onEditItem}
+                  onDeleteItem={onDeleteItem}
+                  onToggleComplete={onToggleComplete}
+                  onSlotClick={handleSlotClick}
+                  draggedItemId={draggedItem?.id || null}
+                />
+              )}
+              {viewMode === "week" && (
+                <WeekGrid
+                  items={displayItems}
+                  selectedDate={selectedDate}
+                  onReschedule={onReschedule}
+                  onEditItem={onEditItem}
+                  onDeleteItem={onDeleteItem}
+                  onToggleComplete={onToggleComplete}
+                  onSlotClick={handleSlotClick}
+                  onDateSelect={(date) => {
+                    setSelectedDate(date)
+                  }}
+                  draggedItemId={draggedItem?.id || null}
+                />
+              )}
+              {viewMode === "month" && (
+                <MonthGrid
+                  items={displayItems}
+                  selectedDate={selectedDate}
+                  onDateChange={setSelectedDate}
+                />
+              )}
+            </div>
+          </div>
+
+          {/* Sheet for Slot Click - Inside Fullscreen Overlay */}
+          <Sheet
+            open={isDrawerOpen}
+            onOpenChange={(open) => {
+              if (!open) {
+                handleDrawerClose()
+              }
+              setIsDrawerOpen(open)
+            }}
+          >
+            <SheetContent className="sm:max-w-md">
+              <SheetHeader>
+                <SheetTitle>Add Itinerary Item</SheetTitle>
+              </SheetHeader>
+              <div className="flex justify-center px-4 pt-4 pb-4">
+                <ItineraryForm
+                  className="mx-auto w-full"
+                  initialStartTime={slotStartTime}
+                  initialEndTime={slotEndTime}
+                  initialDate={slotDate}
+                  onSuccess={() => {
+                    handleDrawerClose()
+                    onSuccess?.()
+                  }}
+                />
+              </div>
+            </SheetContent>
+          </Sheet>
+
+          {/* Floating Fullscreen Indicator */}
+          <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-full bg-primary/90 px-3 py-1.5 text-xs font-medium text-primary-foreground shadow-lg backdrop-blur-sm">
+            <Maximize2 className="h-3 w-3" />
+            <span>Fullscreen Mode</span>
+            <span className="ml-1 rounded bg-primary-foreground/20 px-1.5 py-0.5 text-[10px]">ESC to exit</span>
+          </div>
+        </div>
+      )}
+
+      {/* Sheet for Slot Click - Normal Mode */}
+      <Sheet
+        open={isDrawerOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            handleDrawerClose()
+          }
+          setIsDrawerOpen(open)
+        }}
+      >
+        <SheetContent className="sm:max-w-md">
+          <SheetHeader>
+            <SheetTitle>Add Itinerary Item</SheetTitle>
+          </SheetHeader>
+          <div className="flex justify-center px-4 pt-4 pb-4">
+            <ItineraryForm
+              className="mx-auto w-full"
+              initialStartTime={slotStartTime}
+              initialEndTime={slotEndTime}
+              initialDate={slotDate}
+              onSuccess={() => {
+                handleDrawerClose()
+                onSuccess?.()
+              }}
+            />
+          </div>
+        </SheetContent>
+      </Sheet>
     </DndContext>
   )
 }

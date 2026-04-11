@@ -14,6 +14,26 @@ export const useItineraryStore = create<ItineraryStore>()(
     }),
     {
       name: 'itinerary-storage',
-    }
+      // Serialize/deserialize dates properly
+      serialize: (state) => {
+        return JSON.stringify({
+          ...state,
+          state: {
+            ...state.state,
+            selectedDate: state.state.selectedDate.toISOString(),
+          },
+        })
+      },
+      deserialize: (str) => {
+        const parsed = JSON.parse(str as string)
+        return {
+          ...parsed,
+          state: {
+            ...parsed.state,
+            selectedDate: new Date(parsed.state.selectedDate),
+          },
+        }
+      },
+    } as any
   )
 )
