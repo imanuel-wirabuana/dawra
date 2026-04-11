@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { ArrowUpDown } from "lucide-react"
+import { ArrowUpDown, ArrowUp, ArrowDown, CheckCircle, Circle } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import {
   Popover,
@@ -15,18 +15,18 @@ import { SortOption } from "@/types"
 interface SortOptionConfig {
   value: SortOption
   label: string
-  icon: string
+  icon: LucideIcon
 }
 
 const sortOptions: SortOptionConfig[] = [
-  { value: "title-asc", label: "Title (A-Z)", icon: "↑" },
-  { value: "title-desc", label: "Title (Z-A)", icon: "↓" },
-  { value: "created-asc", label: "Created (Oldest)", icon: "↑" },
-  { value: "created-desc", label: "Created (Newest)", icon: "↓" },
-  { value: "cost-asc", label: "Cost (Low to High)", icon: "↑" },
-  { value: "cost-desc", label: "Cost (High to Low)", icon: "↓" },
-  { value: "completed", label: "Completed First", icon: "✓" },
-  { value: "incomplete", label: "Incomplete First", icon: "○" },
+  { value: "title-asc", label: "Title (A-Z)", icon: ArrowUp },
+  { value: "title-desc", label: "Title (Z-A)", icon: ArrowDown },
+  { value: "created-asc", label: "Created (Oldest)", icon: ArrowUp },
+  { value: "created-desc", label: "Created (Newest)", icon: ArrowDown },
+  { value: "cost-asc", label: "Cost (Low to High)", icon: ArrowUp },
+  { value: "cost-desc", label: "Cost (High to Low)", icon: ArrowDown },
+  { value: "completed", label: "Completed First", icon: CheckCircle },
+  { value: "incomplete", label: "Incomplete First", icon: Circle },
 ]
 
 interface SortSelectorProps {
@@ -63,7 +63,7 @@ export default function SortSelector({
       </PopoverTrigger>
       <PopoverContent className="w-48 p-1" align="end">
         <div className="flex flex-col">
-          {sortOptions.map(({ value, label, icon }) => (
+          {sortOptions.map(({ value, label, icon: Icon }) => (
             <button
               key={value}
               onClick={() => {
@@ -78,16 +78,14 @@ export default function SortSelector({
               )}
             >
               <span>{label}</span>
-              <span
+              <Icon
                 className={cn(
-                  "text-xs",
+                  "h-3 w-3",
                   currentSort === value
                     ? "text-primary-foreground/70"
                     : "text-muted-foreground"
                 )}
-              >
-                {icon}
-              </span>
+              />
             </button>
           ))}
         </div>

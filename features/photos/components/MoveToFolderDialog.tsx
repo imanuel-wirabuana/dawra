@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Folder, MoveRight, Loader2, FolderOpen } from "lucide-react"
+import { Folder, MoveRight, Loader2, FolderOpen, X } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import type { Folder as FolderType } from "@/types"
 
@@ -152,6 +152,7 @@ export default function MoveToFolderDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={handleClose} disabled={isMoving}>
+            <X className="mr-1 h-4 w-4" />
             Cancel
           </Button>
           <Button

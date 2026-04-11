@@ -9,8 +9,10 @@ import {
   startOfMonth,
   endOfMonth,
   eachDayOfInterval,
+  isToday as isDateToday,
 } from "date-fns"
 import { cn } from "@/lib/utils"
+import { Clock, CheckCircle2 } from "lucide-react"
 
 interface MonthGridProps {
   items: Item[]
@@ -50,14 +52,18 @@ export default function MonthGrid({
     })
   }
 
+  const completedCount = (day: Date) => {
+    return getItemsForDay(day).filter((item) => item.completed).length
+  }
+
   return (
-    <div className={cn("flex h-full flex-col border bg-background", className)}>
+    <div className={cn("flex h-full flex-col border bg-background rounded-lg overflow-hidden", className)}>
       {/* Week day headers */}
-      <div className="grid grid-cols-7 border-b bg-muted/30">
+      <div className="grid grid-cols-7 border-b bg-muted/40">
         {weekDayNames.map((name) => (
           <div
             key={name}
-            className="py-2 text-center text-xs font-medium text-muted-foreground"
+            className="py-2.5 text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider"
           >
             {name}
           </div>
@@ -67,34 +73,54 @@ export default function MonthGrid({
       {/* Calendar grid */}
       <div className="flex-1">
         {weeks.map((week, weekIndex) => (
-          <div key={weekIndex} className="grid grid-cols-7 border-b">
+          <div key={weekIndex} className="grid grid-cols-7 border-b last:border-b-0">
             {week.map((day) => {
               const dayItems = getItemsForDay(day)
               const isCurrentMonth = day.getMonth() === selectedDate.getMonth()
-              const isToday = isSameDay(day, new Date())
+              const isToday = isDateToday(day)
               const isSelected = isSameDay(day, selectedDate)
+              const completed = completedCount(day)
+              const total = dayItems.length
 
               return (
                 <div
                   key={day.toISOString()}
                   className={cn(
-                    "min-h-24 cursor-pointer border-r p-1 transition-colors hover:bg-muted/50",
-                    !isCurrentMonth && "bg-muted/20 text-muted-foreground",
-                    isSelected && "bg-primary/10 ring-1 ring-primary"
+                    "min-h-[100px] cursor-pointer border-r last:border-r-0 p-2 transition-all duration-200",
+                    !isCurrentMonth && "bg-muted/10 text-muted-foreground/60",
+                    isCurrentMonth && "bg-background hover:bg-muted/30",
+                    isSelected && "bg-primary/5 ring-2 ring-primary ring-inset relative z-10"
                   )}
                   onClick={() => onDateChange(day)}
                 >
-                  <div
-                    className={cn(
-                      "mb-1 flex h-6 w-6 items-center justify-center rounded-full text-sm",
-                      isToday
-                        ? "bg-primary text-primary-foreground"
-                        : isSelected
-                          ? "bg-primary/20 text-primary"
-                          : "text-foreground"
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div
+                      className={cn(
+                        "flex h-7 w-7 items-center justify-center rounded-full text-sm font-medium transition-colors",
+                        isToday
+                          ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
+                          : isSelected
+                            ? "bg-primary/15 text-primary"
+                            : "text-foreground hover:bg-muted"
+                      )}
+                    >
+                      {format(day, "d")}
+                    </div>
+                    {total > 0 && (
+                      <div className="flex items-center gap-1">
+                        {completed === total && (
+                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                        )}
+                        <span className={cn(
+                          "text-[10px] font-medium px-1.5 py-0.5 rounded-full",
+                          completed === total
+                            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+                            : "bg-primary/10 text-primary"
+                        )}>
+                          {completed}/{total}
+                        </span>
+                      </div>
                     )}
-                  >
-                    {format(day, "d")}
                   </div>
 
                   <div className="space-y-1">
@@ -102,17 +128,20 @@ export default function MonthGrid({
                       <div
                         key={item.id}
                         className={cn(
-                          "truncate rounded px-1 py-0.5 text-[10px]",
+                          "flex items-center gap-1 rounded-md px-1.5 py-1 text-[10px] transition-colors",
                           item.itemType === "bucket-list"
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-muted text-muted-foreground"
+                            ? "bg-gradient-to-r from-primary to-primary/90 text-primary-foreground shadow-sm"
+                            : "bg-muted border border-border/50 text-muted-foreground",
+                          item.completed && "opacity-50 grayscale"
                         )}
                       >
-                        {item.start} {item.title}
+                        <Clock className="h-2.5 w-2.5 shrink-0 opacity-70" />
+                        <span className="truncate font-medium">{item.title}</span>
                       </div>
                     ))}
                     {dayItems.length > 3 && (
-                      <div className="text-[10px] text-muted-foreground">
+                      <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-medium px-1">
+                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary/50" />
                         +{dayItems.length - 3} more
                       </div>
                     )}

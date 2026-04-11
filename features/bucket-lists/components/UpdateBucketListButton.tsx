@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import { Edit2 } from "lucide-react"
+import { Edit2, X, Save, Loader2 } from "lucide-react"
 import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -133,6 +133,7 @@ export default function UpdateBucketListItemButton({
               }}
               disabled={updateMutation.isPending}
             >
+              <X className="mr-1 h-3 w-3" />
               Cancel
             </Button>
             <Button
@@ -142,7 +143,17 @@ export default function UpdateBucketListItemButton({
                 updateMutation.isPending || !title.trim() || !description.trim()
               }
             >
-              {updateMutation.isPending ? "Saving..." : "Save"}
+              {updateMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="mr-1 h-3 w-3" />
+                  Save
+                </>
+              )}
             </Button>
           </div>
         </div>

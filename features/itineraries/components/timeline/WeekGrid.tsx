@@ -20,9 +20,11 @@ import {
   startOfWeek,
   endOfWeek,
   eachDayOfInterval,
+  isToday,
 } from "date-fns"
 import { cn } from "@/lib/utils"
 import { useMemo } from "react"
+import { CalendarDays } from "lucide-react"
 
 interface WeekGridProps {
   items: Item[]
@@ -31,6 +33,7 @@ interface WeekGridProps {
   onEditItem?: (item: Item) => void
   onDeleteItem?: (id: string) => void
   onSlotClick?: (date: Date, hour: number, minute: number) => void
+  onDateSelect?: (date: Date) => void
   draggedItemId: string | null
   className?: string
 }
@@ -42,6 +45,7 @@ export default function WeekGrid({
   onEditItem,
   onDeleteItem,
   onSlotClick,
+  onDateSelect,
   draggedItemId,
   className,
 }: WeekGridProps) {
@@ -108,23 +112,36 @@ export default function WeekGrid({
               style={{ minWidth: DAY_COL_WIDTH, width: `${100 / 7}%` }}
             >
               <div
+                onClick={() => onDateSelect?.(day)}
                 className={cn(
-                  "sticky top-0 z-10 h-8 border-b px-2 py-2 text-center",
-                  isToday ? "bg-primary/10" : "bg-muted/30",
-                  isSelected && "bg-primary/20 ring-1 ring-primary"
+                  "sticky top-0 z-10 h-10 border-b px-2 py-1.5 text-center transition-all duration-200 cursor-pointer hover:brightness-105",
+                  isToday
+                    ? "bg-gradient-to-b from-primary/15 to-primary/5 border-primary/20 hover:from-primary/20 hover:to-primary/10"
+                    : "bg-gradient-to-b from-muted/50 to-muted/20 hover:from-muted/60 hover:to-muted/30",
+                  isSelected && "bg-gradient-to-b from-primary/10 to-primary/5 ring-2 ring-primary ring-inset z-20"
                 )}
+                title="Click to view this day"
               >
-                <div className="text-xs text-muted-foreground">
+                <div className={cn(
+                  "text-[10px] font-semibold uppercase tracking-wider",
+                  isToday ? "text-primary" : "text-muted-foreground/70"
+                )}>
                   {format(day, "EEE")}
                 </div>
-                <div
-                  className={cn(
-                    "text-sm font-medium",
-                    isToday && "text-primary",
-                    isSelected && "text-primary"
+                <div className="flex items-center justify-center gap-1">
+                  {isToday && (
+                    <div className="h-1.5 w-1.5 rounded-full bg-primary" />
                   )}
-                >
-                  {format(day, "d")}
+                  <div
+                    className={cn(
+                      "text-sm font-bold",
+                      isToday && "text-primary",
+                      isSelected && !isToday && "text-primary",
+                      !isToday && !isSelected && "text-foreground/80"
+                    )}
+                  >
+                    {format(day, "d")}
+                  </div>
                 </div>
               </div>
 

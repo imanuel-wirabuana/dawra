@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import { Trash2 } from "lucide-react"
+import { Trash2, X, Loader2 } from "lucide-react"
 import { useState, useImperativeHandle, forwardRef } from "react"
 import { useDeletePhoto } from "../hooks/useDeletePhoto"
 import {
@@ -81,6 +81,7 @@ const PhotoBulkDeleteButton = forwardRef<
         </DialogHeader>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>
+            <X className="mr-1 h-4 w-4" />
             Cancel
           </Button>
           <Button
@@ -88,7 +89,17 @@ const PhotoBulkDeleteButton = forwardRef<
             onClick={handleBulkDelete}
             disabled={deleteMutation.isPending}
           >
-            {deleteMutation.isPending ? "Deleting..." : "Delete"}
+            {deleteMutation.isPending ? (
+              <>
+                <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                Deleting...
+              </>
+            ) : (
+              <>
+                <Trash2 className="mr-1 h-4 w-4" />
+                Delete
+              </>
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

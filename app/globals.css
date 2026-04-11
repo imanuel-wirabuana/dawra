@@ -129,6 +129,21 @@
 }
 
 @layer utilities {
+  /* Gradient animation */
+  @keyframes gradient {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  .animate-gradient {
+    animation: gradient 3s ease infinite;
+  }
+
+  /* Wave animation for Brand */
+  @keyframes wave {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+  }
+
   /* Line clamp utilities */
   .line-clamp-2 {
     display: -webkit-box;

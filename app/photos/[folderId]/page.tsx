@@ -2,7 +2,7 @@
 
 import { use } from "react"
 import Link from "next/link"
-import { ArrowLeft, FolderOpen, Trash2 } from "lucide-react"
+import { ArrowLeft, FolderOpen, Trash2, X } from "lucide-react"
 import { useDeleteFolder } from "@/features/photos/hooks/useDeleteFolder"
 import {
   AlertDialog,
@@ -138,11 +138,15 @@ export default function FolderPage({ params }: FolderPageProps) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="gap-1.5">
+              <X className="h-4 w-4" />
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteFolder}
-              className="text-destructive-foreground bg-destructive hover:bg-destructive/90"
+              className="gap-1.5 text-destructive-foreground bg-destructive hover:bg-destructive/90"
             >
+              <Trash2 className="h-4 w-4" />
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

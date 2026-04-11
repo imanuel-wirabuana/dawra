@@ -10,7 +10,7 @@ import {
   type DragStartEvent,
   type DragOverEvent,
 } from "@dnd-kit/core"
-import { Trash2, Pencil, ChevronLeft, ChevronRight } from "lucide-react"
+import { Trash2, Pencil, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, MapPin, GripVertical, Check } from "lucide-react"
 import { useState, useEffect, useMemo, useCallback, useRef } from "react"
 import { cn } from "@/lib/utils"
 import { useDebounce } from "@/hooks/useDebounce"
@@ -323,46 +323,84 @@ export default function GridTimeline({
       return isSameDay(item.date, selectedDate)
     })
 
+    const completedCount = sidebarItems.filter((item) => item.completed).length
+
     return (
-      <div className="hidden w-64 shrink-0 border-r bg-background lg:block">
-        <div className="p-3">
-          <Calendar
-            mode="single"
-            selected={selectedDate}
-            onSelect={(date) => date && setSelectedDate(date)}
-            className="rounded-md border"
-          />
+      <div className="hidden w-72 shrink-0 border-r bg-gradient-to-b from-background to-muted/20 lg:block">
+        <div className="p-4">
+          <div className="rounded-xl border border-border/50 bg-background p-3 shadow-sm">
+            <Calendar
+              mode="single"
+              selected={selectedDate}
+              onSelect={(date) => date && setSelectedDate(date)}
+              className="rounded-md"
+            />
+          </div>
         </div>
 
-        <div className="border-t p-3">
-          <h3 className="mb-2 text-sm font-medium">
-            {format(selectedDate, "MMMM d, yyyy")}
-          </h3>
-          <div className="max-h-64 space-y-2 overflow-y-auto">
+        <div className="border-t border-border/50 px-4 py-3">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold flex items-center gap-2">
+              <CalendarIcon className="h-4 w-4 text-primary" />
+              {format(selectedDate, "MMM d, yyyy")}
+            </h3>
+            {sidebarItems.length > 0 && (
+              <span className={cn(
+                "text-[10px] font-medium px-2 py-0.5 rounded-full",
+                completedCount === sidebarItems.length
+                  ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+                  : "bg-primary/10 text-primary"
+              )}>
+                {completedCount}/{sidebarItems.length}
+              </span>
+            )}
+          </div>
+          <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
             {sidebarItems.length === 0 ? (
-              <p className="text-xs text-muted-foreground">No items</p>
+              <div className="flex flex-col items-center justify-center py-6 text-center">
+                <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center mb-2">
+                  <CalendarIcon className="h-5 w-5 text-muted-foreground/50" />
+                </div>
+                <p className="text-xs text-muted-foreground font-medium">No items</p>
+                <p className="text-[10px] text-muted-foreground/60 mt-0.5">Add an item to get started</p>
+              </div>
             ) : (
               sidebarItems.map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-center gap-2 rounded-md border p-2 text-xs"
+                  className={cn(
+                    "flex items-center gap-2 rounded-lg border p-2.5 text-xs transition-all duration-150 hover:shadow-sm",
+                    item.itemType === "bucket-list"
+                      ? "border-primary/20 bg-gradient-to-r from-primary/5 to-transparent"
+                      : "border-border/50 bg-muted/30",
+                    item.completed && "opacity-60 grayscale"
+                  )}
                 >
                   <span
                     className={cn(
-                      "rounded px-1 text-[8px] font-bold",
+                      "shrink-0 rounded-md px-1.5 py-0.5 text-[8px] font-bold uppercase shadow-sm",
                       item.itemType === "bucket-list"
                         ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-muted-foreground"
+                        : "bg-muted-foreground/20 text-muted-foreground"
                     )}
                   >
                     {item.itemType === "bucket-list" ? "BL" : "CS"}
                   </span>
-                  <div className="flex-1 truncate">
-                    <div className="font-medium">{item.title}</div>
-                    <div className="text-muted-foreground">
+                  <div className="flex-1 min-w-0">
+                    <div className={cn(
+                      "font-medium truncate",
+                      item.completed && "line-through"
+                    )}>{item.title}</div>
+                    <div className="text-muted-foreground flex items-center gap-1">
+                      <Clock className="h-2.5 w-2.5" />
                       {item.start} - {item.end}
                     </div>
                   </div>
+                  {item.completed && (
+                    <div className="shrink-0 h-4 w-4 rounded-full bg-emerald-500 flex items-center justify-center">
+                      <Check className="h-2.5 w-2.5 text-white" />
+                    </div>
+                  )}
                 </div>
               ))
             )}
@@ -506,30 +544,52 @@ export default function GridTimeline({
     >
       <div className={cn("flex h-full flex-col", className)}>
         {/* Toolbar */}
-        <div className="flex items-center justify-between border-b bg-background p-3">
+        <div className="flex items-center justify-between border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-3 sticky top-0 z-30">
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" onClick={goToPrevious}>
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" onClick={goToToday}>
-              Today
-            </Button>
-            <Button variant="outline" size="icon" onClick={goToNext}>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-            <span className="ml-4 text-lg font-semibold">
-              {viewMode === "day" && format(selectedDate, "EEEE, MMMM d, yyyy")}
-              {viewMode === "week" &&
-                `${format(weekDays[0], "MMMM d")} - ${format(weekDays[6], "MMMM d, yyyy")}`}
-              {viewMode === "month" && format(selectedDate, "MMMM yyyy")}
-            </span>
+            <div className="flex items-center gap-1 rounded-lg border border-border/50 bg-muted/30 p-1">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={goToPrevious}
+                className="h-8 w-8 hover:bg-background"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                onClick={goToToday} 
+                className="h-8 gap-1.5 px-3 text-sm font-medium hover:bg-background"
+              >
+                <CalendarIcon className="h-4 w-4 text-primary" />
+                Today
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={goToNext}
+                className="h-8 w-8 hover:bg-background"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="ml-2 flex flex-col">
+              <span className="text-base font-semibold leading-tight">
+                {viewMode === "day" && format(selectedDate, "EEEE, MMMM d, yyyy")}
+                {viewMode === "week" &&
+                  `${format(weekDays[0], "MMM d")} - ${format(weekDays[6], "MMM d, yyyy")}`}
+                {viewMode === "month" && format(selectedDate, "MMMM yyyy")}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {viewMode === "week" && `${weekDays.length} days selected`}
+              </span>
+            </div>
           </div>
 
           <Select
             value={viewMode}
             onValueChange={(v) => setViewMode(v as ViewMode)}
           >
-            <SelectTrigger className="w-32">
+            <SelectTrigger className="w-28 h-9 bg-background border-border/50">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -564,6 +624,9 @@ export default function GridTimeline({
                 onEditItem={onEditItem}
                 onDeleteItem={onDeleteItem}
                 onSlotClick={onSlotClick}
+                onDateSelect={(date) => {
+                  setSelectedDate(date)
+                }}
                 draggedItemId={draggedItem?.id || null}
               />
             )}
@@ -582,37 +645,43 @@ export default function GridTimeline({
         {draggedItem ? (
           <div
             className={cn(
-              "flex cursor-grabbing flex-col gap-0.5 rounded-md border p-2 shadow-lg",
+              "flex cursor-grabbing flex-col gap-1 rounded-lg border-2 p-2.5 shadow-xl ring-4 ring-primary/10 scale-105",
               draggedItem.itemType === "bucket-list"
-                ? "border-primary bg-primary"
-                : "border-muted-foreground/20 bg-muted"
+                ? "border-primary bg-gradient-to-br from-primary to-primary/90"
+                : "border-muted-foreground/30 bg-gradient-to-br from-muted to-muted/80"
             )}
             style={{
-              width: "120px",
+              width: "140px",
               height: `${(getDurationMinutes(draggedItem.start, draggedItem.end) / 60) * HOUR_HEIGHT}px`,
-              minHeight: "40px",
+              minHeight: "50px",
             }}
           >
             {/* Drop target indicator */}
             {dropTarget && (
-              <div className="mb-1 rounded bg-primary-foreground/20 px-1.5 py-0.5 text-[10px] font-medium text-primary-foreground">
+              <div className={cn(
+                "mb-1 rounded-md px-2 py-1 text-[10px] font-semibold flex items-center gap-1",
+                draggedItem.itemType === "bucket-list"
+                  ? "bg-primary-foreground/20 text-primary-foreground"
+                  : "bg-primary/10 text-primary"
+              )}>
+                <Clock className="h-3 w-3" />
                 {format(dropTarget.date, "MMM d")} @ {dropTarget.time}
               </div>
             )}
             <div className="flex items-start gap-2">
               <span
                 className={cn(
-                  "shrink-0 rounded px-1 text-[8px] font-bold uppercase",
+                  "shrink-0 rounded-md px-1.5 py-0.5 text-[8px] font-bold uppercase shadow-sm",
                   draggedItem.itemType === "bucket-list"
-                    ? "bg-primary-foreground/20 text-primary-foreground"
-                    : "bg-muted-foreground/20 text-muted-foreground"
+                    ? "bg-primary-foreground/25 text-primary-foreground"
+                    : "bg-primary/20 text-primary"
                 )}
               >
                 {draggedItem.itemType === "bucket-list" ? "BL" : "CS"}
               </span>
               <h3
                 className={cn(
-                  "truncate text-xs font-semibold",
+                  "truncate text-xs font-bold",
                   draggedItem.itemType === "bucket-list"
                     ? "text-primary-foreground"
                     : "text-foreground"
@@ -621,16 +690,48 @@ export default function GridTimeline({
                 {draggedItem.title}
               </h3>
             </div>
-            <p
-              className={cn(
-                "text-[10px] opacity-80",
+            <div className="flex items-center gap-1 text-[10px] opacity-90">
+              <Clock className={cn(
+                "h-3 w-3",
+                draggedItem.itemType === "bucket-list"
+                  ? "text-primary-foreground/80"
+                  : "text-muted-foreground"
+              )} />
+              <span className={cn(
+                "tabular-nums font-medium",
                 draggedItem.itemType === "bucket-list"
                   ? "text-primary-foreground"
                   : "text-muted-foreground"
-              )}
-            >
-              {draggedItem.start} - {draggedItem.end}
-            </p>
+              )}>
+                {draggedItem.start} - {draggedItem.end}
+              </span>
+            </div>
+            {draggedItem.location && (
+              <div className="flex items-center gap-1 text-[9px] opacity-80">
+                <MapPin className={cn(
+                  "h-2.5 w-2.5",
+                  draggedItem.itemType === "bucket-list"
+                    ? "text-primary-foreground/70"
+                    : "text-muted-foreground"
+                )} />
+                <span className={cn(
+                  "truncate",
+                  draggedItem.itemType === "bucket-list"
+                    ? "text-primary-foreground/80"
+                    : "text-muted-foreground/80"
+                )}>
+                  {draggedItem.location}
+                </span>
+              </div>
+            )}
+            <div className="mt-auto flex items-center justify-center opacity-30">
+              <GripVertical className={cn(
+                "h-4 w-4",
+                draggedItem.itemType === "bucket-list"
+                  ? "text-primary-foreground"
+                  : "text-muted-foreground"
+              )} />
+            </div>
           </div>
         ) : null}
       </DragOverlay>

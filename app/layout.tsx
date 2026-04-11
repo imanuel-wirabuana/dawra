@@ -1,16 +1,18 @@
-import { Geist, Geist_Mono, Figtree, Pacifico } from "next/font/google"
+import { Geist, Geist_Mono, Figtree, Pacifico, Parisienne } from "next/font/google"
 import type { Metadata } from "next"
 
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
 import Navbar from "@/components/Navbar"
+import FloatingNav from "@/components/FloatingNav"
 import DynamicBreadcrumb from "@/components/DynamicBreadcrumb"
 import ChatWidget from "@/components/ChatWidget"
 import Providers from "./providers"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Toaster } from "@/components/ui/sonner"
 import Footer from "@/components/Footer"
+import { Brand } from "@/components/Brand"
 
 const figtree = Figtree({ subsets: ["latin"], variable: "--font-sans" })
 
@@ -18,6 +20,12 @@ const pacifico = Pacifico({
   subsets: ["latin"],
   weight: ["400"],
   variable: "--font-brand",
+})
+
+const parisienne = Parisienne({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-cursive",
 })
 
 const fontMono = Geist_Mono({
@@ -44,17 +52,22 @@ export default function RootLayout({
         fontMono.variable,
         "font-sans",
         figtree.variable,
-        pacifico.variable
+        pacifico.variable,
+        parisienne.variable
       )}
     >
       <body>
         <Providers>
           <TooltipProvider>
             <ThemeProvider>
-              <Navbar className="sticky top-0 z-50" />
-              <DynamicBreadcrumb />
+              {/* <Navbar className="sticky top-0 z-50" /> */}
+              <header className="flex flex-row px-7 mt-3 lg:px-27 justify-between container">
+                <Brand size="md" />
+                <DynamicBreadcrumb />
+              </header>
               {children}
               <Footer />
+              <FloatingNav />
               <ChatWidget />
               <Toaster position="bottom-right" />
             </ThemeProvider>

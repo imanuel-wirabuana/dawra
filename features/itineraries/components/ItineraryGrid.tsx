@@ -8,7 +8,7 @@ import { useAddItineraryItem } from "../hooks/useAddItineraryItem"
 import GridTimeline from "@/features/itineraries/components/GridTimeline"
 import DatePicker from "./DatePicker"
 import ItineraryForm from "./ItineraryForm"
-import { Plus } from "lucide-react"
+import { Plus, X, Save, CalendarDays, Wallet, ListTodo } from "lucide-react"
 import {
   Popover,
   PopoverContent,
@@ -245,26 +245,29 @@ export default function ItineraryGrid() {
 
   return (
     <>
-      <Card className="overflow-hidden border-border/50 shadow-sm">
-        <CardHeader className="border-b border-border/50 bg-muted/30 px-5 py-4">
+      <Card className="overflow-hidden border-border/60 shadow-lg shadow-black/5">
+        <CardHeader className="border-b border-border/50 bg-gradient-to-b from-muted/50 to-muted/20 px-5 py-4">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-3">
               <DatePicker />
               <Popover open={formOpen} onOpenChange={setFormOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     size="sm"
-                    className="h-8 gap-1.5 bg-primary px-3 font-medium text-primary-foreground transition-all duration-150 hover:bg-primary/90 active:scale-[0.98]"
+                    className="h-9 gap-1.5 bg-primary px-4 font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:shadow-md hover:shadow-primary/20 active:scale-[0.98]"
                   >
                     <Plus className="h-4 w-4" />
                     Add Item
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-80 p-0" align="end">
-                  <div className="border-b border-border/50 bg-muted/30 px-4 py-3">
-                    <h3 className="text-sm font-semibold">Add New Item</h3>
-                    <p className="text-xs text-muted-foreground">
-                      Schedule a new activity
+                <PopoverContent className="w-80 p-0 shadow-lg" align="end">
+                  <div className="border-b border-border/50 bg-gradient-to-b from-muted/50 to-muted/20 px-4 py-3">
+                    <h3 className="text-sm font-semibold flex items-center gap-2">
+                      <CalendarDays className="h-4 w-4 text-primary" />
+                      Add New Item
+                    </h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Schedule a new activity to your itinerary
                     </p>
                   </div>
                   <div className="p-4">
@@ -273,15 +276,19 @@ export default function ItineraryGrid() {
                 </PopoverContent>
               </Popover>
             </div>
-            <div className="flex items-center gap-3">
-              <span className="text-xs text-muted-foreground">
-                {transformedItems.length}{" "}
-                {transformedItems.length === 1 ? "item" : "items"}
-              </span>
-              {totalCost > 0 && (
-                <span className="flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
-                  Rp {totalCost.toLocaleString("id-ID")}
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/40 px-3 py-1.5 rounded-full">
+                <ListTodo className="h-3.5 w-3.5" />
+                <span className="font-medium">
+                  {transformedItems.length}{" "}
+                  {transformedItems.length === 1 ? "item" : "items"}
                 </span>
+              </div>
+              {totalCost > 0 && (
+                <div className="flex items-center gap-2 rounded-full bg-gradient-to-r from-emerald-100 to-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:from-emerald-900/30 dark:to-emerald-900/20 dark:text-emerald-400 shadow-sm">
+                  <Wallet className="h-3.5 w-3.5" />
+                  Rp {totalCost.toLocaleString("id-ID")}
+                </div>
               )}
             </div>
           </div>
@@ -453,6 +460,7 @@ export default function ItineraryGrid() {
                   onClick={() => setEditingItem(null)}
                   className="flex-1"
                 >
+                  <X className="mr-1 h-4 w-4" />
                   Cancel
                 </Button>
                 <Button
@@ -460,7 +468,14 @@ export default function ItineraryGrid() {
                   disabled={updateMutation.isPending}
                   className="flex-1"
                 >
-                  {updateMutation.isPending ? "Saving..." : "Save Changes"}
+                  {updateMutation.isPending ? (
+                    "Saving..."
+                  ) : (
+                    <>
+                      <Save className="mr-1 h-4 w-4" />
+                      Save Changes
+                    </>
+                  )}
                 </Button>
               </div>
             </form>

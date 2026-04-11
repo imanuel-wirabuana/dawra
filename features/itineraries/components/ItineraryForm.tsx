@@ -19,6 +19,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import CategorySelector from "@/features/categories/components/CategorySelector"
 import { cn } from "@/lib/utils"
+import { Loader2, Plus, Inbox, Sparkles, Clock, Calendar } from "lucide-react"
 
 interface ItineraryFormProps {
   onSuccess?: () => void
@@ -161,6 +162,8 @@ export default function ItineraryForm({
 
   return (
     <form onSubmit={handleSubmit} className={cn("space-y-4", className)}>
+      {/* Item Type Selection */}
+      <div className="rounded-lg border border-border/50 bg-muted/10 p-1">
       <Tabs
         value={itemType}
         onValueChange={(v: string) => setItemType(v as ItemType)}
@@ -181,28 +184,44 @@ export default function ItineraryForm({
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="bucket-list" className="mt-3 space-y-2">
-          <Label htmlFor="bucketList" className="text-xs font-medium">
-            Select Bucket List Item
-          </Label>
-          <Select
-            value={selectedBucketListId}
-            onValueChange={setSelectedBucketListId}
-            disabled={addItineraryMutation.isPending}
-          >
-            <SelectTrigger className="h-9 border-input/60 bg-background text-sm transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20">
-              <SelectValue placeholder="Choose an item..." />
-            </SelectTrigger>
-            <SelectContent>
-              {bucketListItems
-                .filter((item) => !item.completed)
-                .map((item) => (
-                  <SelectItem key={item.id} value={item.id!}>
-                    {item.title}
-                  </SelectItem>
-                ))}
-            </SelectContent>
-          </Select>
+        <TabsContent value="bucket-list" className="mt-3 space-y-3">
+          <div className="space-y-1.5">
+            <Label htmlFor="bucketList" className="text-xs font-medium flex items-center gap-1.5">
+              <Sparkles className="h-3 w-3 text-primary" />
+              Select Bucket List Item
+            </Label>
+            <Select
+              value={selectedBucketListId}
+              onValueChange={setSelectedBucketListId}
+              disabled={addItineraryMutation.isPending}
+            >
+              <SelectTrigger className="h-10 border-input/60 bg-background text-sm transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20">
+                <SelectValue placeholder="Choose an item from your bucket list..." />
+              </SelectTrigger>
+              <SelectContent className="max-h-60">
+                {bucketListItems.filter((item) => !item.completed).length === 0 ? (
+                  <div className="flex flex-col items-center justify-center p-4 text-center">
+                    <Inbox className="h-8 w-8 text-muted-foreground/50 mb-2" />
+                    <p className="text-sm text-muted-foreground">No bucket list items</p>
+                    <p className="text-xs text-muted-foreground/70">Add items in the Bucket Lists section</p>
+                  </div>
+                ) : (
+                  bucketListItems
+                    .filter((item) => !item.completed)
+                    .map((item) => (
+                      <SelectItem key={item.id} value={item.id!} className="py-2">
+                        <div className="flex flex-col items-start">
+                          <span className="font-medium">{item.title}</span>
+                          {item.location && (
+                            <span className="text-xs text-muted-foreground">{item.location}</span>
+                          )}
+                        </div>
+                      </SelectItem>
+                    ))
+                )}
+              </SelectContent>
+            </Select>
+          </div>
         </TabsContent>
 
         <TabsContent value="custom" className="mt-3 space-y-3">
@@ -284,63 +303,71 @@ export default function ItineraryForm({
           </div>
         </TabsContent>
       </Tabs>
+      </div>
 
-      {/* Time fields (always shown) */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-1.5">
-          <Label htmlFor="startTime" className="text-xs font-medium">
-            Start Time
-          </Label>
-          <Select
-            value={startTime}
-            onValueChange={(value) => {
-              setStartTime(value)
-              // Reset end time if it's now invalid
-              if (endTime && timeToMinutes(endTime) <= timeToMinutes(value)) {
-                setEndTime("")
-              }
-            }}
-            disabled={addItineraryMutation.isPending}
-          >
-            <SelectTrigger className="h-9 border-input/60 bg-background text-sm transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20">
-              <SelectValue placeholder="Select..." />
-            </SelectTrigger>
-            <SelectContent className="max-h-60">
-              {TIME_OPTIONS.map((time) => (
-                <SelectItem key={time} value={time}>
-                  {time}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+      {/* Time Section */}
+      <div className="rounded-lg border border-border/50 bg-muted/20 p-3 space-y-3">
+        <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+          <Clock className="h-3.5 w-3.5" />
+          Schedule Time
         </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="endTime" className="text-xs font-medium">
-            End Time
-          </Label>
-          <Select
-            value={endTime}
-            onValueChange={setEndTime}
-            disabled={addItineraryMutation.isPending || !startTime}
-          >
-            <SelectTrigger className="h-9 border-input/60 bg-background text-sm transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20">
-              <SelectValue
-                placeholder={startTime ? "Select..." : "Start first"}
-              />
-            </SelectTrigger>
-            <SelectContent className="max-h-60">
-              {getValidEndTimes(startTime).map((time) => (
-                <SelectItem key={time} value={time}>
-                  {time}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label htmlFor="startTime" className="text-xs font-medium">
+              Start Time
+            </Label>
+            <Select
+              value={startTime}
+              onValueChange={(value) => {
+                setStartTime(value)
+                if (endTime && timeToMinutes(endTime) <= timeToMinutes(value)) {
+                  setEndTime("")
+                }
+              }}
+              disabled={addItineraryMutation.isPending}
+            >
+              <SelectTrigger className="h-10 border-input/60 bg-background text-sm transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20">
+                <SelectValue placeholder="Select..." />
+              </SelectTrigger>
+              <SelectContent className="max-h-60">
+                {TIME_OPTIONS.map((time) => (
+                  <SelectItem key={time} value={time}>
+                    {time}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="endTime" className="text-xs font-medium">
+              End Time
+            </Label>
+            <Select
+              value={endTime}
+              onValueChange={setEndTime}
+              disabled={addItineraryMutation.isPending || !startTime}
+            >
+              <SelectTrigger className={cn(
+                "h-10 border-input/60 bg-background text-sm transition-all duration-150",
+                !startTime && "text-muted-foreground/50"
+              )}>
+                <SelectValue placeholder={startTime ? "Select..." : "Start first"} />
+              </SelectTrigger>
+              <SelectContent className="max-h-60">
+                {getValidEndTimes(startTime).map((time) => (
+                  <SelectItem key={time} value={time}>
+                    {time}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 
       {addItineraryMutation.error && (
-        <div className="rounded-lg border border-destructive/20 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+        <div className="rounded-lg border border-destructive/20 bg-destructive/10 px-3 py-2.5 text-xs text-destructive flex items-start gap-2">
+          <span className="inline-block h-1.5 w-1.5 rounded-full bg-destructive mt-1 shrink-0" />
           {addItineraryMutation.error.message}
         </div>
       )}
@@ -348,33 +375,18 @@ export default function ItineraryForm({
       <Button
         type="submit"
         disabled={isSubmitDisabled()}
-        className="h-9 w-full bg-primary font-medium text-primary-foreground transition-all duration-150 hover:bg-primary/90 active:scale-[0.98] disabled:opacity-50"
+        className="h-10 w-full bg-primary font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:shadow-md hover:shadow-primary/20 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {addItineraryMutation.isPending ? (
           <span className="flex items-center gap-2">
-            <svg
-              className="h-4 w-4 animate-spin"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              />
-            </svg>
+            <Loader2 className="h-4 w-4 animate-spin" />
             Adding...
           </span>
         ) : (
-          "Add to Itinerary"
+          <span className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Add to Itinerary
+          </span>
         )}
       </Button>
     </form>

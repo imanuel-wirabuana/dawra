@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { X, Plus, Loader2 } from "lucide-react"
 
 interface CreateFolderDialogProps {
   open: boolean
@@ -90,13 +91,24 @@ export default function CreateFolderDialog({
             onClick={handleClose}
             disabled={addFolderMutation.isPending}
           >
+            <X className="mr-1 h-4 w-4" />
             Cancel
           </Button>
           <Button
             onClick={handleCreate}
             disabled={!name.trim() || addFolderMutation.isPending}
           >
-            {addFolderMutation.isPending ? "Creating..." : "Create"}
+            {addFolderMutation.isPending ? (
+              <>
+                <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                Creating...
+              </>
+            ) : (
+              <>
+                <Plus className="mr-1 h-4 w-4" />
+                Create
+              </>
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

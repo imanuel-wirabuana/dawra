@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { EmojiPicker } from "./EmojiPicker"
+import { Plus } from "lucide-react"
 import type { Reaction } from "@/types"
 import { useReactions } from "../hooks/useReactions"
 
@@ -68,7 +69,7 @@ export function ReactionsDisplay({
           size="sm"
           className="h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
         >
-          😊+
+          <Plus className="h-3 w-3" />
         </Button>
       </EmojiPicker>
     </div>

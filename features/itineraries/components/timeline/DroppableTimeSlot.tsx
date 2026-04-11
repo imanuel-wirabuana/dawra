@@ -37,8 +37,10 @@ export default function DroppableTimeSlot({
       ref={setNodeRef}
       onClick={handleClick}
       className={cn(
-        "absolute w-full cursor-pointer transition-colors hover:bg-primary/10",
-        isOver && "bg-primary/20"
+        "absolute w-full cursor-pointer transition-all duration-150",
+        "hover:bg-primary/5 hover:backdrop-blur-sm",
+        isOver && "bg-primary/20 ring-2 ring-inset ring-primary/30",
+        !draggedItemId && "hover:bg-primary/5"
       )}
       style={{
         top: `${(hour + minute / 60) * HOUR_HEIGHT}px`,

@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import { Trash2 } from "lucide-react"
+import { Trash2, X, Loader2 } from "lucide-react"
 import { useState } from "react"
 import { useDeleteBucketList } from "../hooks/useDeleteBucketList"
 import {
@@ -61,14 +61,27 @@ export default function DeleteBucketListButton({
         </DialogHeader>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
+            <Button variant="outline">
+              <X className="mr-1 h-4 w-4" />
+              Cancel
+            </Button>
           </DialogClose>
           <Button
             variant="destructive"
             onClick={handleDelete}
             disabled={deleteMutation.isPending}
           >
-            {deleteMutation.isPending ? "Deleting..." : "Delete"}
+            {deleteMutation.isPending ? (
+              <>
+                <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                Deleting...
+              </>
+            ) : (
+              <>
+                <Trash2 className="mr-1 h-4 w-4" />
+                Delete
+              </>
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

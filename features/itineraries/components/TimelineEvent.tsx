@@ -1,5 +1,6 @@
 import { useDraggable } from "@dnd-kit/core"
 import { cn } from "@/lib/utils"
+import { Trash2, GripVertical, MapPin, DollarSign, ArrowRight, Clock, FileText } from "lucide-react"
 import type { Category } from "@/types"
 import ToggleItineraryItemButton from "./ToggleItineraryItemButton"
 
@@ -84,109 +85,92 @@ export default function TimelineEvent({
       ref={setNodeRef}
       onClick={handleClick}
       className={cn(
-        "group flex cursor-pointer flex-col gap-1 overflow-hidden rounded-md border p-2 shadow-sm transition-colors",
-        compact && "p-1",
-        isDragging && "opacity-50",
-        item.completed && "opacity-75",
+        "group flex cursor-pointer flex-col gap-1 overflow-hidden rounded-lg border p-2 shadow-sm transition-all duration-200",
+        compact && "p-1.5",
+        isDragging && "opacity-50 scale-[1.02] shadow-lg",
+        item.completed && "opacity-60 grayscale-[0.3]",
         item.itemType === "bucket-list"
-          ? "border-primary bg-primary hover:bg-primary/80"
-          : "border-muted-foreground/20 bg-muted hover:bg-muted/80",
+          ? "border-primary/30 bg-gradient-to-br from-primary to-primary/90 shadow-primary/20 hover:shadow-md hover:from-primary/95 hover:to-primary/85"
+          : "border-border/60 bg-gradient-to-br from-muted to-muted/80 hover:shadow-md hover:from-muted/90 hover:to-muted/70",
         className
       )}
       style={{ ...style, ...dragStyle }}
     >
-      {/* Header row: Type badge + Title + Toggle + Drag Handle */}
-      <div className="flex items-start justify-between gap-1">
+      {/* Header row: Toggle + Type badge + Title + Actions */}
+      <div className="flex items-start justify-between gap-1.5">
         <div className="flex min-w-0 flex-1 items-start gap-1.5">
-          {showToggle && !compact && (
+          {showToggle && (
             <ToggleItineraryItemButton
               itemId={item.id}
               completed={item.completed}
-              className="hidden shrink-0 group-hover:flex"
+              className={cn("shrink-0", compact && "scale-75")}
             />
           )}
-          <span
-            className={cn(
-              "shrink-0 rounded px-1 text-[7px] font-bold tracking-wider uppercase",
-              compact && "text-[6px]",
-              item.itemType === "bucket-list"
-                ? "bg-primary-foreground/20 text-primary-foreground"
-                : "bg-muted-foreground/20 text-muted-foreground"
-            )}
-          >
-            {item.itemType === "bucket-list" ? "BL" : "CS"}
-          </span>
-          <h3
-            className={cn(
-              "truncate text-xs font-bold tracking-tight",
-              item.itemType === "bucket-list"
-                ? "text-primary-foreground"
-                : "text-foreground",
-              compact && "text-[10px]",
-              item.completed && "line-through opacity-70"
-            )}
-          >
-            {item.title}
-          </h3>
+          <div className={cn(
+            "flex min-w-0 flex-1 items-center gap-1.5",
+            compact && "gap-1"
+          )}>
+            <span
+              className={cn(
+                "shrink-0 rounded-md px-1.5 py-0.5 text-[7px] font-bold tracking-wider uppercase shadow-sm",
+                compact && "text-[6px] px-1 py-0.5",
+                item.itemType === "bucket-list"
+                  ? "bg-primary-foreground/25 text-primary-foreground ring-1 ring-primary-foreground/20"
+                  : "bg-muted-foreground/15 text-muted-foreground ring-1 ring-muted-foreground/10"
+              )}
+            >
+              {item.itemType === "bucket-list" ? "BL" : "CS"}
+            </span>
+            <h3
+              className={cn(
+                "truncate text-xs font-semibold tracking-tight leading-tight",
+                item.itemType === "bucket-list"
+                  ? "text-primary-foreground"
+                  : "text-foreground",
+                compact && "text-[10px]",
+                item.completed && "line-through opacity-60"
+              )}
+            >
+              {item.title}
+            </h3>
+          </div>
         </div>
-        <div className="flex shrink-0 items-center gap-1">
+        <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
           {onDelete && (
             <button
               onClick={handleDeleteClick}
               className={cn(
-                "opacity-0 transition-opacity hover:opacity-100",
-                compact ? "opacity-60" : "group-hover:opacity-60",
+                "flex items-center justify-center rounded-md p-1 transition-all duration-150 hover:scale-105",
+                compact ? "p-0.5" : "p-1",
                 item.itemType === "bucket-list"
-                  ? "text-primary-foreground/70 hover:text-primary-foreground"
-                  : "text-muted-foreground/70 hover:text-destructive"
+                  ? "text-primary-foreground/60 hover:bg-primary-foreground/20 hover:text-primary-foreground"
+                  : "text-muted-foreground/60 hover:bg-muted hover:text-destructive"
               )}
               title="Delete"
             >
-              <svg
-                className={cn("shrink-0", compact ? "h-3 w-3" : "h-3.5 w-3.5")}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                />
-              </svg>
+              <Trash2 className={cn("shrink-0", compact ? "h-3 w-3" : "h-3.5 w-3.5")} />
             </button>
           )}
           {draggable && (
             <div
               className={cn(
-                "shrink-0 cursor-grab opacity-0 transition-opacity hover:opacity-100",
-                compact ? "opacity-60" : "group-hover:opacity-60",
+                "flex shrink-0 cursor-grab items-center justify-center rounded-md p-1 transition-all duration-150 hover:scale-105",
+                compact ? "p-0.5" : "p-1",
                 "active:cursor-grabbing"
               )}
               onClick={handleHandleClick}
               {...listeners}
               {...attributes}
             >
-              <svg
+              <GripVertical
                 className={cn(
                   "shrink-0",
                   compact ? "h-3 w-3" : "h-4 w-4",
                   item.itemType === "bucket-list"
-                    ? "text-primary-foreground/50"
-                    : "text-muted-foreground/50"
+                    ? "text-primary-foreground/50 hover:text-primary-foreground/80"
+                    : "text-muted-foreground/50 hover:text-muted-foreground/80"
                 )}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 8h16M4 16h16"
-                />
-              </svg>
+              />
             </div>
           )}
         </div>
@@ -198,15 +182,16 @@ export default function TimelineEvent({
           "flex items-center gap-1 font-medium",
           compact ? "text-[9px]" : "text-[10px]",
           item.itemType === "bucket-list"
-            ? "text-primary-foreground/80"
-            : "text-muted-foreground"
+            ? "text-primary-foreground/90"
+            : "text-muted-foreground/80"
         )}
       >
-        <span className="tabular-nums">{item.start}</span>
-        <span className="opacity-40">→</span>
+        <Clock className={cn("shrink-0 opacity-50", compact ? "h-2.5 w-2.5" : "h-3 w-3")} />
+        <span className="tabular-nums font-semibold">{item.start}</span>
+        <ArrowRight className={cn("shrink-0 opacity-40", compact ? "h-2.5 w-2.5" : "h-3 w-3")} />
         <span className="tabular-nums">{item.end}</span>
         {!compact && (
-          <span className="ml-1.5 text-[9px] font-normal opacity-60">
+          <span className="ml-1.5 rounded-full bg-background/20 px-1.5 py-0 text-[9px] font-medium opacity-80">
             {formatDuration(item.start, item.end)}
           </span>
         )}
@@ -219,33 +204,17 @@ export default function TimelineEvent({
             "flex items-center gap-1",
             compact ? "max-w-25 text-[9px]" : "text-[10px]",
             item.itemType === "bucket-list"
-              ? "text-primary-foreground/70"
-              : "text-muted-foreground/70"
+              ? "text-primary-foreground/80"
+              : "text-muted-foreground/80"
           )}
           title={item.location}
         >
-          <svg
+          <MapPin
             className={cn(
-              "shrink-0 opacity-60",
+              "shrink-0 opacity-70",
               compact ? "h-2.5 w-2.5" : "h-3 w-3"
             )}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-            />
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-            />
-          </svg>
+          />
           <span className="truncate font-medium">
             {compact
               ? item.location.slice(0, 15) +
@@ -262,27 +231,17 @@ export default function TimelineEvent({
             "flex items-center gap-1",
             compact ? "text-[9px]" : "text-[10px]",
             item.itemType === "bucket-list"
-              ? "text-primary-foreground/70"
-              : "text-muted-foreground/70"
+              ? "text-primary-foreground/85"
+              : "text-muted-foreground/85"
           )}
         >
-          <svg
+          <DollarSign
             className={cn(
-              "shrink-0 opacity-60",
+              "shrink-0 opacity-70",
               compact ? "h-2.5 w-2.5" : "h-3 w-3"
             )}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          <span className="font-medium tabular-nums">
+          />
+          <span className="font-semibold tabular-nums">
             Rp {item.cost.toLocaleString("id-ID")}
           </span>
         </div>
@@ -290,35 +249,50 @@ export default function TimelineEvent({
 
       {/* Description - brief in compact */}
       {item.description && (
-        <p
+        <div
           className={cn(
-            "leading-snug",
-            compact ? "line-clamp-1 text-[9px]" : "line-clamp-2 text-[10px]",
+            "flex items-start gap-1",
+            compact && "hidden"
+          )}
+        >
+          <FileText className={cn(
+            "shrink-0 mt-0.5 opacity-50",
+            compact ? "h-2.5 w-2.5" : "h-3 w-3",
             item.itemType === "bucket-list"
               ? "text-primary-foreground/60"
               : "text-muted-foreground/60"
-          )}
-        >
-          {compact
-            ? item.description.slice(0, 35) +
-              (item.description.length > 35 ? "…" : "")
-            : item.description}
-        </p>
+          )} />
+          <p
+            className={cn(
+              "leading-snug flex-1",
+              compact ? "line-clamp-1 text-[9px]" : "line-clamp-2 text-[10px]",
+              item.itemType === "bucket-list"
+                ? "text-primary-foreground/70"
+                : "text-muted-foreground/70"
+            )}
+          >
+            {compact
+              ? item.description.slice(0, 35) +
+                (item.description.length > 35 ? "…" : "")
+              : item.description}
+          </p>
+        </div>
       )}
 
       {/* Categories - badges always */}
       {item.categories && item.categories.length > 0 && (
-        <div className="flex flex-wrap items-center gap-1">
-          {item.categories.slice(0, compact ? 3 : undefined).map((category) => (
+        <div className="flex flex-wrap items-center gap-1 mt-0.5">
+          {item.categories.slice(0, compact ? 2 : undefined).map((category) => (
             <span
               key={category.id}
               className={cn(
-                "inline-flex items-center gap-1 rounded font-medium",
-                compact ? "px-1.5 py-0 text-[8px]" : "px-2 py-0.5 text-[9px]"
+                "inline-flex items-center gap-1 rounded-full font-medium shadow-sm",
+                compact ? "px-1.5 py-0.5 text-[8px]" : "px-2 py-0.5 text-[9px]"
               )}
               style={{
-                backgroundColor: `${category.color}25`,
+                backgroundColor: `${category.color}20`,
                 color: category.color,
+                boxShadow: `0 0 0 1px ${category.color}30`,
               }}
             >
               <span
@@ -331,16 +305,16 @@ export default function TimelineEvent({
               <span className="tracking-tight">{category.name}</span>
             </span>
           ))}
-          {compact && item.categories.length > 3 && (
+          {compact && item.categories.length > 2 && (
             <span
               className={cn(
-                "text-[8px] font-medium",
+                "text-[8px] font-medium px-1 py-0.5 rounded-full bg-background/30",
                 item.itemType === "bucket-list"
-                  ? "text-primary-foreground/40"
-                  : "text-muted-foreground/40"
+                  ? "text-primary-foreground/60"
+                  : "text-muted-foreground/60"
               )}
             >
-              +{item.categories.length - 3}
+              +{item.categories.length - 2}
             </span>
           )}
         </div>

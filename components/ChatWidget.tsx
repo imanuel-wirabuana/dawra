@@ -68,7 +68,7 @@ const getStoredDisplayName = () => {
 
 export default function ChatWidget() {
   const [currentUserId] = useState(generateUserId)
-  const [isMinimized, setIsMinimized] = useState(false)
+  const [isMinimized, setIsMinimized] = useState(true)
   const [displayName, setDisplayName] = useState(getStoredDisplayName)
   const [message, setMessage] = useState("")
   const [replyTo, setReplyTo] = useState<ChatMessage | null>(null)

@@ -11,7 +11,7 @@ import FolderGrid from "@/features/photos/components/FolderGrid"
 import CreateFolderDialog from "@/features/photos/components/CreateFolderDialog"
 import EmptyState from "@/features/photos/components/EmptyState"
 import LoadingState from "@/features/photos/components/LoadingState"
-import { LayoutGrid } from "lucide-react"
+import { LayoutGrid, Camera } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import Link from "next/link"
@@ -63,8 +63,13 @@ export default function PhotoWall() {
     <div className="mx-auto max-w-7xl">
       <div className="mb-8 flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Photos</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <div className="flex items-center gap-3">
+            <div className="rounded-full bg-primary/10 p-2">
+              <Camera className="h-5 w-5 text-primary" />
+            </div>
+            <h1 className="text-2xl font-semibold tracking-tight">Photos</h1>
+          </div>
+          <p className="mt-2 text-sm text-muted-foreground">
             Organize your travel memories into folders and albums.
           </p>
         </div>

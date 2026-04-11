@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 import { Check } from "lucide-react"
 import { useToggleItineraryItem } from "../hooks/useToggleItineraryItem"
 
@@ -23,14 +23,26 @@ export default function ToggleItineraryItemButton({
   }
 
   return (
-    <Button
-      variant={completed ? "default" : "outline"}
-      size="icon"
+    <button
       onClick={handleToggle}
       disabled={toggleMutation.isPending || !itemId}
-      className={`h-4 w-4 rounded-full border-2 border-primary ${completed ? "bg-primary hover:bg-primary/90" : ""} ${className}`}
+      className={cn(
+        "flex items-center justify-center rounded-full border-2 transition-all duration-200 ease-out",
+        "h-5 w-5 min-h-[20px] min-w-[20px]",
+        "focus:outline-none focus:ring-2 focus:ring-primary/30 focus:ring-offset-1",
+        "hover:scale-110 active:scale-95",
+        completed
+          ? "border-primary bg-primary text-primary-foreground shadow-sm"
+          : "border-muted-foreground/40 bg-transparent text-muted-foreground/40 hover:border-primary/60 hover:text-primary/60",
+        toggleMutation.isPending && "opacity-50 cursor-wait",
+        className
+      )}
+      title={completed ? "Mark as incomplete" : "Mark as complete"}
+      aria-label={completed ? "Mark as incomplete" : "Mark as complete"}
     >
-      {completed && <Check className="h-2 w-2" />}
-    </Button>
+      {completed && (
+        <Check className="h-3 w-3 stroke-[3] transition-transform duration-200 ease-out" />
+      )}
+    </button>
   )
 }

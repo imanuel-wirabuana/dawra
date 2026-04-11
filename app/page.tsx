@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Sparkles, ArrowRight } from "lucide-react"
+import { Sparkles, ArrowRight, Camera } from "lucide-react"
 import Link from "next/link"
+import { Brand } from "@/components/Brand"
 
 export default function Page() {
   return (
@@ -53,14 +54,13 @@ export default function Page() {
               </span>
             </h1>
             <p className="mx-auto mb-8 max-w-2xl text-base leading-relaxed font-light text-muted-foreground/90 sm:text-lg">
-              <span className="font-medium text-primary">Dawra</span> — where
-              every moment becomes a milestone, every adventure an achievement,
-              and every day a step toward our goals.
+              Where every moment becomes a milestone, every adventure an
+              achievement, and every day a step toward our goals.
             </p>
             <div className="mb-8 flex justify-center">
               <div className="max-w-sm overflow-hidden rounded-xl border border-border/50 bg-card/50 p-5 shadow-sm backdrop-blur-sm transition-all duration-200 hover:border-border/70 hover:shadow-md">
-                <div className="mb-4 text-center text-lg font-light tracking-widest text-primary">
-                  DAWRA
+                <div className="flex justify-center mb-2">
+                  <Brand size="md" />
                 </div>
                 <div className="space-y-2.5 text-sm text-muted-foreground">
                   <div className="flex items-start gap-2.5">
@@ -114,7 +114,10 @@ export default function Page() {
                 asChild
                 className="h-11 gap-2 rounded-full border-border/60 px-6 font-medium text-foreground transition-all duration-150 hover:border-primary/50 hover:bg-primary/5 hover:text-primary"
               >
-                <Link href="/photos">Our Dawra Memories</Link>
+                <Link href="/photos">
+                  <Camera className="h-4 w-4" />
+                  Our Dawra Memories
+                </Link>
               </Button>
             </div>
           </div>

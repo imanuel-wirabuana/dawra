@@ -3,7 +3,7 @@
 import { useState } from "react"
 import type { Category } from "@/types"
 import { Label } from "@/components/ui/label"
-import { Loader2, Plus, Trash2 } from "lucide-react"
+import { Loader2, Plus, Trash2, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -142,7 +142,10 @@ export default function CreateCategoryPopover({
                   Creating...
                 </>
               ) : (
-                "Create"
+                <>
+                  <Plus className="mr-1 h-3 w-3" />
+                  Create
+                </>
               )}
             </Button>
             <Button
@@ -151,6 +154,7 @@ export default function CreateCategoryPopover({
               disabled={isCreating}
               className="h-8 px-2 text-xs"
             >
+              <X className="mr-1 h-3 w-3" />
               Cancel
             </Button>
           </div>
