@@ -20,7 +20,6 @@ import ChatsPanelSkeleton from "./ChatsPanelSkeleton"
 import { useTyping } from "../hooks/useTyping"
 import { useReactions } from "../hooks/useReactions"
 import { useEditDelete } from "../hooks/useEditDelete"
-import { editMessage } from "../services/edit-delete.service"
 import type { ChatMessage } from "@/types"
 import {
   DropdownMenu,
@@ -62,6 +61,11 @@ export default function ChatsPanel({ className }: ChatsPanelProps) {
   const [replyTo, setReplyTo] = useState<ChatMessage | null>(null)
   const [editingMessage, setEditingMessage] = useState<ChatMessage | null>(null)
   const [editText, setEditText] = useState("")
+
+  // Use the edit hook when editing a message
+  const editDelete = editingMessage
+    ? useEditDelete(editingMessage.id || "", currentUserId)
+    : null
 
   const { messages, loading: messagesLoading } = useRealtimeChats()
   const addChatMessage = useAddChatMessage()
@@ -200,9 +204,9 @@ export default function ChatsPanel({ className }: ChatsPanelProps) {
 
       <form
         onSubmit={handleSubmit}
-        className="space-y-2 border-t border-border/50 bg-muted/10 p-3"
+        className="flex  gap-3 space-y-2 border-t border-border/50 bg-muted/10 p-3"
       >
-        <div className="flex gap-2">
+        <div className="flex flex-1 gap-2">
           <Input
             placeholder="Name"
             value={displayName}
@@ -217,7 +221,7 @@ export default function ChatsPanel({ className }: ChatsPanelProps) {
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 shrink-0 rounded-md text-muted-foreground transition-all duration-150 hover:bg-primary/10 hover:text-primary"
+                  className="h-full w-8 shrink-0 rounded-md text-muted-foreground transition-all duration-150 hover:bg-primary/10 hover:text-primary"
                 >
                   <Smile className="h-4 w-4" />
                 </Button>
@@ -229,7 +233,7 @@ export default function ChatsPanel({ className }: ChatsPanelProps) {
                       key={emoji}
                       type="button"
                       onClick={() => setMessage((prev) => prev + emoji)}
-                      className="flex h-7 w-7 items-center justify-center rounded text-base transition-colors hover:bg-muted"
+                      className="flex h-7 w-7 cursor-pointer items-center justify-center rounded text-base transition-colors hover:bg-muted"
                     >
                       {emoji}
                     </button>
@@ -262,9 +266,9 @@ export default function ChatsPanel({ className }: ChatsPanelProps) {
           )}
           <Button
             type="submit"
-            size="sm"
+            
             disabled={addChatMessage.isPending || !message.trim()}
-            className="h-7 gap-1 bg-primary px-3 text-xs font-medium text-primary-foreground transition-all duration-150 hover:bg-primary/90 active:scale-[0.98] disabled:opacity-50"
+            className="h-full gap-1 bg-primary px-3 text-xs font-medium text-primary-foreground transition-all duration-150 hover:bg-primary/90 active:scale-[0.98] disabled:opacity-50"
           >
             {addChatMessage.isPending ? (
               <Loader2 className="h-3 w-3 animate-spin" />
@@ -296,18 +300,21 @@ export default function ChatsPanel({ className }: ChatsPanelProps) {
               </Button>
               <Button
                 onClick={async () => {
-                  if (editingMessage) {
-                    await editMessage(
-                      editingMessage.id || "",
-                      editText,
-                      currentUserId
-                    )
+                  if (editingMessage && editDelete) {
+                    await editDelete.editMessage.mutateAsync(editText)
                     setEditingMessage(null)
                   }
                 }}
-                disabled={!editText.trim()}
+                disabled={!editText.trim() || editDelete?.editMessage.isPending}
               >
-                Save
+                {editDelete?.editMessage.isPending ? (
+                  <>
+                    <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save"
+                )}
               </Button>
             </div>
           </div>
@@ -447,7 +454,7 @@ function MessageItem({
                     <button
                       key={emoji}
                       onClick={() => handleReactionClick(emoji)}
-                      className="flex h-8 w-8 items-center justify-center rounded text-lg transition-colors hover:bg-muted"
+                      className="flex h-8 w-8 cursor-pointer items-center justify-center rounded text-lg transition-colors hover:bg-muted"
                     >
                       {emoji}
                     </button>

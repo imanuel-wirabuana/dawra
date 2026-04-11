@@ -65,7 +65,7 @@ export default function ItineraryForm({
   initialDate,
   className,
 }: ItineraryFormProps) {
-  const [itemType, setItemType] = useState<ItemType>("bucket-list")
+  const [itemType, setItemType] = useState<ItemType>("custom")
 
   // Data hooks - must be before any derived state
   const { selectedDate: storeSelectedDate } = useItineraryStore()
@@ -170,18 +170,19 @@ export default function ItineraryForm({
         className="w-full"
       >
         <TabsList className="grid h-9 w-full grid-cols-2 bg-muted/50 p-1">
+           <TabsTrigger
+            value="custom"
+            className="text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm"
+          >
+            Custom
+          </TabsTrigger>
           <TabsTrigger
             value="bucket-list"
             className="text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm"
           >
             Bucket List
           </TabsTrigger>
-          <TabsTrigger
-            value="custom"
-            className="text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm"
-          >
-            Custom
-          </TabsTrigger>
+         
         </TabsList>
 
         <TabsContent value="bucket-list" className="mt-3 space-y-3">

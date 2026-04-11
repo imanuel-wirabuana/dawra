@@ -334,28 +334,38 @@ export default function FullscreenMode({
             {draggedItem ? (
               <div
                 className={cn(
-                  "w-48 rounded-lg border p-3 shadow-lg",
-                  draggedItem.itemType === "bucket-list"
-                    ? "border-primary/30 bg-gradient-to-br from-primary to-primary/90 text-primary-foreground"
-                    : "border-border/60 bg-gradient-to-br from-muted to-muted/80 text-foreground"
+                  "flex cursor-grabbing flex-col gap-1 overflow-hidden rounded-lg border-2 p-2.5 shadow-2xl",
+                  "rotate-2 scale-105 ring-4 ring-primary/20",
+                  draggedItem.categories?.length
+                    ? "border-white/50"
+                    : draggedItem.itemType === "bucket-list"
+                      ? "border-primary"
+                      : "border-muted-foreground/30"
                 )}
+                style={{
+                  background: draggedItem.categories?.length
+                    ? draggedItem.categories.length >= 2
+                      ? `linear-gradient(135deg, ${draggedItem.categories[0].color} 0%, ${draggedItem.categories[1].color} 100%)`
+                      : draggedItem.categories[0].color
+                    : draggedItem.itemType === "bucket-list"
+                      ? "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.9) 100%)"
+                      : "linear-gradient(135deg, hsl(var(--muted)) 0%, hsl(var(--muted) / 0.8) 100%)",
+                  minWidth: "140px",
+                }}
               >
-                <div className="flex items-center gap-2">
-                  <GripVertical className="h-4 w-4 opacity-50" />
-                  <span className="truncate text-sm font-semibold">
-                    {draggedItem.title}
-                  </span>
+                <h3 className={cn(
+                  "truncate text-sm font-bold",
+                  draggedItem.categories?.length ? "text-white drop-shadow-sm" : draggedItem.itemType === "bucket-list" ? "text-primary-foreground" : "text-foreground"
+                )}>
+                  {draggedItem.title}
+                </h3>
+                <div className={cn(
+                  "flex items-center gap-1.5 text-xs",
+                  draggedItem.categories?.length ? "text-white/90" : draggedItem.itemType === "bucket-list" ? "text-primary-foreground/80" : "text-muted-foreground"
+                )}>
+                  <Clock className="h-3.5 w-3.5 opacity-70" />
+                  <span className="tabular-nums">{draggedItem.start} - {draggedItem.end}</span>
                 </div>
-                <div className="mt-2 flex items-center gap-1 text-xs opacity-80">
-                  <Clock className="h-3 w-3" />
-                  <span>{draggedItem.start} - {draggedItem.end}</span>
-                </div>
-                {draggedItem.location && (
-                  <div className="mt-1 flex items-center gap-1 text-xs opacity-70">
-                    <MapPin className="h-3 w-3" />
-                    <span className="truncate">{draggedItem.location}</span>
-                  </div>
-                )}
               </div>
             ) : null}
           </DragOverlay>

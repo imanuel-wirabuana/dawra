@@ -102,7 +102,7 @@ export default function EditItineraryItemSheet({
         </SheetHeader>
 
         {editedItem && (
-          <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+          <form onSubmit={handleSubmit} className="flex flex-col min-h-0 overflow-hidden">
             <div className="flex-1 min-h-0 overflow-y-auto px-1 py-2 space-y-4">
               {/* Title */}
               <div className="space-y-2">
@@ -255,7 +255,7 @@ export default function EditItineraryItemSheet({
             </div>
 
             {/* Actions */}
-            <div className="flex gap-2 pt-4 pb-2 border-t mt-auto px-1 shrink-0">
+            <div className="flex gap-2 pt-4 pb-2  mt-auto px-1 shrink-0">
               <Button
                 type="button"
                 variant="outline"

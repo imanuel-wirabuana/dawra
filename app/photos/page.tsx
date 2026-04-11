@@ -60,7 +60,7 @@ export default function PhotoWall() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl">
+    <div className="mx-auto ">
       <div className="mb-8 flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">

@@ -273,7 +273,7 @@ export default function ChatWidget() {
                             key={emoji}
                             type="button"
                             onClick={() => setMessage((prev) => prev + emoji)}
-                            className="flex h-8 w-8 items-center justify-center rounded text-lg transition-colors hover:bg-muted"
+                            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded text-lg transition-colors hover:bg-muted"
                           >
                             {emoji}
                           </button>
@@ -496,7 +496,7 @@ function MessageItem({
                     <button
                       key={emoji}
                       onClick={() => handleReactionClick(emoji)}
-                      className="flex h-7 w-7 items-center justify-center rounded transition-colors hover:bg-muted"
+                      className="flex h-7 w-7 cursor-pointer items-center justify-center rounded transition-colors hover:bg-muted"
                     >
                       {emoji}
                     </button>

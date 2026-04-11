@@ -27,7 +27,7 @@ export default function ToggleItineraryItemButton({
       onClick={handleToggle}
       disabled={toggleMutation.isPending || !itemId}
       className={cn(
-        "flex items-center justify-center rounded-full border-2 transition-all duration-200 ease-out",
+        "flex cursor-pointer items-center justify-center rounded-full border-2 transition-all duration-200 ease-out",
         "h-5 w-5 min-h-[20px] min-w-[20px]",
         "focus:outline-none focus:ring-2 focus:ring-primary/30 focus:ring-offset-1",
         "hover:scale-110 active:scale-95",

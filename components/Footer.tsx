@@ -8,7 +8,7 @@ export default function Footer() {
           {new Date().getFullYear()}{" "}
           <span className="font-bold text-primary">Dawra</span>. All rights
           reserved. Made with{" "}
-          <Heart className="inline-block h-4 w-4 text-red-500 fill-red-500" /> by{" "}
+          <Heart className="inline-block h-4 w-4 text-primary fill-primary" /> by{" "}
           <a
             href="https://github.com/imanuel-wirabuana"
             target="_blank"

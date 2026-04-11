@@ -118,7 +118,7 @@ export default function TimelineEvent({
 
   // Check if event fits in one 15-minute slot (15 min or less)
   const durationMinutes = getDurationMinutes(item.start, item.end)
-  const isShortEvent = durationMinutes <= 15
+  const isShortEvent = durationMinutes <= 30
 
   // Determine card background based on categories
   const categories = item.categories || []
@@ -139,7 +139,8 @@ export default function TimelineEvent({
         onClick={handleClick}
         {...(draggable ? { ...listeners, ...attributes } : {})}
         className={cn(
-          "group flex cursor-pointer flex-col gap-1 overflow-hidden rounded-lg border p-2 shadow-sm transition-all duration-200",
+          "group flex cursor-pointer flex-col overflow-hidden rounded-lg border p-2 shadow-sm transition-all duration-200",
+          !isShortEvent && "gap-1",
           compact && "p-1.5",
           isShortEvent && "justify-center",
           draggable && "cursor-grab active:cursor-grabbing",
@@ -157,9 +158,10 @@ export default function TimelineEvent({
         {/* Title Row */}
         <h3
           className={cn(
-            "truncate text-xs font-semibold tracking-tight leading-tight",
+            "truncate font-semibold tracking-tight leading-tight",
+          isShortEvent ? "text-[10px]" : "text-xs",
             hasCategories ? "text-white drop-shadow-sm" : isBucketList ? "text-primary-foreground" : "text-foreground",
-            compact && "text-[10px]",
+            compact && !isShortEvent && "text-[10px]",
             item.completed && "line-through opacity-60"
           )}
         >

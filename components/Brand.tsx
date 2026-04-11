@@ -21,7 +21,7 @@ export function Brand({ className, size = "md" }: BrandProps) {
       href="/"
       className={cn(
         "group flex items-center gap-1.5 font-bold",
-        "[font-family:var(--font-cursive),cursive]",
+        "[font-family:'Concert One',cursive]",
         "transition-all duration-300 hover:opacity-80",
         sizeClasses[size],
         className

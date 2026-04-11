@@ -16,7 +16,7 @@ import {
   ComboboxList,
   ComboboxValue,
 } from "@/components/ui/combobox"
-import CreateCategoryPopover from "./CreateCategoryPopover"
+import CreateCategoryDialog from "./CreateCategory"
 import { cn } from "@/lib/utils"
 
 interface CategorySelectorProps {
@@ -136,7 +136,7 @@ export default function CategorySelector({
         </Combobox>
       </div>
       <div className="w-fit">
-        <CreateCategoryPopover
+        <CreateCategoryDialog
           onCategoryCreated={handleCategoryCreated}
           onError={handleError}
           createCategory={createCategory}

@@ -5,6 +5,7 @@ import { useRealtimeItineraryItems } from "../hooks/useRealtimeItineraryItems"
 import { useGetBucketListItems } from "../hooks/useGetBucketListItems"
 import { useUpdateItineraryItem } from "../hooks/useUpdateItineraryItem"
 import { useToggleItineraryItem } from "../hooks/useToggleItineraryItem"
+import { useDeleteItineraryItem } from "../hooks/useDeleteItineraryItem"
 import GridTimeline from "@/features/itineraries/components/GridTimeline"
 import ItineraryForm from "./ItineraryForm"
 import { Plus, CalendarDays, Wallet, ListTodo } from "lucide-react"
@@ -16,7 +17,6 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import EditItineraryItemSheet from "./EditItineraryItemSheet"
-import { deleteItineraryItem } from "../services/delete.service"
 import type { ItineraryItem, Category } from "@/types"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -28,6 +28,7 @@ export default function ItineraryGrid() {
   const bucketListItems = useGetBucketListItems()
   const updateMutation = useUpdateItineraryItem()
   const toggleMutation = useToggleItineraryItem()
+  const deleteMutation = useDeleteItineraryItem()
   const { selectedDate, setSelectedDate } = useItineraryStore()
   const [editingItem, setEditingItem] = useState<{
     id: string
@@ -45,14 +46,14 @@ export default function ItineraryGrid() {
   const [formOpen, setFormOpen] = useState(false)
 
   const handleDelete = async (id: string) => {
-    await deleteItineraryItem(id)
+    await deleteMutation.mutateAsync(id)
   }
 
   const handleToggleComplete = async (id: string, completed: boolean) => {
     await toggleMutation.mutateAsync({ id, completed })
   }
 
-  const handleReschedule = async (
+  const handleReschedule = (
     id: string,
     newStartTime: string,
     newEndTime: string,
@@ -62,7 +63,8 @@ export default function ItineraryGrid() {
     const formatDateForInput = (date: Date) => format(date, "yyyy-MM-dd")
     const dateToUse = targetDate || selectedDate
 
-    await updateMutation.mutateAsync({
+    // Fire-and-forget: don't await, optimistic update handles the UI immediately
+    updateMutation.mutate({
       id,
       updates: {
         date: formatDateForInput(dateToUse),

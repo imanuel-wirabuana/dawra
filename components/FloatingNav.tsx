@@ -32,7 +32,7 @@ export default function FloatingNav() {
     <nav className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2">
       <div
         className={cn(
-          "flex items-center py-1.5 rounded-full border border-border/50 bg-sidebar/90 shadow-lg backdrop-blur-md transition-all duration-300 ease-out",
+          "flex items-center py-1.5 rounded-full border-2 border-primary/30 bg-sidebar/90 shadow-lg backdrop-blur-md transition-all duration-300 ease-out",
           isExpanded ? "px-2" : "px-1.5 "
         )}
       >

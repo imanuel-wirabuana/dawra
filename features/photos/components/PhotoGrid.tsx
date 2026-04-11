@@ -11,6 +11,7 @@ import PhotoBulkDeleteButton, {
   type PhotoBulkDeleteButtonRef,
 } from "./PhotoBulkDeleteButton"
 import { usePhotoSelection } from "../hooks/usePhotoSelection"
+import { useMovePhotos } from "../hooks/useMovePhotos"
 import { CheckSquare, X, ArrowLeft, Info, Folder, Filter } from "lucide-react"
 import { useHotkey } from "@tanstack/react-hotkeys"
 import {
@@ -21,7 +22,6 @@ import {
 import type { Photo, Folder as FolderType } from "@/types"
 import MoveToFolderDialog from "./MoveToFolderDialog"
 import PhotoGalleryModal from "./PhotoGalleryModal"
-import { movePhotosToFolder } from "../services/movePhotos.service"
 
 interface PhotoGridProps {
   photos: Photo[]
@@ -66,6 +66,8 @@ const PhotoGrid = forwardRef<PhotoGridRef, PhotoGridProps>(
       isSelectionMode,
     })
 
+    const movePhotosMutation = useMovePhotos()
+
     const toggleSelectionMode = () => {
       setIsSelectionMode(!isSelectionMode)
       if (isSelectionMode) {
@@ -108,7 +110,7 @@ const PhotoGrid = forwardRef<PhotoGridRef, PhotoGridProps>(
     })
 
     const handleMovePhotos = async (folderId: string | null) => {
-      await movePhotosToFolder(selectedIds, folderId)
+      await movePhotosMutation.mutateAsync({ photoIds: selectedIds, folderId })
       clear()
     }
 

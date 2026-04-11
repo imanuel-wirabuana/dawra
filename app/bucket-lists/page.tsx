@@ -7,7 +7,7 @@ import { Target, CheckCircle } from "lucide-react"
 
 export default function Page() {
   return (
-    <div className="mx-auto max-w-7xl">
+    <div className="mx-auto">
       <div className="mb-8">
         <div className="flex items-center gap-3">
           <div className="rounded-full bg-primary/10 p-2">

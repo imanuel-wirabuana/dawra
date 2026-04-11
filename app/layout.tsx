@@ -61,7 +61,7 @@ export default function RootLayout({
           <TooltipProvider>
             <ThemeProvider>
               {/* <Navbar className="sticky top-0 z-50" /> */}
-              <header className="flex flex-row px-7 mt-3 lg:px-27 justify-between container">
+              <header className="flex flex-row px-7 py-3 lg:px-17 border-b-4 border-muted border-dashed justify-between container">
                 <Brand size="md" />
                 <DynamicBreadcrumb />
               </header>
@@ -69,7 +69,7 @@ export default function RootLayout({
               <Footer />
               <FloatingNav />
               <ChatWidget />
-              <Toaster position="top-center" />
+              <Toaster position="top-center" richColors />
             </ThemeProvider>
           </TooltipProvider>
         </Providers>

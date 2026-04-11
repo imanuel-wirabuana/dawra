@@ -61,7 +61,7 @@ export default function ViewModeSelector({
               key={mode}
               onClick={() => onViewModeChange(mode)}
               className={cn(
-                "flex items-center gap-2 rounded-md px-2 py-1.5 text-xs font-medium transition-all duration-150",
+                "flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-xs font-medium transition-all duration-150",
                 viewMode === mode
                   ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"

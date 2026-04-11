@@ -13,7 +13,6 @@ import {
 import { Trash2, Pencil, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, MapPin, GripVertical, Check, Maximize2, Minimize2 } from "lucide-react"
 import { useState, useEffect, useMemo, useCallback, useRef } from "react"
 import { cn } from "@/lib/utils"
-import { useDebounce } from "@/hooks/useDebounce"
 import { Calendar } from "@/components/ui/calendar"
 import {
   Select,
@@ -70,7 +69,6 @@ interface GridTimelineProps {
   ) => Promise<void> | void
   selectedDate?: Date
   onDateChange?: (date: Date) => void
-  debounceMs?: number
   className?: string
   onSuccess?: () => void
 }
@@ -83,7 +81,6 @@ export default function GridTimeline({
   onReschedule,
   selectedDate: externalSelectedDate,
   onDateChange,
-  debounceMs = 300,
   className,
   onSuccess,
 }: GridTimelineProps) {
@@ -104,16 +101,8 @@ export default function GridTimeline({
   const [slotEndTime, setSlotEndTime] = useState("")
   const [slotDate, setSlotDate] = useState<Date | null>(null)
 
-  // Optimistic items state for smooth drag/drop visual feedback
-  const [optimisticItems, setOptimisticItems] = useState<Map<string, Item>>(
-    new Map()
-  )
-  const pendingUpdateRef = useRef<{
-    id: string
-    newStartTime: string
-    newEndTime: string
-    targetDate: Date
-  } | null>(null)
+  // Instant optimistic updates for seamless drag-drop (like Google Calendar)
+  const [optimisticItem, setOptimisticItem] = useState<Item | null>(null)
 
   const selectedDate = externalSelectedDate || internalDate
   const setSelectedDate = onDateChange || setInternalDate
@@ -126,15 +115,13 @@ export default function GridTimeline({
     })
   )
 
-  // Merge optimistic items with actual items for rendering
+  // Merge optimistic item with items for instant visual feedback
   const displayItems = useMemo(() => {
-    if (optimisticItems.size === 0) return items
-
-    return items.map((item) => {
-      const optimistic = optimisticItems.get(item.id)
-      return optimistic || item
-    })
-  }, [items, optimisticItems])
+    if (!optimisticItem) return items
+    return items.map((item) =>
+      item.id === optimisticItem.id ? optimisticItem : item
+    )
+  }, [items, optimisticItem])
 
   useEffect(() => {
     const checkMobile = () => {
@@ -210,13 +197,15 @@ export default function GridTimeline({
 
   const handleDragStart = useCallback(
     (event: DragStartEvent) => {
-      const item = displayItems.find((i) => i.id === event.active.id)
+      const item = items.find((i) => i.id === event.active.id)
       if (item) {
         setDraggedItem(item)
         setDropTarget(null)
+        // Clear any previous optimistic state
+        setOptimisticItem(null)
       }
     },
-    [displayItems]
+    [items]
   )
 
   const handleDragOver = (event: DragOverEvent) => {
@@ -247,46 +236,6 @@ export default function GridTimeline({
 
     setDropTarget({ time: newStartTime, date: targetDate })
   }
-
-  // Debounced reschedule handler for smooth background updates
-  const {
-    debouncedCallback: debouncedReschedule,
-    cancel: cancelReschedule,
-    flush: flushReschedule,
-  } = useDebounce(
-    async (
-      id: string,
-      newStartTime: string,
-      newEndTime: string,
-      targetDate: Date
-    ) => {
-      if (!onReschedule) return
-
-      pendingUpdateRef.current = null
-      await onReschedule(id, newStartTime, newEndTime, targetDate)
-      // Clear optimistic item after successful update
-      setOptimisticItems((prev) => {
-        const next = new Map(prev)
-        next.delete(id)
-        return next
-      })
-    },
-    debounceMs
-  )
-
-  // Flush any pending reschedule on unmount or when items change externally
-  useEffect(() => {
-    return () => {
-      flushReschedule()
-    }
-  }, [flushReschedule])
-
-  // Reset optimistic items when external items change
-  useEffect(() => {
-    setOptimisticItems(new Map())
-    cancelReschedule()
-    pendingUpdateRef.current = null
-  }, [items, cancelReschedule])
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
@@ -322,18 +271,7 @@ export default function GridTimeline({
         targetDate = addDays(weekStart, dayIndex)
       }
 
-      // Cancel any pending previous reschedule
-      cancelReschedule()
-
-      // Store pending update reference
-      pendingUpdateRef.current = {
-        id: draggedItem.id,
-        newStartTime,
-        newEndTime,
-        targetDate,
-      }
-
-      // Optimistically update the item position for immediate visual feedback
+      // Create optimistic item for INSTANT visual feedback
       const updatedItem: Item = {
         ...draggedItem,
         start: newStartTime,
@@ -341,14 +279,11 @@ export default function GridTimeline({
         date: targetDate,
       }
 
-      setOptimisticItems((prev) => {
-        const next = new Map(prev)
-        next.set(draggedItem.id, updatedItem)
-        return next
-      })
+      // Apply optimistic update IMMEDIATELY (synchronous)
+      setOptimisticItem(updatedItem)
 
-      // Trigger debounced background update
-      debouncedReschedule(draggedItem.id, newStartTime, newEndTime, targetDate)
+      // Fire mutation in background (non-blocking)
+      onReschedule(draggedItem.id, newStartTime, newEndTime, targetDate)
 
       setDraggedItem(null)
       setDropTarget(null)
@@ -358,8 +293,6 @@ export default function GridTimeline({
       onReschedule,
       selectedDate,
       viewMode,
-      debouncedReschedule,
-      cancelReschedule,
     ]
   )
 
@@ -544,7 +477,7 @@ export default function GridTimeline({
                   {item.itemType === "custom" && onEditItem && (
                     <button
                       onClick={() => onEditItem(item)}
-                      className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
+                      className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
                       title="Edit item"
                     >
                       <Pencil className="h-4 w-4" />
@@ -552,7 +485,7 @@ export default function GridTimeline({
                   )}
                   <button
                     onClick={() => onDeleteItem(item.id)}
-                    className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                    className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
                     title="Delete item"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -717,97 +650,80 @@ export default function GridTimeline({
         </div>
       </div>
 
-      <DragOverlay dropAnimation={null}>
+      <DragOverlay className="z-50">
         {draggedItem ? (
           <div
             className={cn(
-              "flex cursor-grabbing flex-col gap-1 rounded-lg border-2 p-2.5 shadow-xl ring-4 ring-primary/10 scale-105",
-              draggedItem.itemType === "bucket-list"
-                ? "border-primary bg-gradient-to-br from-primary to-primary/90"
-                : "border-muted-foreground/30 bg-gradient-to-br from-muted to-muted/80"
+              "flex cursor-grabbing flex-col rounded-lg border p-2 shadow-lg",
+              "scale-90 ring-1 ring-primary/30",
+              draggedItem.categories?.length
+                ? "border-white/30 shadow-xl"
+                : draggedItem.itemType === "bucket-list"
+                  ? "border-primary/30 bg-gradient-to-br from-primary to-primary/90"
+                  : "border-border/60 bg-gradient-to-br from-muted to-muted/80"
             )}
             style={{
-              width: "140px",
-              height: `${(getDurationMinutes(draggedItem.start, draggedItem.end) / 60) * HOUR_HEIGHT}px`,
-              minHeight: "50px",
+              background: draggedItem.categories?.length
+                ? draggedItem.categories.length >= 2
+                  ? `linear-gradient(135deg, ${draggedItem.categories[0].color} 0%, ${draggedItem.categories[1].color} 100%)`
+                  : draggedItem.categories[0].color
+                : undefined,
             }}
           >
-            {/* Drop target indicator */}
+            
+
+            {/* Title - same style as TimelineEvent */}
+            <h3 className={cn(
+              "truncate font-semibold tracking-tight leading-tight text-xs",
+              draggedItem.categories?.length
+                ? "text-white drop-shadow-sm"
+                : draggedItem.itemType === "bucket-list"
+                  ? "text-primary-foreground"
+                  : "text-foreground"
+            )}>
+              {draggedItem.title}
+            </h3>
+
+            {/* Time - same style as TimelineEvent */}
+            {!dropTarget && (
+              <div className={cn(
+                "mt-0.5 flex items-center gap-1 text-[10px]",
+                draggedItem.categories?.length
+                  ? "text-white/90"
+                  : draggedItem.itemType === "bucket-list"
+                    ? "text-primary-foreground/80"
+                    : "text-muted-foreground"
+              )}>
+                <Clock className="h-2.5 w-2.5" />
+                <span className="tabular-nums">{draggedItem.start} - {draggedItem.end}</span>
+              </div>
+            )}
+
+            {/* Drop target preview badge - same style as event card info */}
             {dropTarget && (
               <div className={cn(
-                "mb-1 rounded-md px-2 py-1 text-[10px] font-semibold flex items-center gap-1",
-                draggedItem.itemType === "bucket-list"
-                  ? "bg-primary-foreground/20 text-primary-foreground"
-                  : "bg-primary/10 text-primary"
+                "mb-1.5 flex flex-col ring-1 ring-primary/30 items-center -translate-x-[120%] -translate-y-1/2 justify-between rounded-md px-2 py-0.5 text-[10px] font-medium",
+                draggedItem.categories?.length || draggedItem.itemType === "bucket-list"
+                  ? "bg-black/30 text-white"
+                  : ""
               )}>
-                <Clock className="h-3 w-3" />
-                {format(dropTarget.date, "MMM d")} @ {dropTarget.time}
+                <div className="flex flex items-center gap-1">
+                  <CalendarIcon className="h-2.5 w-2.5" />
+                  <span>{format(dropTarget.date, "MMM d")}</span>
+                </div>
+                <div className="flex items-center gap-1 tabular-nums">
+                  <span>{dropTarget.time}</span>
+                  <span>→</span>
+                  <span>
+                    {minutesToTime(
+                      timeToMinutes(dropTarget.time) + getDurationMinutes(draggedItem.start, draggedItem.end)
+                    )}
+                  </span>
+                </div>
               </div>
             )}
-            <div className="flex items-start gap-2">
-              <span
-                className={cn(
-                  "shrink-0 rounded-md px-1.5 py-0.5 text-[8px] font-bold uppercase shadow-sm",
-                  draggedItem.itemType === "bucket-list"
-                    ? "bg-primary-foreground/25 text-primary-foreground"
-                    : "bg-primary/20 text-primary"
-                )}
-              >
-                {draggedItem.itemType === "bucket-list" ? "BL" : "CS"}
-              </span>
-              <h3
-                className={cn(
-                  "truncate text-xs font-bold",
-                  draggedItem.itemType === "bucket-list"
-                    ? "text-primary-foreground"
-                    : "text-foreground"
-                )}
-              >
-                {draggedItem.title}
-              </h3>
-            </div>
-            <div className="flex items-center gap-1 text-[10px] opacity-90">
-              <Clock className={cn(
-                "h-3 w-3",
-                draggedItem.itemType === "bucket-list"
-                  ? "text-primary-foreground/80"
-                  : "text-muted-foreground"
-              )} />
-              <span className={cn(
-                "tabular-nums font-medium",
-                draggedItem.itemType === "bucket-list"
-                  ? "text-primary-foreground"
-                  : "text-muted-foreground"
-              )}>
-                {draggedItem.start} - {draggedItem.end}
-              </span>
-            </div>
-            {draggedItem.location && (
-              <div className="flex items-center gap-1 text-[9px] opacity-80">
-                <MapPin className={cn(
-                  "h-2.5 w-2.5",
-                  draggedItem.itemType === "bucket-list"
-                    ? "text-primary-foreground/70"
-                    : "text-muted-foreground"
-                )} />
-                <span className={cn(
-                  "truncate",
-                  draggedItem.itemType === "bucket-list"
-                    ? "text-primary-foreground/80"
-                    : "text-muted-foreground/80"
-                )}>
-                  {draggedItem.location}
-                </span>
-              </div>
-            )}
-            <div className="mt-auto flex items-center justify-center opacity-30">
-              <GripVertical className={cn(
-                "h-4 w-4",
-                draggedItem.itemType === "bucket-list"
-                  ? "text-primary-foreground"
-                  : "text-muted-foreground"
-              )} />
-            </div>
+
+            
           </div>
         ) : null}
       </DragOverlay>

@@ -8,13 +8,15 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { useCategories } from "../hooks/useCategories"
 
-interface CreateCategoryPopoverProps {
+interface CreateCategoryDialogProps {
   onCategoryCreated: (category: Category) => void
   onError: (error: string) => void
   createCategory: (category: Omit<Category, "id">) => void
@@ -24,7 +26,7 @@ interface CreateCategoryPopoverProps {
   disabled?: boolean
 }
 
-export default function CreateCategoryPopover({
+export default function CreateCategoryDialog({
   onCategoryCreated,
   onError,
   createCategory,
@@ -32,7 +34,7 @@ export default function CreateCategoryPopover({
   trigger,
   onCategoryDeleted,
   disabled = false,
-}: CreateCategoryPopoverProps) {
+}: CreateCategoryDialogProps) {
   const [open, setOpen] = useState(false)
   const [name, setName] = useState("")
   const [color, setColor] = useState("#a21caf")
@@ -102,10 +104,13 @@ export default function CreateCategoryPopover({
   )
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>{trigger || defaultTrigger}</PopoverTrigger>
-      <PopoverContent className="w-72" align="center">
-        <div className="space-y-3">
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>{trigger || defaultTrigger}</DialogTrigger>
+      <DialogContent className="sm:max-w-sm">
+        <DialogHeader>
+          <DialogTitle>Create Category</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 pt-2">
           {/* Create New Category Section */}
           <div className="space-y-1.5">
             <Label htmlFor="category-name" className="text-xs">
@@ -132,7 +137,7 @@ export default function CreateCategoryPopover({
                   type="button"
                   onClick={() => setColor(preset.value)}
                   disabled={isCreating}
-                  className={`h-8 w-full rounded-md ${preset.bg} flex items-center justify-center transition-all hover:scale-105 disabled:opacity-50 ${
+                  className={`h-8 w-full cursor-pointer rounded-md ${preset.bg} flex items-center justify-center transition-all hover:scale-105 disabled:opacity-50 ${
                     color.toLowerCase() === preset.value.toLowerCase()
                       ? "ring-2 ring-offset-1 ring-foreground"
                       : ""
@@ -226,7 +231,7 @@ export default function CreateCategoryPopover({
             </div>
           )}
         </div>
-      </PopoverContent>
-    </Popover>
+      </DialogContent>
+    </Dialog>
   )
 }

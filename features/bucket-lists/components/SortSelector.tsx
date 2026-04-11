@@ -71,7 +71,7 @@ export default function SortSelector({
                 setOpen(false)
               }}
               className={cn(
-                "flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-xs font-medium transition-all duration-150",
+                "flex cursor-pointer items-center justify-between gap-2 rounded-md px-2 py-1.5 text-xs font-medium transition-all duration-150",
                 currentSort === value
                   ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"

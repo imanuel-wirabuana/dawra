@@ -24,7 +24,7 @@ export function EmojiPicker({ onEmojiSelect, children }: EmojiPickerProps) {
             <button
               key={emoji}
               onClick={() => onEmojiSelect(emoji)}
-              className="flex h-8 w-8 items-center justify-center rounded hover:bg-muted transition-colors text-lg"
+              className="flex h-8 w-8 cursor-pointer items-center justify-center rounded hover:bg-muted transition-colors text-lg"
             >
               {emoji}
             </button>

@@ -61,7 +61,7 @@ export default function PhotoViewModeSelector({
               key={mode}
               onClick={() => onViewModeChange(mode)}
               className={cn(
-                "flex items-center gap-2 rounded px-2 py-1.5 text-xs hover:bg-accent",
+                "flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-xs hover:bg-accent",
                 viewMode === mode && "bg-accent"
               )}
             >

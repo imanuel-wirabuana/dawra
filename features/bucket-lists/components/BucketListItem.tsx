@@ -82,7 +82,7 @@ export default function BucketListItem({
           <PopoverTrigger asChild>
             <button
               className={cn(
-                "shrink-0 rounded-md p-1.5 transition-all duration-150",
+                "cursor-pointer shrink-0 rounded-md p-1.5 transition-all duration-150",
                 "hover:bg-accent hover:text-accent-foreground",
                 "focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none"
               )}

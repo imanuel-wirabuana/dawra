@@ -72,7 +72,7 @@ export default function Navbar({ className }: NavbarProps) {
             <ThemeToggle />
             <button
               onClick={toggleMobileMenu}
-              className="p-2 text-foreground md:hidden"
+              className="cursor-pointer p-2 text-foreground md:hidden"
               aria-label="Toggle menu"
             >
               {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
