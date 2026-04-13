@@ -7,20 +7,20 @@ import { Target, CheckCircle } from "lucide-react"
 
 export default function Page() {
   return (
-    <div className="mx-auto">
-      <div className="mb-8">
+    <div className="w-full">
+      <div className="mb-6 sm:mb-8">
         <div className="flex items-center gap-3">
           <div className="rounded-full bg-primary/10 p-2">
             <Target className="h-5 w-5 text-primary" />
           </div>
-          <h1 className="text-2xl font-semibold tracking-tight">Bucket Lists</h1>
+          <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">Bucket Lists</h1>
         </div>
         <p className="mt-2 text-sm text-muted-foreground">
           Track your goals and dreams. Add items, organize by categories, and
           mark them as complete.
         </p>
       </div>
-      <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
+      <div className="flex flex-col gap-4 sm:gap-6 lg:flex-row lg:gap-8">
         <div className="order-2 w-full lg:order-1 lg:w-[70%]">
           <Suspense fallback={<BucketListGridSkeleton />}>
             <BucketListGrid />

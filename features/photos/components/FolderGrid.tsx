@@ -42,7 +42,7 @@ export default function FolderGrid({
           <div key={folder.id} className="group relative shrink-0">
             <Link
               href={`/photos/${folder.id}`}
-              className="flex items-center gap-2 rounded-full border border-border/50 bg-muted/30 px-3 py-1.5 text-xs font-medium text-foreground transition-all duration-150 hover:border-primary/30 hover:bg-primary/5"
+              className="flex items-center gap-2 rounded-full border border-border/50 bg-gradient-to-b from-muted/50 to-muted/20 px-3 py-1.5 text-xs font-medium text-foreground transition-all duration-150 hover:border-primary/30 hover:from-primary/10 hover:to-primary/5"
             >
               <Folder className="h-3.5 w-3.5 text-primary" />
               <span className="max-w-32 truncate">{folder.name}</span>

@@ -85,12 +85,12 @@ export default function Page() {
   }
 
   return (
-    <div className="container">
-      <div className="mb-4 flex flex-col items-center justify-end gap-4 lg:flex-row">
-        <div className="flex w-full max-w-xs items-center gap-3">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+        <div className="flex w-full sm:w-auto sm:max-w-xs items-center gap-2 sm:gap-3">
           <Label
             htmlFor="limit"
-            className="text-sm whitespace-nowrap text-muted-foreground"
+            className="text-xs sm:text-sm whitespace-nowrap text-muted-foreground"
           >
             Limit: {photoLimit}
           </Label>
@@ -100,85 +100,88 @@ export default function Page() {
             max={50}
             value={[photoLimit]}
             onValueChange={(value) => setPhotoLimit(value[0])}
+            className="flex-1"
           />
         </div>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline" size="sm">
-              <Settings2 className="mr-2 h-4 w-4" />
-              Settings
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="w-80">
-            <DialogHeader>
-              <DialogTitle>Settings</DialogTitle>
-            </DialogHeader>
-            <div className="grid gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="seed">Seed</Label>
-                <Input
-                  id="seed"
-                  type="number"
-                  value={seed}
-                  onChange={(e) => setSeed(Number(e.target.value))}
-                />
+        <div className="flex items-center gap-2">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm" className="h-8 sm:h-9">
+                <Settings2 className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Settings</span>
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="w-80 sm:w-96">
+              <DialogHeader>
+                <DialogTitle>Settings</DialogTitle>
+              </DialogHeader>
+              <div className="grid gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="seed">Seed</Label>
+                  <Input
+                    id="seed"
+                    type="number"
+                    value={seed}
+                    onChange={(e) => setSeed(Number(e.target.value))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="width">Width (px)</Label>
+                  <Input
+                    id="width"
+                    type="number"
+                    min={100}
+                    value={width}
+                    onChange={(e) => setWidth(Number(e.target.value))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="height">Height (px)</Label>
+                  <Input
+                    id="height"
+                    type="number"
+                    min={100}
+                    value={height}
+                    onChange={(e) => setHeight(Number(e.target.value))}
+                  />
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="width">Width (px)</Label>
-                <Input
-                  id="width"
-                  type="number"
-                  min={100}
-                  value={width}
-                  onChange={(e) => setWidth(Number(e.target.value))}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="height">Height (px)</Label>
-                <Input
-                  id="height"
-                  type="number"
-                  min={100}
-                  value={height}
-                  onChange={(e) => setHeight(Number(e.target.value))}
-                />
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" disabled={screenshotLoading}>
-              {screenshotLoading ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Camera className="mr-2 h-4 w-4" />
-              )}
-              Screenshot (
-              {qualityOptions.find((o) => o.ratio === pixelRatio)?.label ||
-                pixelRatio + "x"}
-              )
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {qualityOptions.map((option) => (
+            </DialogContent>
+          </Dialog>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" disabled={screenshotLoading} className="h-8 sm:h-9">
+                {screenshotLoading ? (
+                  <Loader2 className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin" />
+                ) : (
+                  <Camera className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                )}
+                <span className="hidden sm:inline">Screenshot (</span>
+                {qualityOptions.find((o) => o.ratio === pixelRatio)?.label ||
+                  pixelRatio + "x"}
+                <span className="hidden sm:inline">)</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {qualityOptions.map((option) => (
+                <DropdownMenuItem
+                  key={option.ratio}
+                  onClick={() => setPixelRatio(option.ratio)}
+                  className="flex items-center justify-between"
+                >
+                  {option.label} ({option.ratio}x)
+                  {pixelRatio === option.ratio && <Check className="h-4 w-4" />}
+                </DropdownMenuItem>
+              ))}
               <DropdownMenuItem
-                key={option.ratio}
-                onClick={() => setPixelRatio(option.ratio)}
-                className="flex items-center justify-between"
+                onClick={handleScreenshot}
+                className="font-semibold"
               >
-                {option.label} ({option.ratio}x)
-                {pixelRatio === option.ratio && <Check className="h-4 w-4" />}
+                Take Screenshot Now
               </DropdownMenuItem>
-            ))}
-            <DropdownMenuItem
-              onClick={handleScreenshot}
-              className="font-semibold"
-            >
-              Take Screenshot Now
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
       <p className="text-sm text-muted-foreground">
         Press <kbd>R</kbd> to randomize.

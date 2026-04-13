@@ -58,8 +58,8 @@ export default function PhotoUploadArea({
         className={cn(
           "p-6 text-center transition-all duration-200",
           dragActive
-            ? "border-2 border-dashed border-primary bg-primary/5"
-            : "border-2 border-dashed border-border/50 hover:border-primary/30"
+            ? "border-2 border-dashed border-primary bg-gradient-to-b from-primary/10 to-primary/5"
+            : "border-2 border-dashed border-border/50 bg-gradient-to-b from-background to-muted/10 hover:border-primary/30"
         )}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}

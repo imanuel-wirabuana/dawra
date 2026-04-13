@@ -58,7 +58,7 @@ export default function BucketListForm({ className }: BucketListFormProps) {
         className
       )}
     >
-      <CardHeader className="space-y-1 border-b bg-muted/30 px-5 py-4">
+      <CardHeader className="space-y-1 border-b border-border/50 bg-gradient-to-b from-muted/50 to-muted/20 px-5 py-4">
         <CardTitle className="text-base font-semibold">Add New Item</CardTitle>
         <p className="text-xs text-muted-foreground">
           Create a new bucket list goal

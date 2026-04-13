@@ -310,8 +310,8 @@ export default function GridTimeline({
 
     return (
       <div className="hidden w-72 shrink-0 border-r bg-gradient-to-b from-background to-muted/20 lg:block">
-        <div className="p-4">
-          <div className="rounded-xl border border-border/50 bg-background p-3 shadow-sm">
+        <div className="p-0">
+          <div className="rounded-none  p-3 ">
             <Calendar
               mode="single"
               selected={selectedDate}

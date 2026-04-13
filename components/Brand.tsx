@@ -11,9 +11,9 @@ interface BrandProps {
 export function Brand({ className, size = "md" }: BrandProps) {
 
   const sizeClasses = {
-    sm: "text-2xl",
-    md: "text-3xl",
-    lg: "text-5xl",
+    sm: "text-xl sm:text-2xl",
+    md: "text-2xl sm:text-3xl",
+    lg: "text-4xl sm:text-5xl",
   }
 
   return (

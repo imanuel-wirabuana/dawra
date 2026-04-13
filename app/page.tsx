@@ -9,10 +9,10 @@ export default function Page() {
     <div className="flex min-h-[80vh] flex-col">
       {/* Hero Section - Full Viewport minus navbar */}
       <section
-        className="flex flex-1 items-center justify-center py-8"
+        className="flex flex-1 items-center justify-center py-4 sm:py-8 px-4"
         style={{ minHeight: "calc(100vh - 4rem)" }}
       >
-        <div className="container mx-auto px-6">
+        <div className="container mx-auto px-2 sm:px-6">
           <div className="mx-auto max-w-4xl text-center">
             <Badge
               variant="outline"

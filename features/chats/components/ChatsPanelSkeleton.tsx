@@ -16,7 +16,7 @@ export default function ChatsPanelSkeleton({
       )}
     >
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-border/50 bg-muted/20 px-3 py-2">
+      <div className="flex items-center justify-between border-b border-border/50 bg-gradient-to-b from-muted/50 to-muted/20 px-3 py-2">
         <Skeleton className="h-4 w-12" />
         <Skeleton className="h-7 w-48 rounded-md" />
       </div>
@@ -59,7 +59,7 @@ export default function ChatsPanelSkeleton({
       </div>
 
       {/* Input area */}
-      <div className="space-y-2 border-t border-border/50 bg-muted/10 p-3">
+      <div className="space-y-2 border-t border-border/50 bg-gradient-to-b from-muted/30 to-muted/5 p-3">
         <div className="flex gap-2">
           <Skeleton className="h-8 w-28 shrink-0" />
           <div className="flex flex-1 gap-1.5">

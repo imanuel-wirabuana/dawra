@@ -18,6 +18,7 @@ export async function uploadPhoto(
 
     if (!response.ok) {
       const errorData = await response.json()
+      console.error("Photo upload failed:", errorData)
       throw new Error(errorData.message || `Upload failed for ${file.name}`)
     }
 

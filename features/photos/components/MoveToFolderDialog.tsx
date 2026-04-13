@@ -83,10 +83,10 @@ export default function MoveToFolderDialog({
           {/* Remove from current folder option */}
           {currentFolder && (
             <Card
-              className={`cursor-pointer p-4 transition-colors ${
+              className={`cursor-pointer p-4 transition-all ${
                 selectedFolderId === null
-                  ? "border-primary bg-primary/10"
-                  : "hover:bg-muted/50"
+                  ? "border-primary bg-gradient-to-r from-primary/15 to-primary/5"
+                  : "hover:from-muted/60 hover:to-muted/30 bg-gradient-to-b from-background to-muted/20"
               }`}
               onClick={() => setSelectedFolderId(null)}
             >
@@ -117,10 +117,10 @@ export default function MoveToFolderDialog({
               {availableFolders.map((folder) => (
                 <Card
                   key={folder.id}
-                  className={`cursor-pointer p-4 transition-colors ${
+                  className={`cursor-pointer p-4 transition-all ${
                     selectedFolderId === folder.id
-                      ? "border-primary bg-primary/10"
-                      : "hover:bg-muted/50"
+                      ? "border-primary bg-gradient-to-r from-primary/15 to-primary/5"
+                      : "hover:from-muted/60 hover:to-muted/30 bg-gradient-to-b from-background to-muted/20"
                   }`}
                   onClick={() => setSelectedFolderId(folder.id)}
                 >

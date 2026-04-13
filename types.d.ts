@@ -1,4 +1,4 @@
-import { Timestamp } from "firebase/firestore"
+import { Timestamp, FieldValue } from "firebase/firestore"
 
 // ============================================================================
 // CORE
@@ -179,6 +179,81 @@ type SortOption =
   /** Sort by cost in descending order (highest first) */
   | "cost-desc"
 
+// ============================================================================
+// EXPENSES
+// ============================================================================
+
+/**
+ * Period view options for expenses aggregation
+ */
+type PeriodView = "daily" | "weekly" | "monthly"
+
+/**
+ * Represents a custom expense entry manually added by the user
+ */
+type CustomExpenseData = {
+  /** Display name of the expense */
+  name: string
+  /** Cost amount in local currency (IDR) */
+  amount: number
+  /** Date of the expense in ISO format (YYYY-MM-DD) */
+  date: string
+  /** Optional note/description */
+  note?: string
+  /** Optional category for grouping */
+  category?: Category
+}
+
+/**
+ * Represents an expense record in the database.
+ * Can be a custom entry or linked to an itinerary item.
+ */
+type Expense = {
+  /** Unique identifier (Firebase document ID) */
+  id?: string
+  /** Whether to include this expense in calculations (default: true) */
+  include?: boolean
+  /** Type of expense - custom user entry or linked itinerary */
+  expenseType: "custom" | "itinerary"
+  /** Custom expense data (when expenseType is 'custom') */
+  customExpense?: CustomExpenseData
+  /** Reference to itinerary document ID (when expenseType is 'itinerary') */
+  itineraryId?: string
+  /** Cached amount for quick access (denormalized from source) */
+  cachedAmount?: number
+  /** Cached date for quick access (denormalized from source) */
+  cachedDate?: string
+  /** Timestamp when the expense was created */
+  createdAt?: Timestamp | FieldValue
+  /** Timestamp when the expense was last updated */
+  updatedAt?: Timestamp | FieldValue
+}
+
+/**
+ * Filter options for expenses view
+ */
+type ExpenseFilter = "all" | "custom" | "itinerary"
+
+/**
+ * Represents a period group (day, week, or month) with aggregated expenses
+ */
+type ExpensePeriodGroup = {
+  /** Period identifier (date string, week range, or month) */
+  periodKey: string
+  /** Display label for the period */
+  label: string
+  /** Start date of the period */
+  startDate: Date
+  /** End date of the period */
+  endDate: Date
+  /** Total amount for this period */
+  total: number
+  /** Number of expenses in this period */
+  count: number
+  /** Expenses in this period */
+  expenses: Expense[]
+}
+
 /**
  * Represents a custom item that can be added directly to an itinerary
  * without being linked to an existing bucket list item.
@@ -224,3 +299,4 @@ type TypingStatus = {
   /** Timestamp of when this status was last updated */
   timestamp: Timestamp
 }
+

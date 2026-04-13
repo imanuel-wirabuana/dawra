@@ -163,13 +163,13 @@ export default function ItineraryForm({
   return (
     <form onSubmit={handleSubmit} className={cn("space-y-4", className)}>
       {/* Item Type Selection */}
-      <div className="rounded-lg border border-border/50 bg-muted/10 p-1">
+      <div className="rounded-lg border border-border/50 bg-gradient-to-b from-muted/30 to-muted/10 p-1">
       <Tabs
         value={itemType}
         onValueChange={(v: string) => setItemType(v as ItemType)}
         className="w-full"
       >
-        <TabsList className="grid h-9 w-full grid-cols-2 bg-muted/50 p-1">
+        <TabsList className="grid h-9 w-full grid-cols-2 bg-gradient-to-b from-muted/60 to-muted/30 p-1">
            <TabsTrigger
             value="custom"
             className="text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm"
@@ -307,7 +307,7 @@ export default function ItineraryForm({
       </div>
 
       {/* Time Section */}
-      <div className="rounded-lg border border-border/50 bg-muted/20 p-3 space-y-3">
+      <div className="rounded-lg border border-border/50 bg-gradient-to-b from-muted/40 to-muted/15 p-3 space-y-3">
         <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
           <Clock className="h-3.5 w-3.5" />
           Schedule Time

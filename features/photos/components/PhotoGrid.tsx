@@ -236,7 +236,7 @@ const PhotoGrid = forwardRef<PhotoGridRef, PhotoGridProps>(
       <div className={className}>
         {/* Selection Mode Header */}
         {isSelectionMode ? (
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-primary/10 p-3">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/50 bg-gradient-to-r from-primary/20 to-primary/5 p-3">
             <div className="flex items-center gap-2">
               <CheckSquare className="h-4 w-4 text-primary" />
               <span className="text-sm font-medium text-primary">
@@ -311,7 +311,7 @@ const PhotoGrid = forwardRef<PhotoGridRef, PhotoGridProps>(
             </div>
           </div>
         ) : (
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border/50 bg-card/50 p-2">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border/50 bg-gradient-to-b from-card/70 to-card/40 p-2">
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"

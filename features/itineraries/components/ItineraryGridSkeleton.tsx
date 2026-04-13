@@ -11,7 +11,7 @@ export default function ItineraryGridSkeleton({
 }: ItineraryGridSkeletonProps) {
   return (
     <Card className={cn("overflow-hidden border-border/60", className)}>
-      <CardHeader className="border-b border-border/50 px-5 py-4">
+      <CardHeader className="border-b border-border/50 bg-gradient-to-b from-muted/50 to-muted/20 px-5 py-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-3">
             <Skeleton className="h-9 w-32" />

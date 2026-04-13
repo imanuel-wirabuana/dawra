@@ -74,24 +74,24 @@ export default function FolderPage({ params }: FolderPageProps) {
   }
 
   return (
-    <div>
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-4">
+    <div className="w-full">
+      <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           <Link href="/photos">
-            <Button variant="ghost" size="icon">
-              <ArrowLeft className="h-5 w-5" />
+            <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9">
+              <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
           </Link>
-          <div className="flex items-center gap-3">
-            <FolderOpen className="h-8 w-8 text-primary" />
-            <div>
-              <h1 className="text-2xl font-bold">{folder?.name || "Folder"}</h1>
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <FolderOpen className="h-6 w-6 sm:h-8 sm:w-8 text-primary shrink-0" />
+            <div className="min-w-0">
+              <h1 className="text-lg sm:text-2xl font-bold truncate">{folder?.name || "Folder"}</h1>
               {folder?.description && (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs sm:text-sm text-muted-foreground truncate">
                   {folder.description}
                 </p>
               )}
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 {photos.length} photos
               </p>
             </div>
@@ -100,11 +100,12 @@ export default function FolderPage({ params }: FolderPageProps) {
         <Button
           variant="ghost"
           size="sm"
-          className="text-destructive hover:text-destructive"
+          className="text-destructive hover:text-destructive self-start sm:self-auto h-8 sm:h-9"
           onClick={() => setDeleteDialogOpen(true)}
         >
-          <Trash2 className="mr-2 h-4 w-4" />
-          Delete folder
+          <Trash2 className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+          <span className="hidden sm:inline">Delete folder</span>
+          <span className="sm:hidden">Delete</span>
         </Button>
       </div>
 

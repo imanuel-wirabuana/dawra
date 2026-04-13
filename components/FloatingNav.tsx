@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, Target, Calendar, Camera, MessageCircle, ChevronUp, ChevronDown } from "lucide-react"
+import { Home, Target, Calendar, Camera, MessageCircle, ChevronUp, ChevronDown, Wallet } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useNavStore } from "@/store/navStore"
 import { ThemeToggle } from "./ThemeToggle"
@@ -11,6 +11,7 @@ const navItems = [
   { href: "/", label: "Home", icon: Home },
   { href: "/bucket-lists", label: "Bucket Lists", icon: Target },
   { href: "/itineraries", label: "Itineraries", icon: Calendar },
+  { href: "/expenses", label: "Expenses", icon: Wallet },
   { href: "/photos", label: "Photos", icon: Camera },
   { href: "/chats", label: "Chats", icon: MessageCircle },
 ]

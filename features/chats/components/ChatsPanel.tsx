@@ -126,11 +126,11 @@ export default function ChatsPanel({ className }: ChatsPanelProps) {
   return (
     <div
       className={cn(
-        "flex h-[calc(100vh-14rem)] min-h-96 flex-col overflow-hidden rounded-xl border border-border/50 bg-card shadow-sm",
+        "flex h-[calc(100vh-12rem)] sm:h-[calc(100vh-14rem)] min-h-80 sm:min-h-96 flex-col overflow-hidden rounded-xl border border-border/50 bg-card shadow-sm",
         className
       )}
     >
-      <div className="flex items-center justify-between border-b border-border/50 bg-muted/20 px-3 py-2">
+      <div className="flex items-center justify-between border-b border-border/50 bg-gradient-to-b from-muted/50 to-muted/20 px-2 sm:px-3 py-2">
         <h2 className="text-xs font-semibold text-foreground">Chat</h2>
         <div className="relative">
           <Search className="absolute top-1/2 left-2.5 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
@@ -138,7 +138,7 @@ export default function ChatsPanel({ className }: ChatsPanelProps) {
             placeholder="Search..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-7 w-48 border-input/60 bg-background pl-8 text-xs transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20"
+            className="h-7 w-36 sm:w-48 border-input/60 bg-background pl-8 text-xs transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20"
           />
         </div>
       </div>
@@ -182,7 +182,7 @@ export default function ChatsPanel({ className }: ChatsPanelProps) {
       )}
 
       {replyTo && (
-        <div className="flex items-center justify-between border-t border-border bg-muted/50 px-3 py-1.5">
+        <div className="flex items-center justify-between border-t border-border/50 bg-gradient-to-r from-muted/50 to-muted/30 px-3 py-1.5">
           <div className="flex items-center gap-1.5 text-xs">
             <Reply className="h-3 w-3" />
             <span className="text-muted-foreground">Reply to</span>
@@ -204,14 +204,14 @@ export default function ChatsPanel({ className }: ChatsPanelProps) {
 
       <form
         onSubmit={handleSubmit}
-        className="flex  gap-3 space-y-2 border-t border-border/50 bg-muted/10 p-3"
+        className="flex flex-col sm:flex-row gap-2 sm:gap-3 border-t border-border/50 bg-gradient-to-b from-muted/30 to-muted/5 p-2 sm:p-3"
       >
         <div className="flex flex-1 gap-2">
           <Input
             placeholder="Name"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
-            className="h-8 w-28 shrink-0 border-input/60 bg-background text-xs transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20"
+            className="h-8 w-20 sm:w-28 shrink-0 border-input/60 bg-background text-xs transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20"
             disabled={addChatMessage.isPending}
           />
           <div className="flex flex-1 gap-1.5">
@@ -221,7 +221,7 @@ export default function ChatsPanel({ className }: ChatsPanelProps) {
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="h-full w-8 shrink-0 rounded-md text-muted-foreground transition-all duration-150 hover:bg-primary/10 hover:text-primary"
+                  className="h-8 w-8 shrink-0 rounded-md text-muted-foreground transition-all duration-150 hover:bg-primary/10 hover:text-primary"
                 >
                   <Smile className="h-4 w-4" />
                 </Button>
@@ -260,22 +260,21 @@ export default function ChatsPanel({ className }: ChatsPanelProps) {
         </div>
         <div className="flex items-center justify-end gap-2">
           {addChatMessage.error && (
-            <p className="text-[10px] text-destructive">
+            <p className="text-[10px] text-destructive flex-1 sm:flex-none">
               {addChatMessage.error.message}
             </p>
           )}
           <Button
             type="submit"
-            
             disabled={addChatMessage.isPending || !message.trim()}
-            className="h-full gap-1 bg-primary px-3 text-xs font-medium text-primary-foreground transition-all duration-150 hover:bg-primary/90 active:scale-[0.98] disabled:opacity-50"
+            className="h-8 sm:h-full gap-1 bg-primary px-3 text-xs font-medium text-primary-foreground transition-all duration-150 hover:bg-primary/90 active:scale-[0.98] disabled:opacity-50"
           >
             {addChatMessage.isPending ? (
               <Loader2 className="h-3 w-3 animate-spin" />
             ) : (
               <Send className="h-3 w-3" />
             )}
-            Send
+            <span className="hidden sm:inline">Send</span>
           </Button>
         </div>
       </form>

@@ -60,26 +60,26 @@ export default function PhotoWall() {
   }
 
   return (
-    <div className="mx-auto ">
-      <div className="mb-8 flex items-start justify-between gap-4">
+    <div className="w-full">
+      <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
         <div>
-          <div className="flex items-center gap-3">
-            <div className="rounded-full bg-primary/10 p-2">
-              <Camera className="h-5 w-5 text-primary" />
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="rounded-full bg-primary/10 p-1.5 sm:p-2">
+              <Camera className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
             </div>
-            <h1 className="text-2xl font-semibold tracking-tight">Photos</h1>
+            <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">Photos</h1>
           </div>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-muted-foreground">
             Organize your travel memories into folders and albums.
           </p>
         </div>
-        <Link href="/photos/wall">
+        <Link href="/photos/wall" className="shrink-0">
           <Button
             variant="outline"
             size="sm"
-            className="h-8 gap-1.5 border-border/60 text-xs font-medium transition-all duration-150 hover:border-primary/50 hover:bg-primary/5"
+            className="h-7 sm:h-8 gap-1.5 border-border/60 text-xs font-medium transition-all duration-150 hover:border-primary/50 hover:bg-primary/5"
           >
-            <LayoutGrid className="h-3.5 w-3.5" />
+            <LayoutGrid className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
             Wall View
           </Button>
         </Link>
@@ -89,15 +89,13 @@ export default function PhotoWall() {
       <PhotoUploadArea isUploading={isUploading} onUpload={handleUpload} />
 
       {/* Folders Section */}
-      {folders.length > 0 && (
-        <div className="mt-6">
-          <FolderGrid
-            folders={folders}
-            photos={photos}
-            onCreateFolder={() => setCreateFolderOpen(true)}
-          />
-        </div>
-      )}
+      <div className="mt-6">
+        <FolderGrid
+          folders={folders}
+          photos={photos}
+          onCreateFolder={() => setCreateFolderOpen(true)}
+        />
+      </div>
 
       {/* Unassigned Photos Section */}
       <div className="mt-6">

@@ -61,9 +61,11 @@ export default function RootLayout({
           <TooltipProvider>
             <ThemeProvider>
               {/* <Navbar className="sticky top-0 z-50" /> */}
-              <header className="flex flex-row px-7 py-3 lg:px-17 border-b-4 border-muted border-dashed justify-between container">
-                <Brand size="md" />
-                <DynamicBreadcrumb />
+              <header className="container mx-auto px-4 py-3 sm:px-6 lg:px-8 border-b-4 border-muted border-dashed">
+                <div className="flex flex-row items-center justify-between">
+                  <Brand size="md" />
+                  <DynamicBreadcrumb />
+                </div>
               </header>
               {children}
               <Footer />

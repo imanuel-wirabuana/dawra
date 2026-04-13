@@ -180,21 +180,21 @@ export default function ItineraryGrid() {
   return (
     <>
       <Card className="overflow-hidden border-border/60 shadow-lg shadow-black/5">
-        <CardHeader className="border-b border-border/50 bg-gradient-to-b from-muted/50 to-muted/20 px-5 py-4">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex flex-wrap items-center gap-3">
-              
+        <CardHeader className="border-b border-border/50 bg-gradient-to-b from-muted/50 to-muted/20 px-3 py-3 sm:px-5 sm:py-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-2 sm:gap-3">
               <Sheet open={formOpen} onOpenChange={setFormOpen}>
                 <SheetTrigger asChild>
                   <Button
                     size="sm"
-                    className="h-9 gap-1.5 bg-primary px-4 font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:shadow-md hover:shadow-primary/20 active:scale-[0.98]"
+                    className="h-8 sm:h-9 gap-1.5 bg-primary px-3 sm:px-4 font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:shadow-md hover:shadow-primary/20 active:scale-[0.98]"
                   >
                     <Plus className="h-4 w-4" />
-                    Add Item
+                    <span className="hidden sm:inline">Add Item</span>
+                    <span className="sm:hidden">Add</span>
                   </Button>
                 </SheetTrigger>
-                <SheetContent className="sm:max-w-md">
+                <SheetContent className="sm:max-w-md w-full">
                   <SheetHeader>
                     <SheetTitle className="flex items-center gap-2 text-base">
                       <CalendarDays className="h-4 w-4 text-primary" />
@@ -207,18 +207,19 @@ export default function ItineraryGrid() {
                 </SheetContent>
               </Sheet>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/40 px-3 py-1.5 rounded-full">
-                <ListTodo className="h-3.5 w-3.5" />
+            <div className="flex items-center gap-2 sm:gap-4">
+              <div className="flex items-center gap-1.5 sm:gap-2 text-xs text-muted-foreground bg-muted/40 px-2 sm:px-3 py-1.5 rounded-full">
+                <ListTodo className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                 <span className="font-medium">
                   {transformedItems.length}{" "}
                   {transformedItems.length === 1 ? "item" : "items"}
                 </span>
               </div>
               {totalCost > 0 && (
-                <div className="flex items-center gap-2 rounded-full bg-gradient-to-r from-emerald-100 to-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:from-emerald-900/30 dark:to-emerald-900/20 dark:text-emerald-400 shadow-sm">
-                  <Wallet className="h-3.5 w-3.5" />
-                  Rp {totalCost.toLocaleString("id-ID")}
+                <div className="flex items-center gap-1.5 sm:gap-2 rounded-full bg-gradient-to-r from-emerald-100 to-emerald-50 px-2 sm:px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:from-emerald-900/30 dark:to-emerald-900/20 dark:text-emerald-400 shadow-sm">
+                  <Wallet className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                  <span className="hidden sm:inline">Rp {totalCost.toLocaleString("id-ID")}</span>
+                  <span className="sm:hidden">{totalCost >= 1000000 ? `${(totalCost / 1000000).toFixed(1)}M` : `${(totalCost / 1000).toFixed(0)}K`}</span>
                 </div>
               )}
             </div>
