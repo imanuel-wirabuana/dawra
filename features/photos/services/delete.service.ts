@@ -1,5 +1,3 @@
-import type { Photo } from "@/types"
-
 export async function deletePhoto(photoId: string): Promise<void> {
   try {
     const response = await fetch(`/api/v1/photos/${photoId}`, {

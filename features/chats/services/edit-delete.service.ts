@@ -3,11 +3,7 @@ import { db } from "@/lib/firebase/client"
 
 const CHATS_COLLECTION = "chats"
 
-export async function editMessage(
-  messageId: string,
-  newMessage: string,
-  userId: string
-) {
+export async function editMessage(messageId: string, newMessage: string) {
   if (!newMessage.trim()) {
     throw new Error("Message cannot be empty")
   }
@@ -19,7 +15,7 @@ export async function editMessage(
   })
 }
 
-export async function deleteMessage(messageId: string, userId: string) {
+export async function deleteMessage(messageId: string) {
   const messageRef = doc(db, CHATS_COLLECTION, messageId)
   await updateDoc(messageRef, {
     isDeleted: true,

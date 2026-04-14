@@ -1,5 +1,3 @@
-import { useDroppable } from "@dnd-kit/core"
-import { cn } from "@/lib/utils"
 import type { Category } from "@/types"
 
 export type ViewMode = "day" | "week" | "month"

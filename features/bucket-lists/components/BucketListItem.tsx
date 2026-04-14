@@ -2,7 +2,6 @@ import { MapPin, MoreHorizontal, Wallet } from "lucide-react"
 
 import type { BucketList } from "@/types"
 import { cn } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
 import {
   Popover,
   PopoverContent,

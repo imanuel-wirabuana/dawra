@@ -10,7 +10,16 @@ import {
   type DragStartEvent,
   type DragOverEvent,
 } from "@dnd-kit/core"
-import { Trash2, Pencil, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, MapPin, GripVertical, Check, Maximize2, Minimize2 } from "lucide-react"
+import {
+  Trash2,
+  Pencil,
+  ChevronLeft,
+  ChevronRight,
+  Calendar as CalendarIcon,
+  Clock,
+  Maximize2,
+  Minimize2,
+} from "lucide-react"
 import { useState, useEffect, useMemo, useCallback, useRef } from "react"
 import { cn } from "@/lib/utils"
 import { Calendar } from "@/components/ui/calendar"
@@ -50,7 +59,6 @@ import {
   getDurationMinutes,
   minutesToTime,
   timeToMinutes,
-  HOUR_HEIGHT,
   type Item,
   type ViewMode,
 } from "./timeline/shared"
@@ -125,7 +133,9 @@ export default function GridTimeline({
 
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
+      queueMicrotask(() => {
+        setIsMobile(window.innerWidth < 768)
+      })
     }
     checkMobile()
     window.addEventListener("resize", checkMobile)
@@ -191,10 +201,6 @@ export default function GridTimeline({
     }
   }
 
-  const goToToday = () => {
-    setSelectedDate(new Date())
-  }
-
   const handleDragStart = useCallback(
     (event: DragStartEvent) => {
       const item = items.find((i) => i.id === event.active.id)
@@ -239,7 +245,7 @@ export default function GridTimeline({
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
-      const { active, over } = event
+      const { over } = event
 
       if (!over || !onReschedule || !draggedItem) {
         setDraggedItem(null)
@@ -288,12 +294,7 @@ export default function GridTimeline({
       setDraggedItem(null)
       setDropTarget(null)
     },
-    [
-      draggedItem,
-      onReschedule,
-      selectedDate,
-      viewMode,
-    ]
+    [draggedItem, onReschedule, selectedDate, viewMode]
   )
 
   const renderSidebar = () => {
@@ -311,29 +312,31 @@ export default function GridTimeline({
     return (
       <div className="hidden w-72 shrink-0 border-r bg-gradient-to-b from-background to-muted/20 lg:block">
         <div className="p-0">
-          <div className="rounded-none  p-3 ">
+          <div className="rounded-none p-3">
             <Calendar
               mode="single"
               selected={selectedDate}
               onSelect={(date) => date && setSelectedDate(date)}
-              className="rounded-md w-full"
+              className="w-full rounded-md"
             />
           </div>
         </div>
 
         <div className="border-t border-border/50 px-4 py-3">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold flex items-center gap-2">
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="flex items-center gap-2 text-sm font-semibold">
               <CalendarIcon className="h-4 w-4 text-primary" />
               {format(selectedDate, "MMM d, yyyy")}
             </h3>
             {sidebarItems.length > 0 && (
-              <span className={cn(
-                "text-[10px] font-medium px-2 py-0.5 rounded-full",
-                completedCount === sidebarItems.length
-                  ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-                  : "bg-primary/10 text-primary"
-              )}>
+              <span
+                className={cn(
+                  "rounded-full px-2 py-0.5 text-[10px] font-medium",
+                  completedCount === sidebarItems.length
+                    ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+                    : "bg-primary/10 text-primary"
+                )}
+              >
                 {completedCount}/{sidebarItems.length}
               </span>
             )}
@@ -341,11 +344,15 @@ export default function GridTimeline({
           <div className="min-h-72 space-y-2 overflow-y-auto pr-1">
             {sidebarItems.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-6 text-center">
-                <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center mb-2">
+                <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-muted">
                   <CalendarIcon className="h-5 w-5 text-muted-foreground/50" />
                 </div>
-                <p className="text-xs text-muted-foreground font-medium">No items</p>
-                <p className="text-[10px] text-muted-foreground/60 mt-0.5">Add an item to get started</p>
+                <p className="text-xs font-medium text-muted-foreground">
+                  No items
+                </p>
+                <p className="mt-0.5 text-[10px] text-muted-foreground/60">
+                  Add an item to get started
+                </p>
               </div>
             ) : (
               sidebarItems.map((item) => (
@@ -388,7 +395,7 @@ export default function GridTimeline({
             </Button>
           </div>
           {/* Mobile: Select dropdown */}
-          <div className="lg:hidden flex items-center gap-2">
+          <div className="flex items-center gap-2 lg:hidden">
             <Select
               value={viewMode}
               onValueChange={(v) => setViewMode(v as ViewMode)}
@@ -418,7 +425,7 @@ export default function GridTimeline({
           </div>
 
           {/* Desktop: Button group */}
-          <div className="hidden lg:flex items-center gap-1 rounded-lg border border-border/50 bg-muted/30 p-1">
+          <div className="hidden items-center gap-1 rounded-lg border border-border/50 bg-muted/30 p-1 lg:flex">
             <Button
               variant={viewMode === "day" ? "secondary" : "ghost"}
               size="sm"
@@ -539,22 +546,17 @@ export default function GridTimeline({
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div
-        ref={containerRef}
-        className={cn(
-          "flex h-full flex-col",
-          className
-        )}
-      >
+      <div ref={containerRef} className={cn("flex h-full flex-col", className)}>
         {/* Toolbar */}
-        <div className="flex items-center justify-between border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-3 sticky top-0 z-30">
+        <div className="sticky top-0 z-30 flex items-center justify-between border-b bg-background/95 p-3 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1 rounded-lg border border-border/50 bg-muted/30 p-1">
-              <DatePicker/>
+              <DatePicker />
             </div>
             <div className="ml-2 flex flex-col">
-              <span className="text-base font-semibold leading-tight">
-                {viewMode === "day" && format(selectedDate, "EEEE, MMMM d, yyyy")}
+              <span className="text-base leading-tight font-semibold">
+                {viewMode === "day" &&
+                  format(selectedDate, "EEEE, MMMM d, yyyy")}
                 {viewMode === "week" &&
                   `${format(weekDays[0], "MMM d")} - ${format(weekDays[6], "MMM d, yyyy")}`}
                 {viewMode === "month" && format(selectedDate, "MMMM yyyy")}
@@ -596,7 +598,7 @@ export default function GridTimeline({
             variant="outline"
             size="icon"
             onClick={toggleFullscreen}
-            className="h-8 w-8 ml-2"
+            className="ml-2 h-8 w-8"
             title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
           >
             {isFullscreen ? (
@@ -670,44 +672,51 @@ export default function GridTimeline({
                 : undefined,
             }}
           >
-            
-
             {/* Title - same style as TimelineEvent */}
-            <h3 className={cn(
-              "truncate font-semibold tracking-tight leading-tight text-xs",
-              draggedItem.categories?.length
-                ? "text-white drop-shadow-sm"
-                : draggedItem.itemType === "bucket-list"
-                  ? "text-primary-foreground"
-                  : "text-foreground"
-            )}>
+            <h3
+              className={cn(
+                "truncate text-xs leading-tight font-semibold tracking-tight",
+                draggedItem.categories?.length
+                  ? "text-white drop-shadow-sm"
+                  : draggedItem.itemType === "bucket-list"
+                    ? "text-primary-foreground"
+                    : "text-foreground"
+              )}
+            >
               {draggedItem.title}
             </h3>
 
             {/* Time - same style as TimelineEvent */}
             {!dropTarget && (
-              <div className={cn(
-                "mt-0.5 flex items-center gap-1 text-[10px]",
-                draggedItem.categories?.length
-                  ? "text-white/90"
-                  : draggedItem.itemType === "bucket-list"
-                    ? "text-primary-foreground/80"
-                    : "text-muted-foreground"
-              )}>
+              <div
+                className={cn(
+                  "mt-0.5 flex items-center gap-1 text-[10px]",
+                  draggedItem.categories?.length
+                    ? "text-white/90"
+                    : draggedItem.itemType === "bucket-list"
+                      ? "text-primary-foreground/80"
+                      : "text-muted-foreground"
+                )}
+              >
                 <Clock className="h-2.5 w-2.5" />
-                <span className="tabular-nums">{draggedItem.start} - {draggedItem.end}</span>
+                <span className="tabular-nums">
+                  {draggedItem.start} - {draggedItem.end}
+                </span>
               </div>
             )}
 
             {/* Drop target preview badge - same style as event card info */}
             {dropTarget && (
-              <div className={cn(
-                "mb-1.5 flex flex-col ring-1 ring-primary/30 items-center -translate-x-[120%] -translate-y-1/2 justify-between rounded-md px-2 py-0.5 text-[10px] font-medium",
-                draggedItem.categories?.length || draggedItem.itemType === "bucket-list"
-                  ? "bg-black/30 text-white"
-                  : ""
-              )}>
-                <div className="flex flex items-center gap-1">
+              <div
+                className={cn(
+                  "mb-1.5 flex -translate-x-[120%] -translate-y-1/2 flex-col items-center justify-between rounded-md px-2 py-0.5 text-[10px] font-medium ring-1 ring-primary/30",
+                  draggedItem.categories?.length ||
+                    draggedItem.itemType === "bucket-list"
+                    ? "bg-black/30 text-white"
+                    : ""
+                )}
+              >
+                <div className="flex items-center gap-1">
                   <CalendarIcon className="h-2.5 w-2.5" />
                   <span>{format(dropTarget.date, "MMM d")}</span>
                 </div>
@@ -716,14 +725,13 @@ export default function GridTimeline({
                   <span>→</span>
                   <span>
                     {minutesToTime(
-                      timeToMinutes(dropTarget.time) + getDurationMinutes(draggedItem.start, draggedItem.end)
+                      timeToMinutes(dropTarget.time) +
+                        getDurationMinutes(draggedItem.start, draggedItem.end)
                     )}
                   </span>
                 </div>
               </div>
             )}
-
-            
           </div>
         ) : null}
       </DragOverlay>

@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { X, Plus, Loader2, Folder } from "lucide-react"
+import { Plus, Loader2, Folder } from "lucide-react"
 
 interface CreateFolderDialogProps {
   open: boolean

@@ -50,7 +50,7 @@ export const PATCH = async (
       ...body,
       updatedAt: serverTimestamp(),
     })
-  } catch (error) {
+  } catch {
     return Response.json(apiError("Failed to update document"), { status: 500 })
   }
   return Response.json(apiSuccess(null, "Document updated successfully"))
@@ -74,7 +74,7 @@ export const PUT = async (
       ...body,
       updatedAt: serverTimestamp(),
     })
-  } catch (error) {
+  } catch {
     return Response.json(apiError("Failed to update document"), { status: 500 })
   }
   return Response.json(apiSuccess(null, "Document updated successfully"))
@@ -94,7 +94,7 @@ export const DELETE = async (
   const { id } = await params
   try {
     await deleteDoc(doc(db, COLLECTION_NAME, id))
-  } catch (error) {
+  } catch {
     return Response.json(apiError("Failed to delete document"), { status: 500 })
   }
   return Response.json(apiSuccess(null, "Document deleted successfully"))

@@ -3,7 +3,6 @@ import { db } from "@/lib/firebase/client"
 import {
   collection,
   deleteDoc,
-  doc,
   where,
   getDocs,
   query,

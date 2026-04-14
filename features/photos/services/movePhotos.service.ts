@@ -1,5 +1,12 @@
 import { db } from "@/lib/firebase/client"
-import { collection, query, where, getDocs, updateDoc, writeBatch, doc } from "firebase/firestore"
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  writeBatch,
+  doc,
+} from "firebase/firestore"
 
 export async function movePhotosToFolder(
   photoIds: string[],

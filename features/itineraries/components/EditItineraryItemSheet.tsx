@@ -79,7 +79,9 @@ export default function EditItineraryItemSheet({
 
   // Sync with parent state when item changes
   useEffect(() => {
-    setEditedItem(item)
+    queueMicrotask(() => {
+      setEditedItem(item)
+    })
   }, [item])
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -96,14 +98,17 @@ export default function EditItineraryItemSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-md h-[90vh] flex flex-col overflow-hidden px-4">
+      <SheetContent className="flex h-[90vh] flex-col overflow-hidden px-4 sm:max-w-md">
         <SheetHeader className="px-1 pb-4">
           <SheetTitle>Edit Itinerary Item</SheetTitle>
         </SheetHeader>
 
         {editedItem && (
-          <form onSubmit={handleSubmit} className="flex flex-col min-h-0 overflow-hidden">
-            <div className="flex-1 min-h-0 overflow-y-auto px-1 py-2 space-y-4">
+          <form
+            onSubmit={handleSubmit}
+            className="flex min-h-0 flex-col overflow-hidden"
+          >
+            <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-1 py-2">
               {/* Title */}
               <div className="space-y-2">
                 <Label htmlFor="editTitle">Title</Label>
@@ -151,9 +156,7 @@ export default function EditItineraryItemSheet({
                   onChange={(e) =>
                     setEditedItem({
                       ...editedItem,
-                      cost: e.target.value
-                        ? Number(e.target.value)
-                        : undefined,
+                      cost: e.target.value ? Number(e.target.value) : undefined,
                     })
                   }
                   disabled={isBucketList}
@@ -255,7 +258,7 @@ export default function EditItineraryItemSheet({
             </div>
 
             {/* Actions */}
-            <div className="flex gap-2 pt-4 pb-2  mt-auto px-1 shrink-0">
+            <div className="mt-auto flex shrink-0 gap-2 px-1 pt-4 pb-2">
               <Button
                 type="button"
                 variant="outline"
@@ -265,11 +268,7 @@ export default function EditItineraryItemSheet({
                 <X className="mr-1 h-4 w-4" />
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                disabled={isPending}
-                className="flex-1"
-              >
+              <Button type="submit" disabled={isPending} className="flex-1">
                 {isPending ? (
                   "Saving..."
                 ) : (

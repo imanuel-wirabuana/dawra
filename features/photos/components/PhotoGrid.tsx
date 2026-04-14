@@ -131,16 +131,6 @@ const PhotoGrid = forwardRef<PhotoGridRef, PhotoGridProps>(
     }
 
     const renderPhotoGrid = () => {
-      const commonProps = (photo: Photo) => ({
-        photo,
-        folders,
-        onRemove: isSelectionMode ? undefined : handleRemovePhoto,
-        isDeleting: deletingPhotoId === photo.id,
-        isSelected: selected.has(photo.id),
-        isSelectionMode,
-        onSelect: handleSelect,
-      })
-
       switch (viewMode) {
         case "full":
           return (

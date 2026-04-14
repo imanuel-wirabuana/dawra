@@ -1,6 +1,6 @@
 "use client"
 
-import { Loader2, Plus } from "lucide-react"
+import { Plus } from "lucide-react"
 
 import type { Category } from "@/types"
 import { cn } from "@/lib/utils"
@@ -16,7 +16,6 @@ import {
   ComboboxList,
   ComboboxValue,
 } from "@/components/ui/combobox"
-import { Label } from "@/components/ui/label"
 
 import { useCategories } from "../hooks/useCategories"
 import CreateCategoryDialog from "./CreateCategory"
@@ -34,25 +33,14 @@ export default function CategorySelector({
   className,
   disabled = false,
 }: CategorySelectorProps) {
-  const {
-    categories,
-    isLoading,
-    error,
-    createCategory,
-    isCreating,
-    createError,
-  } = useCategories()
+  const { categories, isLoading, error, isCreating, createError } =
+    useCategories()
 
   const selectedCategoryIds = selectedCategories.map((c) => c.id)
 
   const handleCategoryCreated = (newCategory: Category) => {
     // Automatically select the newly created category
     onCategoriesChange([...selectedCategories, newCategory])
-  }
-
-  const handleError = (errorMessage: string) => {
-    // Error is handled by React Query state
-    console.error("Category creation error:", errorMessage)
   }
 
   const handleCategoryDeleted = (categoryId: string) => {
@@ -140,8 +128,6 @@ export default function CategorySelector({
       <div className="w-fit">
         <CreateCategoryDialog
           onCategoryCreated={handleCategoryCreated}
-          onError={handleError}
-          createCategory={createCategory}
           isCreating={isCreating}
           onCategoryDeleted={handleCategoryDeleted}
           disabled={disabled}

@@ -1,5 +1,3 @@
-import type { BucketList } from "@/types"
-
 export async function toggleBucketListItem({
   id,
   completed,

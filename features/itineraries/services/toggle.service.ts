@@ -1,5 +1,3 @@
-import type { ItineraryItem } from "@/types"
-
 export async function toggleItineraryItem({
   id,
   completed,

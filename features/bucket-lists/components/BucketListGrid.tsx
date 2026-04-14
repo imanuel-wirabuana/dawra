@@ -121,9 +121,12 @@ export default function BucketListGrid({ className }: BucketListGridProps) {
   })
 
   useEffect(() => {
-    subscribeToBucketList((data) => {
-      setBucketList(data)
+    const unsubscribe = subscribeToBucketList((data) => {
+      queueMicrotask(() => {
+        setBucketList(data)
+      })
     })
+    return unsubscribe
   }, [])
 
   function handleExitSelectionMode() {

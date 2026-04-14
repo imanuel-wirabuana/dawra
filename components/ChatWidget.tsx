@@ -333,11 +333,7 @@ export default function ChatWidget() {
               <Button
                 onClick={async () => {
                   if (editingMessage) {
-                    await editMessage(
-                      editingMessage.id || "",
-                      editText,
-                      currentUserId
-                    )
+                    await editMessage(editingMessage.id || "", editText)
                     setEditingMessage(null)
                   }
                 }}
@@ -375,7 +371,7 @@ function MessageItem({
     ? getReplyMessage(message.replyToId)
     : null
   const { addReaction, removeReaction } = useReactions(message.id || "")
-  const { deleteMessage } = useEditDelete(message.id || "", currentUserId)
+  const { deleteMessage } = useEditDelete(message.id || "")
 
   const groupedReactions = (message.reactions || []).reduce(
     (acc, reaction) => {

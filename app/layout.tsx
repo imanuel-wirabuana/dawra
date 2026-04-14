@@ -1,16 +1,9 @@
-import {
-  Geist,
-  Geist_Mono,
-  Figtree,
-  Pacifico,
-  Parisienne,
-} from "next/font/google"
+import { Geist_Mono, Figtree, Pacifico, Parisienne } from "next/font/google"
 import type { Metadata } from "next"
 
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
-import Navbar from "@/components/Navbar"
 import FloatingNav from "@/components/FloatingNav"
 import DynamicBreadcrumb from "@/components/DynamicBreadcrumb"
 import ChatWidget from "@/components/ChatWidget"

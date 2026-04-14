@@ -10,8 +10,10 @@ export function useRealtimeFolders() {
 
   useEffect(() => {
     const unsubscribe = subscribeToFolders((data) => {
-      setFolders(data)
-      setLoading(false)
+      queueMicrotask(() => {
+        setFolders(data)
+        setLoading(false)
+      })
     })
 
     return unsubscribe

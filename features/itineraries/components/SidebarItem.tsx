@@ -17,7 +17,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { Item } from "./timeline/shared"
-import { formatDuration, getDurationMinutes } from "./timeline/shared"
+import { formatDuration } from "./timeline/shared"
 import {
   Dialog,
   DialogContent,
@@ -43,8 +43,10 @@ export default function SidebarItem({
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isPendingToggle, setIsPendingToggle] = useState(false)
 
-  const durationMinutes = getDurationMinutes(item.start, item.end)
-  const hasDetails = item.location || item.cost || (item.categories && item.categories.length > 0)
+  const hasDetails =
+    item.location ||
+    item.cost ||
+    (item.categories && item.categories.length > 0)
   const isBucketList = item.itemType === "bucket-list"
 
   const handleToggleComplete = async () => {
@@ -77,7 +79,7 @@ export default function SidebarItem({
       <div
         onClick={handleClick}
         className={cn(
-          "flex flex-col gap-1.5 rounded-lg border p-3 text-xs transition-all duration-150 hover:shadow-md cursor-pointer",
+          "flex cursor-pointer flex-col gap-1.5 rounded-lg border p-3 text-xs transition-all duration-150 hover:shadow-md",
           isBucketList
             ? "border-primary/20 bg-gradient-to-r from-primary/5 to-transparent"
             : "border-border/50 bg-muted/30",
@@ -101,7 +103,7 @@ export default function SidebarItem({
                 className={cn(
                   "h-4 w-4 border-2",
                   item.completed
-                    ? "border-emerald-500 bg-emerald-500 data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
+                    ? "border-emerald-500 bg-emerald-500 data-[state=checked]:border-emerald-500 data-[state=checked]:bg-emerald-500"
                     : "border-muted-foreground/30"
                 )}
               />
@@ -117,10 +119,10 @@ export default function SidebarItem({
           >
             {isBucketList ? "BL" : "CS"}
           </span>
-          <div className="flex-1 min-w-0">
+          <div className="min-w-0 flex-1">
             <div
               className={cn(
-                "font-medium text-sm leading-tight",
+                "text-sm leading-tight font-medium",
                 item.completed && "line-through"
               )}
             >
@@ -128,7 +130,7 @@ export default function SidebarItem({
             </div>
           </div>
           {item.completed && !onToggleComplete && (
-            <div className="shrink-0 h-4 w-4 rounded-full bg-emerald-500 flex items-center justify-center">
+            <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-500">
               <Check className="h-2.5 w-2.5 text-white" />
             </div>
           )}
@@ -138,9 +140,11 @@ export default function SidebarItem({
         <div className="flex items-center gap-2 text-muted-foreground">
           <div className="flex items-center gap-1">
             <Clock className="h-3 w-3" />
-            <span>{item.start} - {item.end}</span>
+            <span>
+              {item.start} - {item.end}
+            </span>
           </div>
-          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-muted font-medium">
+          <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium">
             {formatDuration(item.start, item.end)}
           </span>
         </div>
@@ -165,7 +169,7 @@ export default function SidebarItem({
 
         {/* Categories */}
         {item.categories && item.categories.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-0.5">
+          <div className="mt-0.5 flex flex-wrap gap-1">
             {item.categories.map((category) => (
               <span
                 key={category.id}
@@ -187,7 +191,7 @@ export default function SidebarItem({
 
         {/* Description - truncated */}
         {item.description && (
-          <div className="text-[10px] text-muted-foreground/80 line-clamp-2 mt-0.5 leading-relaxed">
+          <div className="mt-0.5 line-clamp-2 text-[10px] leading-relaxed text-muted-foreground/80">
             {item.description}
           </div>
         )}

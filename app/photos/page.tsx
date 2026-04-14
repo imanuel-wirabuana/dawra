@@ -2,7 +2,6 @@
 
 import { useRealtimePhotos } from "@/features/photos/hooks/useRealtimePhotos"
 import { useRealtimeFolders } from "@/features/photos/hooks/useRealtimeFolders"
-import { useDeleteFolder } from "@/features/photos/hooks/useDeleteFolder"
 import { useUploadPhoto } from "@/features/photos/hooks/useUploadPhoto"
 import { useDeletePhoto } from "@/features/photos/hooks/useDeletePhoto"
 import PhotoUploadArea from "@/features/photos/components/PhotoUploadArea"
@@ -22,7 +21,6 @@ export default function PhotoWall() {
   const { folders, loading: foldersLoading } = useRealtimeFolders()
   const { mutateAsync: uploadPhoto, isPending: isUploading } = useUploadPhoto()
   const { mutateAsync: deletePhoto } = useDeletePhoto()
-  const { mutateAsync: deleteFolder } = useDeleteFolder()
   const [createFolderOpen, setCreateFolderOpen] = useState(false)
   const [showUnassignedOnly, setShowUnassignedOnly] = useState(true)
 
@@ -49,14 +47,6 @@ export default function PhotoWall() {
       await deletePhoto(photoId)
     } catch (error) {
       console.error("Delete error:", error)
-    }
-  }
-
-  const handleDeleteFolder = async (folderId: string) => {
-    try {
-      await deleteFolder(folderId)
-    } catch (error) {
-      console.error("Delete folder error:", error)
     }
   }
 

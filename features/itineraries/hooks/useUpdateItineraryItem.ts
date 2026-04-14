@@ -36,7 +36,9 @@ export function useUpdateItineraryItem() {
       await queryClient.cancelQueries({ queryKey: ["itinerary"] })
 
       // Snapshot previous value for rollback
-      const previousItems = queryClient.getQueryData<ItineraryItem[]>(["itinerary"])
+      const previousItems = queryClient.getQueryData<ItineraryItem[]>([
+        "itinerary",
+      ])
 
       // Optimistically update the cache
       queryClient.setQueryData<ItineraryItem[]>(["itinerary"], (old) => {
@@ -48,7 +50,7 @@ export function useUpdateItineraryItem() {
 
       return { previousItems }
     },
-    onError: (err, { id, updates }, context) => {
+    onError: (err, _, context) => {
       // Rollback on error
       if (context?.previousItems) {
         queryClient.setQueryData(["itinerary"], context.previousItems)

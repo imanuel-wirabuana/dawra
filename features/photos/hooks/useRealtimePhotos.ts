@@ -8,8 +8,10 @@ export function useRealtimePhotos() {
 
   useEffect(() => {
     const unsubscribe = subscribeToPhotos((data) => {
-      setPhotos(data)
-      setLoading(false)
+      queueMicrotask(() => {
+        setPhotos(data)
+        setLoading(false)
+      })
     })
 
     return unsubscribe

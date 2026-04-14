@@ -1,5 +1,5 @@
-import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { create } from "zustand"
+import { persist } from "zustand/middleware"
 
 interface ItineraryStore {
   selectedDate: Date
@@ -13,7 +13,7 @@ export const useItineraryStore = create<ItineraryStore>()(
       setSelectedDate: (date: Date) => set({ selectedDate: date }),
     }),
     {
-      name: 'itinerary-storage',
+      name: "itinerary-storage",
       // Serialize/deserialize dates properly
       serialize: (state: { state: ItineraryStore }) => {
         return JSON.stringify({
@@ -34,6 +34,10 @@ export const useItineraryStore = create<ItineraryStore>()(
           },
         }
       },
-    } as any
+    } as {
+      name: string
+      serialize: (state: { state: ItineraryStore }) => string
+      deserialize: (str: string) => { state: ItineraryStore }
+    }
   )
 )

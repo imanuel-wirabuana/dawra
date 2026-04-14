@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { ChevronLeft, ChevronRight, X, Download } from "lucide-react"
 import type { Photo } from "@/types"
+import Image from "next/image"
 
 interface PhotoGalleryModalProps {
   photos: Photo[]
@@ -117,7 +118,7 @@ export default function PhotoGalleryModal({
           </Button>
 
           {/* Image */}
-          <img
+          <Image
             src={`https://lh3.googleusercontent.com/d/${currentPhoto.id}=s0`}
             alt={currentPhoto.realFileName || "Photo"}
             className="max-h-full max-w-full object-contain"

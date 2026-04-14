@@ -20,11 +20,9 @@ import {
   startOfWeek,
   endOfWeek,
   eachDayOfInterval,
-  isToday,
 } from "date-fns"
 import { cn } from "@/lib/utils"
 import { useMemo } from "react"
-import { CalendarDays } from "lucide-react"
 
 interface WeekGridProps {
   items: Item[]
@@ -116,18 +114,21 @@ export default function WeekGrid({
               <div
                 onClick={() => onDateSelect?.(day)}
                 className={cn(
-                  "sticky top-0 z-10 h-10 border-b px-2 py-1.5 text-center transition-all duration-200 cursor-pointer hover:brightness-105",
+                  "sticky top-0 z-10 h-10 cursor-pointer border-b px-2 py-1.5 text-center transition-all duration-200 hover:brightness-105",
                   isToday
-                    ? "bg-gradient-to-b from-primary/15 to-primary/5 border-primary/20 hover:from-primary/20 hover:to-primary/10"
+                    ? "border-primary/20 bg-gradient-to-b from-primary/15 to-primary/5 hover:from-primary/20 hover:to-primary/10"
                     : "bg-gradient-to-b from-muted/50 to-muted/20 hover:from-muted/60 hover:to-muted/30",
-                  isSelected && "bg-gradient-to-b from-primary/10 to-primary/5 ring-2 ring-primary ring-inset z-20"
+                  isSelected &&
+                    "z-20 bg-gradient-to-b from-primary/10 to-primary/5 ring-2 ring-primary ring-inset"
                 )}
                 title="Click to view this day"
               >
-                <div className={cn(
-                  "text-[10px] font-semibold uppercase tracking-wider",
-                  isToday ? "text-primary" : "text-muted-foreground/70"
-                )}>
+                <div
+                  className={cn(
+                    "text-[10px] font-semibold tracking-wider uppercase",
+                    isToday ? "text-primary" : "text-muted-foreground/70"
+                  )}
+                >
                   {format(day, "EEE")}
                 </div>
                 <div className="flex items-center justify-center gap-1">

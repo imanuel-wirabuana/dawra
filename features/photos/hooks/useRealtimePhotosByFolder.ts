@@ -10,8 +10,10 @@ export function useRealtimePhotosByFolder(folderId: string) {
 
   useEffect(() => {
     if (!folderId) {
-      setPhotos([])
-      setLoading(false)
+      queueMicrotask(() => {
+        setPhotos([])
+        setLoading(false)
+      })
       return
     }
 

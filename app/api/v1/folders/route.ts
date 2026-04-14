@@ -35,7 +35,7 @@ export const POST = async (request: Request) => {
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     })
-  } catch (error) {
+  } catch {
     return Response.json(apiError("Failed to add folder"), {
       status: 500,
     })

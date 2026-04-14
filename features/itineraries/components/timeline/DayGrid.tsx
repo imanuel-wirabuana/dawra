@@ -13,7 +13,7 @@ import {
   timeToMinutes,
   getDurationMinutes,
 } from "./shared"
-import { format, isSameDay, isToday } from "date-fns"
+import { format, isSameDay } from "date-fns"
 import { cn } from "@/lib/utils"
 import { CalendarDays } from "lucide-react"
 
@@ -84,23 +84,27 @@ export default function DayGrid({
         {/* Header */}
         <div
           className={cn(
-            "sticky top-0 z-10 h-10 border-b px-3 py-2 flex items-center justify-center gap-2",
+            "sticky top-0 z-10 flex h-10 items-center justify-center gap-2 border-b px-3 py-2",
             isSelectedToday
-              ? "bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 border-primary/20"
+              ? "border-primary/20 bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10"
               : "bg-gradient-to-r from-muted/40 via-muted/20 to-muted/40"
           )}
         >
           {isSelectedToday && (
-            <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+            <div className="h-2 w-2 animate-pulse rounded-full bg-primary" />
           )}
-          <CalendarDays className={cn(
-            "h-4 w-4",
-            isSelectedToday ? "text-primary" : "text-muted-foreground/60"
-          )} />
-          <span className={cn(
-            "text-sm font-semibold",
-            isSelectedToday && "text-primary"
-          )}>
+          <CalendarDays
+            className={cn(
+              "h-4 w-4",
+              isSelectedToday ? "text-primary" : "text-muted-foreground/60"
+            )}
+          />
+          <span
+            className={cn(
+              "text-sm font-semibold",
+              isSelectedToday && "text-primary"
+            )}
+          >
             {format(selectedDate, "EEEE, MMMM d")}
           </span>
         </div>

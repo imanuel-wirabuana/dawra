@@ -2,7 +2,13 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { ArrowUpDown, ArrowUp, ArrowDown, CheckCircle, Circle } from "lucide-react"
+import {
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  CheckCircle,
+  Circle,
+} from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import {
   Popover,
@@ -41,10 +47,6 @@ export default function SortSelector({
   className,
 }: SortSelectorProps) {
   const [open, setOpen] = useState(false)
-
-  const currentOption = sortOptions.find(
-    (option) => option.value === currentSort
-  )
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

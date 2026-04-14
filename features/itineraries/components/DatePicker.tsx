@@ -1,11 +1,11 @@
 "use client"
 
-import { useItineraryStore } from "@/store/itineraryStore"
-import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown, CalendarDays } from "lucide-react"
+import { useEffect, useMemo, useState } from "react"
+import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown } from "lucide-react"
+
 import { cn } from "@/lib/utils"
-import { format, isToday as isDateToday } from "date-fns"
-import { useEffect, useCallback, useState } from "react"
+import { Button } from "@/components/ui/button"
+import { useItineraryStore } from "@/store/itineraryStore"
 
 interface DatePickerProps {
   className?: string
@@ -18,7 +18,11 @@ export default function DatePicker({ className }: DatePickerProps) {
   const [pressedKey, setPressedKey] = useState<string | null>(null)
 
   // Ensure selectedDate is a valid Date object
-  const safeSelectedDate = selectedDate instanceof Date ? selectedDate : new Date(selectedDate)
+  const safeSelectedDate = useMemo(
+    () =>
+      selectedDate instanceof Date ? selectedDate : new Date(selectedDate),
+    [selectedDate]
+  )
 
   const goToYesterday = () => {
     setSelectedDate(new Date(safeSelectedDate.getTime() - 24 * 60 * 60 * 1000))
@@ -29,11 +33,15 @@ export default function DatePicker({ className }: DatePickerProps) {
   }
 
   const goToPreviousWeek = () => {
-    setSelectedDate(new Date(safeSelectedDate.getTime() - 7 * 24 * 60 * 60 * 1000))
+    setSelectedDate(
+      new Date(safeSelectedDate.getTime() - 7 * 24 * 60 * 60 * 1000)
+    )
   }
 
   const goToNextWeek = () => {
-    setSelectedDate(new Date(safeSelectedDate.getTime() + 7 * 24 * 60 * 60 * 1000))
+    setSelectedDate(
+      new Date(safeSelectedDate.getTime() + 7 * 24 * 60 * 60 * 1000)
+    )
   }
 
   const goToToday = () => {
@@ -41,56 +49,53 @@ export default function DatePicker({ className }: DatePickerProps) {
   }
 
   // Keyboard navigation with arrow keys
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    switch (e.key) {
-      case "ArrowLeft":
-        e.preventDefault()
-        setPressedKey("ArrowLeft")
-        goToYesterday()
-        break
-      case "ArrowRight":
-        e.preventDefault()
-        setPressedKey("ArrowRight")
-        goToTomorrow()
-        break
-      case "ArrowUp":
-        e.preventDefault()
-        setPressedKey("ArrowUp")
-        goToPreviousWeek()
-        break
-      case "ArrowDown":
-        e.preventDefault()
-        setPressedKey("ArrowDown")
-        goToNextWeek()
-        break
-    }
-  }, [safeSelectedDate])
-
-  const handleKeyUp = useCallback((e: KeyboardEvent) => {
-    if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) {
-      setPressedKey(null)
-    }
-  }, [])
-
   useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      switch (e.key) {
+        case "ArrowLeft":
+          e.preventDefault()
+          setPressedKey("ArrowLeft")
+          setSelectedDate(
+            new Date(safeSelectedDate.getTime() - 24 * 60 * 60 * 1000)
+          )
+          break
+        case "ArrowRight":
+          e.preventDefault()
+          setPressedKey("ArrowRight")
+          setSelectedDate(
+            new Date(safeSelectedDate.getTime() + 24 * 60 * 60 * 1000)
+          )
+          break
+        case "ArrowUp":
+          e.preventDefault()
+          setPressedKey("ArrowUp")
+          setSelectedDate(
+            new Date(safeSelectedDate.getTime() - 7 * 24 * 60 * 60 * 1000)
+          )
+          break
+        case "ArrowDown":
+          e.preventDefault()
+          setPressedKey("ArrowDown")
+          setSelectedDate(
+            new Date(safeSelectedDate.getTime() + 7 * 24 * 60 * 60 * 1000)
+          )
+          break
+      }
+    }
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) {
+        setPressedKey(null)
+      }
+    }
+
     window.addEventListener("keydown", handleKeyDown)
     window.addEventListener("keyup", handleKeyUp)
     return () => {
       window.removeEventListener("keydown", handleKeyDown)
       window.removeEventListener("keyup", handleKeyUp)
     }
-  }, [handleKeyDown, handleKeyUp])
-
-  const isToday = isDateToday(safeSelectedDate)
-  const isTomorrow = format(safeSelectedDate, "yyyy-MM-dd") === format(new Date(Date.now() + 86400000), "yyyy-MM-dd")
-  const isYesterday = format(safeSelectedDate, "yyyy-MM-dd") === format(new Date(Date.now() - 86400000), "yyyy-MM-dd")
-
-  const getDisplayText = () => {
-    if (isToday) return "Today"
-    if (isTomorrow) return "Tomorrow"
-    if (isYesterday) return "Yesterday"
-    return format(safeSelectedDate, "EEEE")
-  }
+  }, [safeSelectedDate, setSelectedDate])
 
   return (
     <div className={cn("flex items-center gap-1", className)}>
@@ -100,8 +105,8 @@ export default function DatePicker({ className }: DatePickerProps) {
         size="icon"
         onClick={goToYesterday}
         className={cn(
-          "h-7 w-7 hover:bg-background transition-all duration-150",
-          pressedKey === "ArrowLeft" && "bg-primary/20 text-primary scale-110"
+          "h-7 w-7 transition-all duration-150 hover:bg-background",
+          pressedKey === "ArrowLeft" && "scale-110 bg-primary/20 text-primary"
         )}
       >
         <ChevronLeft className="h-4 w-4" />
@@ -115,8 +120,8 @@ export default function DatePicker({ className }: DatePickerProps) {
           size="icon"
           onClick={goToPreviousWeek}
           className={cn(
-            "h-5 w-7 hover:bg-background transition-all duration-150",
-            pressedKey === "ArrowUp" && "bg-primary/20 text-primary scale-110"
+            "h-5 w-7 transition-all duration-150 hover:bg-background",
+            pressedKey === "ArrowUp" && "scale-110 bg-primary/20 text-primary"
           )}
         >
           <ChevronUp className="h-3 w-3" />
@@ -124,15 +129,13 @@ export default function DatePicker({ className }: DatePickerProps) {
 
         {/* Date Display with Today button */}
         <div className="flex items-center gap-1.5 rounded-md border border-border/50 bg-muted/30 px-2 py-0.5">
-          
-            <Button
-              variant="ghost"
-              onClick={goToToday}
-              className="h-5 gap-1 px-1.5 text-[10px] font-medium hover:bg-background"
-            >
-              Today
-            </Button>
-          
+          <Button
+            variant="ghost"
+            onClick={goToToday}
+            className="h-5 gap-1 px-1.5 text-[10px] font-medium hover:bg-background"
+          >
+            Today
+          </Button>
         </div>
 
         {/* Down - Next Week */}
@@ -141,8 +144,8 @@ export default function DatePicker({ className }: DatePickerProps) {
           size="icon"
           onClick={goToNextWeek}
           className={cn(
-            "h-5 w-7 hover:bg-background transition-all duration-150",
-            pressedKey === "ArrowDown" && "bg-primary/20 text-primary scale-110"
+            "h-5 w-7 transition-all duration-150 hover:bg-background",
+            pressedKey === "ArrowDown" && "scale-110 bg-primary/20 text-primary"
           )}
         >
           <ChevronDown className="h-3 w-3" />
@@ -155,8 +158,8 @@ export default function DatePicker({ className }: DatePickerProps) {
         size="icon"
         onClick={goToTomorrow}
         className={cn(
-          "h-7 w-7 hover:bg-background transition-all duration-150",
-          pressedKey === "ArrowRight" && "bg-primary/20 text-primary scale-110"
+          "h-7 w-7 transition-all duration-150 hover:bg-background",
+          pressedKey === "ArrowRight" && "scale-110 bg-primary/20 text-primary"
         )}
       >
         <ChevronRight className="h-4 w-4" />

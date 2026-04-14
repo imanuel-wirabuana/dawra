@@ -1,5 +1,3 @@
-import type { BucketList } from "@/types"
-
 export async function deleteBucketListItem(id: string) {
   try {
     const response = await fetch(`/api/v1/bucket-lists/${id}`, {

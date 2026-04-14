@@ -22,7 +22,7 @@ export const GET = async () => {
       id: doc.id,
     })) as Category[]
     return Response.json(apiSuccess(data, "Categories retrieved successfully"))
-  } catch (error) {
+  } catch {
     return Response.json(apiError("Failed to retrieve categories"), {
       status: 500,
     })
@@ -48,7 +48,7 @@ export const POST = async (request: Request) => {
       apiSuccess({ id: docRef.id }, "Category added successfully"),
       { status: 201 }
     )
-  } catch (error) {
+  } catch {
     return Response.json(apiError("Failed to add category"), { status: 500 })
   }
 }

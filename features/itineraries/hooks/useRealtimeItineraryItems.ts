@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react"
 import { subscribeToItineraryItems } from "../services/subscribe.service"
-import { useItineraryStore } from "@/store/itineraryStore"
 import type { ItineraryItem } from "@/types"
 
 export function useRealtimeItineraryItems() {

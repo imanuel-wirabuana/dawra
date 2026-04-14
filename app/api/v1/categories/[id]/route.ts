@@ -50,7 +50,7 @@ export const PATCH = async (
       ...body,
       updatedAt: serverTimestamp(),
     })
-  } catch (error) {
+  } catch {
     return Response.json(apiError("Failed to update category"), {
       status: 500,
     })
@@ -76,7 +76,7 @@ export const PUT = async (
       ...body,
       updatedAt: serverTimestamp(),
     })
-  } catch (error) {
+  } catch {
     return Response.json(apiError("Failed to update category"), {
       status: 500,
     })
@@ -98,7 +98,7 @@ export const DELETE = async (
   const { id } = await params
   try {
     await deleteDoc(doc(db, COLLECTION_NAME, id))
-  } catch (error) {
+  } catch {
     return Response.json(apiError("Failed to delete category"), {
       status: 500,
     })

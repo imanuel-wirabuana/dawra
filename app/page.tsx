@@ -1,6 +1,7 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
+import Link from "next/link"
+import { motion } from "framer-motion"
 import {
   ArrowRight,
   Camera,
@@ -9,8 +10,8 @@ import {
   MapPin,
   CalendarDays,
 } from "lucide-react"
-import Link from "next/link"
-import { motion } from "framer-motion"
+
+import { Button } from "@/components/ui/button"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -30,7 +31,7 @@ const itemVariants = {
     y: 0,
     transition: {
       duration: 0.6,
-      ease: [0.16, 1, 0.3, 1],
+      ease: [0.16, 1, 0.3, 1] as const,
     },
   },
 }
@@ -42,7 +43,7 @@ const floatVariants = {
     scale: 1,
     transition: {
       duration: 0.8,
-      ease: [0.16, 1, 0.3, 1],
+      ease: [0.16, 1, 0.3, 1] as const,
     },
   },
 }

@@ -75,7 +75,7 @@ export default function ChatsPanel({ className }: ChatsPanelProps) {
   const { messages, loading: messagesLoading } = useRealtimeChats()
   const addChatMessage = useAddChatMessage()
   const filteredMessages = useSearchMessages(messages, searchQuery)
-  const { editMessage } = useEditDelete(editingMessage?.id ?? "", currentUserId)
+  const { editMessage } = useEditDelete(editingMessage?.id ?? "")
 
   const { typingUsers, updateTyping } = useTyping(
     currentUserId,
@@ -351,7 +351,7 @@ function MessageItem({
     ? getReplyMessage(message.replyToId)
     : null
   const { addReaction, removeReaction } = useReactions(message.id || "")
-  const { deleteMessage } = useEditDelete(message.id || "", currentUserId)
+  const { deleteMessage } = useEditDelete(message.id || "")
 
   const groupedReactions = (message.reactions || []).reduce(
     (acc, reaction) => {

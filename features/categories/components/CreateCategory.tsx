@@ -20,8 +20,6 @@ import { useCategories } from "../hooks/useCategories"
 
 interface CreateCategoryDialogProps {
   onCategoryCreated: (category: Category) => void
-  onError: (error: string) => void
-  createCategory: (category: Omit<Category, "id">) => void
   isCreating: boolean
   trigger?: React.ReactNode
   onCategoryDeleted?: (categoryId: string) => void
@@ -30,8 +28,6 @@ interface CreateCategoryDialogProps {
 
 export default function CreateCategoryDialog({
   onCategoryCreated,
-  onError,
-  createCategory,
   isCreating,
   trigger,
   onCategoryDeleted,

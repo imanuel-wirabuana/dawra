@@ -1,4 +1,4 @@
-import type { BucketList, Category } from "@/types"
+import type { Category } from "@/types"
 
 export async function updateBucketList({
   id,

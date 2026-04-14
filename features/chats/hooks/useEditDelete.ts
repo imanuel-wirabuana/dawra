@@ -2,12 +2,12 @@ import { useMutation } from "@tanstack/react-query"
 import { deleteMessage, editMessage } from "../services/edit-delete.service"
 import { toast } from "sonner"
 
-export function useEditDelete(messageId: string, userId: string) {
+export function useEditDelete(messageId: string) {
   const editMutation = useMutation({
     mutationFn: async (newMessage: string) => {
       const toastId = toast.loading("Updating message...")
       try {
-        await editMessage(messageId, newMessage, userId)
+        await editMessage(messageId, newMessage)
         toast.success("Message updated", { id: toastId })
       } catch (error) {
         const message =
@@ -22,7 +22,7 @@ export function useEditDelete(messageId: string, userId: string) {
     mutationFn: async () => {
       const toastId = toast.loading("Deleting message...")
       try {
-        await deleteMessage(messageId, userId)
+        await deleteMessage(messageId)
         toast.success("Message deleted", { id: toastId })
       } catch (error) {
         const message =

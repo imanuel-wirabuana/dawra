@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import { Trash2, X, Loader2 } from "lucide-react"
+import { Trash2, Loader2 } from "lucide-react"
 import { useState } from "react"
 import { useDeleteBucketList } from "../hooks/useDeleteBucketList"
 import {

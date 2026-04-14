@@ -1,8 +1,8 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { format } from "date-fns"
-import { Calendar, Clock, Inbox, Loader2, Plus, Sparkles } from "lucide-react"
+import { Clock, Inbox, Loader2, Plus, Sparkles } from "lucide-react"
 
 import type { Category } from "@/types"
 import { cn } from "@/lib/utils"
@@ -129,38 +129,45 @@ export default function ItineraryForm({
     if (itemType === "bucket-list") {
       if (!selectedBucketListId) return
 
-      addItineraryMutation.mutate({
-        ...baseItem,
-        itemType: "bucket-list",
-        completed: false,
-        bucketList: selectedBucketListId,
-      })
+      addItineraryMutation.mutate(
+        {
+          ...baseItem,
+          itemType: "bucket-list",
+          completed: false,
+          bucketList: selectedBucketListId,
+        },
+        {
+          onSuccess: () => {
+            resetForm()
+            onSuccess?.()
+          },
+        }
+      )
     } else {
       if (!customTitle.trim()) return
 
-      addItineraryMutation.mutate({
-        ...baseItem,
-        itemType: "custom",
-        completed: false,
-        customItem: {
-          title: customTitle.trim(),
-          location: customLocation.trim() || undefined,
-          cost: customCost ? Number(customCost) : undefined,
-          description: customDescription.trim() || undefined,
-          categories: selectedCategories,
+      addItineraryMutation.mutate(
+        {
+          ...baseItem,
+          itemType: "custom",
+          completed: false,
+          customItem: {
+            title: customTitle.trim(),
+            location: customLocation.trim() || undefined,
+            cost: customCost ? Number(customCost) : undefined,
+            description: customDescription.trim() || undefined,
+            categories: selectedCategories,
+          },
         },
-      })
+        {
+          onSuccess: () => {
+            resetForm()
+            onSuccess?.()
+          },
+        }
+      )
     }
   }
-
-  // Reset form on successful submission
-  useEffect(() => {
-    if (addItineraryMutation.isSuccess) {
-      resetForm()
-      onSuccess?.()
-      addItineraryMutation.reset()
-    }
-  }, [addItineraryMutation.isSuccess])
 
   return (
     <form onSubmit={handleSubmit} className={cn("space-y-4", className)}>
