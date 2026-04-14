@@ -1,12 +1,10 @@
 "use client"
 
 import { useState } from "react"
+import { Check, Loader2, Plus, Trash2, X } from "lucide-react"
+
 import type { Category } from "@/types"
-import { Label } from "@/components/ui/label"
-import { Loader2, Plus, Trash2, X, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import {
   Dialog,
   DialogContent,
@@ -14,6 +12,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { ScrollArea } from "@/components/ui/scroll-area"
+
 import { useCategories } from "../hooks/useCategories"
 
 interface CreateCategoryDialogProps {
@@ -139,7 +141,7 @@ export default function CreateCategoryDialog({
                   disabled={isCreating}
                   className={`h-8 w-full cursor-pointer rounded-md ${preset.bg} flex items-center justify-center transition-all hover:scale-105 disabled:opacity-50 ${
                     color.toLowerCase() === preset.value.toLowerCase()
-                      ? "ring-2 ring-offset-1 ring-foreground"
+                      ? "ring-2 ring-foreground ring-offset-1"
                       : ""
                   }`}
                   title={preset.name}

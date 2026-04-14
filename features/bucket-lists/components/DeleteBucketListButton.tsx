@@ -51,18 +51,20 @@ export default function DeleteBucketListButton({
           <Trash2 />
         </Button>
       </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Delete Bucket List</DialogTitle>
-          <DialogDescription>
-            Are you sure you want to delete this bucket list? This action cannot
-            be undone.
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader className="space-y-3">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
+            <Trash2 className="h-6 w-6 text-destructive" />
+          </div>
+          <DialogTitle className="text-center">Delete Bucket List</DialogTitle>
+          <DialogDescription className="text-center">
+            Are you sure you want to delete this item? This action cannot be
+            undone.
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter>
+        <DialogFooter className="gap-2 sm:justify-center">
           <DialogClose asChild>
-            <Button variant="outline">
-              <X className="mr-1 h-4 w-4" />
+            <Button variant="outline" className="min-w-25">
               Cancel
             </Button>
           </DialogClose>
@@ -70,15 +72,16 @@ export default function DeleteBucketListButton({
             variant="destructive"
             onClick={handleDelete}
             disabled={deleteMutation.isPending}
+            className="min-w-25"
           >
             {deleteMutation.isPending ? (
               <>
-                <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
                 Deleting...
               </>
             ) : (
               <>
-                <Trash2 className="mr-1 h-4 w-4" />
+                <Trash2 className="mr-1.5 h-4 w-4" />
                 Delete
               </>
             )}

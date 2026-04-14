@@ -1,9 +1,9 @@
 "use client"
 
-import { useCategories } from "../hooks/useCategories"
-import type { Category } from "@/types"
-import { Label } from "@/components/ui/label"
 import { Loader2, Plus } from "lucide-react"
+
+import type { Category } from "@/types"
+import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
   Combobox,
@@ -16,8 +16,10 @@ import {
   ComboboxList,
   ComboboxValue,
 } from "@/components/ui/combobox"
+import { Label } from "@/components/ui/label"
+
+import { useCategories } from "../hooks/useCategories"
 import CreateCategoryDialog from "./CreateCategory"
-import { cn } from "@/lib/utils"
 
 interface CategorySelectorProps {
   selectedCategories: Category[]

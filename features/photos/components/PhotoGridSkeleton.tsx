@@ -20,10 +20,13 @@ export default function PhotoGridSkeleton({
       )}
     >
       {Array.from({ length: count }).map((_, index) => (
-        <div key={index} className="group relative aspect-square overflow-hidden rounded-lg border border-border/50">
+        <div
+          key={index}
+          className="group relative aspect-square overflow-hidden rounded-xl border border-border/40 shadow-sm"
+        >
           <Skeleton className="h-full w-full" />
           {/* Hover overlay skeleton */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
         </div>
       ))}
     </div>

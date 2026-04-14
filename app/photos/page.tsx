@@ -11,10 +11,11 @@ import FolderGrid from "@/features/photos/components/FolderGrid"
 import CreateFolderDialog from "@/features/photos/components/CreateFolderDialog"
 import EmptyState from "@/features/photos/components/EmptyState"
 import LoadingState from "@/features/photos/components/LoadingState"
-import { LayoutGrid, Camera } from "lucide-react"
+import { LayoutGrid, Camera, Images } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import Link from "next/link"
+import { motion } from "framer-motion"
 
 export default function PhotoWall() {
   const { photos, loading: photosLoading } = useRealtimePhotos()
@@ -60,30 +61,47 @@ export default function PhotoWall() {
   }
 
   return (
-    <div className="w-full">
-      <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
-        <div>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="rounded-full bg-primary/10 p-1.5 sm:p-2">
-              <Camera className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+    <div className="w-full px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        className="mb-8 sm:mb-10"
+      >
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-400/20 to-violet-500/10 shadow-sm">
+              <Camera className="h-6 w-6 text-primary" />
             </div>
-            <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">Photos</h1>
+            <div>
+              <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+                Photos
+              </h1>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Memories we capture together
+              </p>
+            </div>
           </div>
-          <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-muted-foreground">
-            Organize your travel memories into folders and albums.
-          </p>
+          <div className="flex items-center gap-3">
+            <Link href="/photos/wall">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-9 gap-2 rounded-full border-border/60 text-sm font-medium transition-all duration-200 hover:border-primary/50 hover:bg-primary/5"
+              >
+                <LayoutGrid className="h-4 w-4" />
+                Wall View
+              </Button>
+            </Link>
+            <div className="flex items-center gap-2 rounded-full border border-border/50 bg-card/60 px-4 py-2 backdrop-blur-sm">
+              <Images className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium text-foreground">
+                Memories
+              </span>
+            </div>
+          </div>
         </div>
-        <Link href="/photos/wall" className="shrink-0">
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-7 sm:h-8 gap-1.5 border-border/60 text-xs font-medium transition-all duration-150 hover:border-primary/50 hover:bg-primary/5"
-          >
-            <LayoutGrid className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-            Wall View
-          </Button>
-        </Link>
-      </div>
+      </motion.div>
 
       {/* Upload Section */}
       <PhotoUploadArea isUploading={isUploading} onUpload={handleUpload} />

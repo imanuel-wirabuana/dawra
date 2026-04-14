@@ -1,14 +1,14 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 import { format } from "date-fns"
-import { useAddItineraryItem } from "../hooks/useAddItineraryItem"
-import { useGetBucketListItems } from "../hooks/useGetBucketListItems"
-import { useItineraryStore } from "@/store/itineraryStore"
+import { Calendar, Clock, Inbox, Loader2, Plus, Sparkles } from "lucide-react"
+
+import type { Category } from "@/types"
+import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import type { Category } from "@/types"
 import {
   Select,
   SelectContent,
@@ -17,9 +17,11 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useItineraryStore } from "@/store/itineraryStore"
 import CategorySelector from "@/features/categories/components/CategorySelector"
-import { cn } from "@/lib/utils"
-import { Loader2, Plus, Inbox, Sparkles, Clock, Calendar } from "lucide-react"
+
+import { useAddItineraryItem } from "../hooks/useAddItineraryItem"
+import { useGetBucketListItems } from "../hooks/useGetBucketListItems"
 
 interface ItineraryFormProps {
   onSuccess?: () => void
@@ -163,151 +165,164 @@ export default function ItineraryForm({
   return (
     <form onSubmit={handleSubmit} className={cn("space-y-4", className)}>
       {/* Item Type Selection */}
-      <div className="rounded-lg border border-border/50 bg-gradient-to-b from-muted/30 to-muted/10 p-1">
-      <Tabs
-        value={itemType}
-        onValueChange={(v: string) => setItemType(v as ItemType)}
-        className="w-full"
-      >
-        <TabsList className="grid h-9 w-full grid-cols-2 bg-gradient-to-b from-muted/60 to-muted/30 p-1">
-           <TabsTrigger
-            value="custom"
-            className="text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm"
-          >
-            Custom
-          </TabsTrigger>
-          <TabsTrigger
-            value="bucket-list"
-            className="text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm"
-          >
-            Bucket List
-          </TabsTrigger>
-         
-        </TabsList>
-
-        <TabsContent value="bucket-list" className="mt-3 space-y-3">
-          <div className="space-y-1.5">
-            <Label htmlFor="bucketList" className="text-xs font-medium flex items-center gap-1.5">
-              <Sparkles className="h-3 w-3 text-primary" />
-              Select Bucket List Item
-            </Label>
-            <Select
-              value={selectedBucketListId}
-              onValueChange={setSelectedBucketListId}
-              disabled={addItineraryMutation.isPending}
+      <div className="rounded-lg border border-border/50 bg-linear-to-b from-muted/30 to-muted/10 p-1">
+        <Tabs
+          value={itemType}
+          onValueChange={(v: string) => setItemType(v as ItemType)}
+          className="w-full"
+        >
+          <TabsList className="grid h-9 w-full grid-cols-2 bg-linear-to-b from-muted/60 to-muted/30 p-1">
+            <TabsTrigger
+              value="custom"
+              className="text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm"
             >
-              <SelectTrigger className="h-10 border-input/60 bg-background text-sm transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20">
-                <SelectValue placeholder="Choose an item from your bucket list..." />
-              </SelectTrigger>
-              <SelectContent className="max-h-60">
-                {bucketListItems.filter((item) => !item.completed).length === 0 ? (
-                  <div className="flex flex-col items-center justify-center p-4 text-center">
-                    <Inbox className="h-8 w-8 text-muted-foreground/50 mb-2" />
-                    <p className="text-sm text-muted-foreground">No bucket list items</p>
-                    <p className="text-xs text-muted-foreground/70">Add items in the Bucket Lists section</p>
-                  </div>
-                ) : (
-                  bucketListItems
-                    .filter((item) => !item.completed)
-                    .map((item) => (
-                      <SelectItem key={item.id} value={item.id!} className="py-2">
-                        <div className="flex flex-col items-start">
-                          <span className="font-medium">{item.title}</span>
-                          {item.location && (
-                            <span className="text-xs text-muted-foreground">{item.location}</span>
-                          )}
-                        </div>
-                      </SelectItem>
-                    ))
-                )}
-              </SelectContent>
-            </Select>
-          </div>
-        </TabsContent>
+              Custom
+            </TabsTrigger>
+            <TabsTrigger
+              value="bucket-list"
+              className="text-xs data-[state=active]:bg-background data-[state=active]:shadow-sm"
+            >
+              Bucket List
+            </TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="custom" className="mt-3 space-y-3">
-          <div className="space-y-1.5">
-            <Label htmlFor="customTitle" className="text-xs font-medium">
-              Title *
-            </Label>
-            <Input
-              id="customTitle"
-              placeholder="e.g., Lunch break, Travel time"
-              value={customTitle}
-              onChange={(e) => setCustomTitle(e.target.value)}
-              disabled={addItineraryMutation.isPending}
-              className="h-9 border-input/60 bg-background text-sm transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
+          <TabsContent value="bucket-list" className="mt-3 space-y-3">
             <div className="space-y-1.5">
               <Label
-                htmlFor="customLocation"
-                className="text-xs font-medium text-muted-foreground"
+                htmlFor="bucketList"
+                className="flex items-center gap-1.5 text-xs font-medium"
               >
-                Location
+                <Sparkles className="h-3 w-3 text-primary" />
+                Select Bucket List Item
+              </Label>
+              <Select
+                value={selectedBucketListId}
+                onValueChange={setSelectedBucketListId}
+                disabled={addItineraryMutation.isPending}
+              >
+                <SelectTrigger className="h-10 border-input/60 bg-background text-sm transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20">
+                  <SelectValue placeholder="Choose an item from your bucket list..." />
+                </SelectTrigger>
+                <SelectContent className="max-h-60">
+                  {bucketListItems.filter((item) => !item.completed).length ===
+                  0 ? (
+                    <div className="flex flex-col items-center justify-center p-4 text-center">
+                      <Inbox className="mb-2 h-8 w-8 text-muted-foreground/50" />
+                      <p className="text-sm text-muted-foreground">
+                        No bucket list items
+                      </p>
+                      <p className="text-xs text-muted-foreground/70">
+                        Add items in the Bucket Lists section
+                      </p>
+                    </div>
+                  ) : (
+                    bucketListItems
+                      .filter((item) => !item.completed)
+                      .map((item) => (
+                        <SelectItem
+                          key={item.id}
+                          value={item.id!}
+                          className="py-2"
+                        >
+                          <div className="flex flex-col items-start">
+                            <span className="font-medium">{item.title}</span>
+                            {item.location && (
+                              <span className="text-xs text-muted-foreground">
+                                {item.location}
+                              </span>
+                            )}
+                          </div>
+                        </SelectItem>
+                      ))
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="custom" className="mt-3 space-y-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="customTitle" className="text-xs font-medium">
+                Title *
               </Label>
               <Input
-                id="customLocation"
-                placeholder="e.g., Cafe Central"
-                value={customLocation}
-                onChange={(e) => setCustomLocation(e.target.value)}
+                id="customTitle"
+                placeholder="e.g., Lunch break, Travel time"
+                value={customTitle}
+                onChange={(e) => setCustomTitle(e.target.value)}
                 disabled={addItineraryMutation.isPending}
                 className="h-9 border-input/60 bg-background text-sm transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
             </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label
+                  htmlFor="customLocation"
+                  className="text-xs font-medium text-muted-foreground"
+                >
+                  Location
+                </Label>
+                <Input
+                  id="customLocation"
+                  placeholder="e.g., Cafe Central"
+                  value={customLocation}
+                  onChange={(e) => setCustomLocation(e.target.value)}
+                  disabled={addItineraryMutation.isPending}
+                  className="h-9 border-input/60 bg-background text-sm transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label
+                  htmlFor="customCost"
+                  className="text-xs font-medium text-muted-foreground"
+                >
+                  Cost (IDR)
+                </Label>
+                <Input
+                  id="customCost"
+                  type="number"
+                  placeholder="0"
+                  value={customCost}
+                  onChange={(e) => setCustomCost(e.target.value)}
+                  disabled={addItineraryMutation.isPending}
+                  className="h-9 border-input/60 bg-background text-sm transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+            </div>
+
             <div className="space-y-1.5">
               <Label
-                htmlFor="customCost"
+                htmlFor="customDescription"
                 className="text-xs font-medium text-muted-foreground"
               >
-                Cost (IDR)
+                Description
               </Label>
               <Input
-                id="customCost"
-                type="number"
-                placeholder="0"
-                value={customCost}
-                onChange={(e) => setCustomCost(e.target.value)}
+                id="customDescription"
+                placeholder="Notes, booking ref, etc."
+                value={customDescription}
+                onChange={(e) => setCustomDescription(e.target.value)}
                 disabled={addItineraryMutation.isPending}
                 className="h-9 border-input/60 bg-background text-sm transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
             </div>
-          </div>
 
-          <div className="space-y-1.5">
-            <Label
-              htmlFor="customDescription"
-              className="text-xs font-medium text-muted-foreground"
-            >
-              Description
-            </Label>
-            <Input
-              id="customDescription"
-              placeholder="Notes, booking ref, etc."
-              value={customDescription}
-              onChange={(e) => setCustomDescription(e.target.value)}
-              disabled={addItineraryMutation.isPending}
-              className="h-9 border-input/60 bg-background text-sm transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <Label className="text-xs font-medium text-muted-foreground">
-              Categories
-            </Label>
-            <CategorySelector
-              selectedCategories={selectedCategories}
-              onCategoriesChange={setSelectedCategories}
-            />
-          </div>
-        </TabsContent>
-      </Tabs>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-muted-foreground">
+                Categories
+              </Label>
+              <CategorySelector
+                selectedCategories={selectedCategories}
+                onCategoriesChange={setSelectedCategories}
+              />
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
 
       {/* Time Section */}
-      <div className="rounded-lg border border-border/50 bg-gradient-to-b from-muted/40 to-muted/15 p-3 space-y-3">
+      <div className="space-y-3 rounded-lg border border-border/50 bg-linear-to-b from-muted/40 to-muted/15 p-3">
         <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
           <Clock className="h-3.5 w-3.5" />
           Schedule Time
@@ -348,11 +363,15 @@ export default function ItineraryForm({
               onValueChange={setEndTime}
               disabled={addItineraryMutation.isPending || !startTime}
             >
-              <SelectTrigger className={cn(
-                "h-10 border-input/60 bg-background text-sm transition-all duration-150",
-                !startTime && "text-muted-foreground/50"
-              )}>
-                <SelectValue placeholder={startTime ? "Select..." : "Start first"} />
+              <SelectTrigger
+                className={cn(
+                  "h-10 border-input/60 bg-background text-sm transition-all duration-150",
+                  !startTime && "text-muted-foreground/50"
+                )}
+              >
+                <SelectValue
+                  placeholder={startTime ? "Select..." : "Start first"}
+                />
               </SelectTrigger>
               <SelectContent className="max-h-60">
                 {getValidEndTimes(startTime).map((time) => (
@@ -367,8 +386,8 @@ export default function ItineraryForm({
       </div>
 
       {addItineraryMutation.error && (
-        <div className="rounded-lg border border-destructive/20 bg-destructive/10 px-3 py-2.5 text-xs text-destructive flex items-start gap-2">
-          <span className="inline-block h-1.5 w-1.5 rounded-full bg-destructive mt-1 shrink-0" />
+        <div className="flex items-start gap-2 rounded-lg border border-destructive/20 bg-destructive/10 px-3 py-2.5 text-xs text-destructive">
+          <span className="mt-1 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-destructive" />
           {addItineraryMutation.error.message}
         </div>
       )}
@@ -376,7 +395,7 @@ export default function ItineraryForm({
       <Button
         type="submit"
         disabled={isSubmitDisabled()}
-        className="h-10 w-full bg-primary font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:shadow-md hover:shadow-primary/20 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+        className="h-10 w-full bg-primary font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:shadow-md hover:shadow-primary/20 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
       >
         {addItineraryMutation.isPending ? (
           <span className="flex items-center gap-2">

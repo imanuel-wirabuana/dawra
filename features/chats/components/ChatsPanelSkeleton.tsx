@@ -1,5 +1,5 @@
-import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface ChatsPanelSkeletonProps {
   className?: string
@@ -16,9 +16,9 @@ export default function ChatsPanelSkeleton({
       )}
     >
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-border/50 bg-gradient-to-b from-muted/50 to-muted/20 px-3 py-2">
-        <Skeleton className="h-4 w-12" />
-        <Skeleton className="h-7 w-48 rounded-md" />
+      <div className="flex items-center justify-between border-b border-border/40 bg-linear-to-b from-muted/60 to-muted/20 px-3 py-2.5">
+        <Skeleton className="h-4 w-12 rounded-md" />
+        <Skeleton className="h-7 w-48 rounded-lg" />
       </div>
 
       {/* Messages area */}
@@ -59,16 +59,16 @@ export default function ChatsPanelSkeleton({
       </div>
 
       {/* Input area */}
-      <div className="space-y-2 border-t border-border/50 bg-gradient-to-b from-muted/30 to-muted/5 p-3">
+      <div className="space-y-2 border-t border-border/40 bg-linear-to-b from-muted/40 to-muted/5 p-3">
         <div className="flex gap-2">
-          <Skeleton className="h-8 w-28 shrink-0" />
+          <Skeleton className="h-8 w-28 shrink-0 rounded-md" />
           <div className="flex flex-1 gap-1.5">
             <Skeleton className="h-8 w-8 shrink-0 rounded-md" />
-            <Skeleton className="h-8 flex-1" />
+            <Skeleton className="h-8 flex-1 rounded-md" />
           </div>
         </div>
         <div className="flex justify-end">
-          <Skeleton className="h-7 w-20" />
+          <Skeleton className="h-7 w-20 rounded-md" />
         </div>
       </div>
     </div>

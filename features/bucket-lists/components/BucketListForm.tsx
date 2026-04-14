@@ -1,16 +1,18 @@
 "use client"
 
 import { useState } from "react"
-import { useAddBucketList } from "../hooks/useAddBucketList"
+import { Loader2, Plus } from "lucide-react"
+
+import type { Category } from "@/types"
+import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { cn } from "@/lib/utils"
-import { Loader2, Plus } from "lucide-react"
+import { Textarea } from "@/components/ui/textarea"
 import CategorySelector from "@/features/categories/components/CategorySelector"
-import type { Category } from "@/types"
+
+import { useAddBucketList } from "../hooks/useAddBucketList"
 
 interface BucketListFormProps {
   className?: string
@@ -54,13 +56,16 @@ export default function BucketListForm({ className }: BucketListFormProps) {
   return (
     <Card
       className={cn(
-        "overflow-hidden border-border/50 shadow-sm transition-shadow duration-200 hover:shadow-md",
+        "overflow-hidden border-border/40 shadow-sm transition-all duration-300 hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5",
         className
       )}
     >
-      <CardHeader className="space-y-1 border-b border-border/50 bg-gradient-to-b from-muted/50 to-muted/20 px-5 py-4">
-        <CardTitle className="text-base font-semibold">Add New Item</CardTitle>
-        <p className="text-xs text-muted-foreground">
+      <CardHeader className="space-y-1.5 border-b border-border/30 bg-linear-to-b from-muted/60 to-muted/20 px-5 py-4">
+        <CardTitle className="flex items-center gap-2 text-base font-semibold">
+          <Plus className="h-4 w-4 text-primary" />
+          Add New Item
+        </CardTitle>
+        <p className="text-xs text-muted-foreground/80">
           Create a new bucket list goal
         </p>
       </CardHeader>

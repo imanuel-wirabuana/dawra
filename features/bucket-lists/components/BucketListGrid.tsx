@@ -1,24 +1,26 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
-import { subscribeToBucketList } from "../services/subscribe.service"
-import type { BucketList, ViewMode, Category, SortOption } from "@/types"
-import BucketListItem from "./BucketListItem"
-import { cn } from "@/lib/utils"
-import { useBucketSelection } from "../hooks/useBucketSelection"
-import { Button } from "@/components/ui/button"
-import BulkDeleteButton, { BulkDeleteButtonRef } from "./BulkDeleteButton"
-import ViewModeSelector from "./ViewModeSelector"
-import CategoryFilterSelector from "../../categories/components/CategoryFilterSelector"
-import SortSelector from "./SortSelector"
-import CompletedFilterSelector from "./CompletedFilterSelector"
-import { X, CheckSquare, ArrowLeft, Info } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
+import { ArrowLeft, CheckSquare, Info, X } from "lucide-react"
 import { useHotkey } from "@tanstack/react-hotkeys"
+
+import type { BucketList, Category, SortOption, ViewMode } from "@/types"
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import CategoryFilterSelector from "@/features/categories/components/CategoryFilterSelector"
+
+import { useBucketSelection } from "../hooks/useBucketSelection"
+import { subscribeToBucketList } from "../services/subscribe.service"
+import BulkDeleteButton, { BulkDeleteButtonRef } from "./BulkDeleteButton"
+import BucketListItem from "./BucketListItem"
+import CompletedFilterSelector from "./CompletedFilterSelector"
+import SortSelector from "./SortSelector"
+import ViewModeSelector from "./ViewModeSelector"
 
 interface BucketListGridProps {
   className?: string
@@ -133,14 +135,16 @@ export default function BucketListGrid({ className }: BucketListGridProps) {
     <div ref={gridRef} className="flex flex-col gap-4">
       {/* Combined selection mode indicator and controls */}
       {isSelectionMode ? (
-        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/50 bg-gradient-to-r from-primary/20 to-primary/5 p-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-primary/20 bg-linear-to-r from-primary/15 to-primary/5 p-3 shadow-sm shadow-primary/5">
           <div className="flex items-center gap-2">
-            <CheckSquare className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium text-primary">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10">
+              <CheckSquare className="h-3.5 w-3.5 text-primary" />
+            </div>
+            <span className="text-sm font-semibold text-primary">
               Selection Mode
             </span>
             {selected.size > 0 && (
-              <span className="text-xs text-primary/70">
+              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
                 {selected.size} item{selected.size !== 1 ? "s" : ""} selected
               </span>
             )}
@@ -215,18 +219,18 @@ export default function BucketListGrid({ className }: BucketListGridProps) {
           </div>
         </div>
       ) : sortedBucketList.length > 0 ? (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border/50 bg-gradient-to-b from-card/70 to-card/40 p-2">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border/40 bg-linear-to-b from-card/80 to-card/50 p-2.5 shadow-sm">
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
               size="sm"
               onClick={toggleSelectionMode}
-              className="h-8 gap-1.5 border-border/60 bg-background px-3 text-xs font-medium transition-all duration-150 hover:border-primary/50 hover:bg-primary/5"
+              className="h-8 gap-1.5 border-border/50 bg-background/80 px-3 text-xs font-medium transition-all duration-200 hover:border-primary/40 hover:bg-primary/5 hover:shadow-sm"
             >
               <CheckSquare className="h-3.5 w-3.5" />
               Select
             </Button>
-            <span className="text-xs text-muted-foreground">
+            <span className="rounded-full bg-muted/50 px-2.5 py-1 text-xs font-medium text-muted-foreground">
               {sortedBucketList.length} items
             </span>
           </div>

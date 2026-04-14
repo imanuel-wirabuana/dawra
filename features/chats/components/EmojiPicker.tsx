@@ -1,17 +1,44 @@
 "use client"
 
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import type { ReactNode } from "react"
+
 import { Button } from "@/components/ui/button"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 
 const COMMON_EMOJIS = [
-  "😀", "😂", "🥰", "😍", "😎", "🤔", "😢", "😡",
-  "👍", "👎", "❤️", "🔥", "🎉", "👏", "🤝", "🙏",
-  "👀", "🤷", "🤦", "🙌", "💯", "✅", "❌", "❓",
+  "😀",
+  "😂",
+  "🥰",
+  "😍",
+  "😎",
+  "🤔",
+  "😢",
+  "😡",
+  "👍",
+  "👎",
+  "❤️",
+  "🔥",
+  "🎉",
+  "👏",
+  "🤝",
+  "🙏",
+  "👀",
+  "🤷",
+  "🤦",
+  "🙌",
+  "💯",
+  "✅",
+  "❌",
+  "❓",
 ]
 
 interface EmojiPickerProps {
   onEmojiSelect: (emoji: string) => void
-  children: React.ReactNode
+  children: ReactNode
 }
 
 export function EmojiPicker({ onEmojiSelect, children }: EmojiPickerProps) {
@@ -23,8 +50,9 @@ export function EmojiPicker({ onEmojiSelect, children }: EmojiPickerProps) {
           {COMMON_EMOJIS.map((emoji) => (
             <button
               key={emoji}
+              type="button"
               onClick={() => onEmojiSelect(emoji)}
-              className="flex h-8 w-8 cursor-pointer items-center justify-center rounded hover:bg-muted transition-colors text-lg"
+              className="flex h-8 w-8 cursor-pointer items-center justify-center rounded text-lg transition-colors hover:bg-muted"
             >
               {emoji}
             </button>

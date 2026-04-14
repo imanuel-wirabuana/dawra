@@ -1,52 +1,62 @@
 "use client"
 
-import { useEffect, useRef, useState, useCallback } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { formatDistanceToNow } from "date-fns"
+import {
+  Loader2,
+  MoreVertical,
+  Pencil,
+  Reply,
+  Search,
+  Send,
+  Smile,
+  Trash2,
+  X,
+} from "lucide-react"
+
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import { Smile, X, Pencil, Send, Loader2, Search } from "lucide-react"
-import { useAddChatMessage } from "../hooks/useAddChatMessage"
-import { useRealtimeChats } from "../hooks/useRealtimeChats"
-import { useSearchMessages } from "../hooks/useSearchMessages"
-import ChatsPanelSkeleton from "./ChatsPanelSkeleton"
-import { useTyping } from "../hooks/useTyping"
-import { useReactions } from "../hooks/useReactions"
-import { useEditDelete } from "../hooks/useEditDelete"
 import type { ChatMessage } from "@/types"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { MoreVertical, Reply, Trash2 } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Input } from "@/components/ui/input"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Textarea } from "@/components/ui/textarea"
+
+import { useAddChatMessage } from "../hooks/useAddChatMessage"
+import { useEditDelete } from "../hooks/useEditDelete"
+import { useRealtimeChats } from "../hooks/useRealtimeChats"
+import { useReactions } from "../hooks/useReactions"
+import { useSearchMessages } from "../hooks/useSearchMessages"
+import { useTyping } from "../hooks/useTyping"
+import ChatsPanelSkeleton from "./ChatsPanelSkeleton"
 
 const COMMON_EMOJIS = ["👍", "❤️", "😂", "🎉", "🔥", "👏", "😍", "🤔", "🤘"]
 
-const generateUserId = () => {
-  if (typeof window !== "undefined") {
-    let userId = localStorage.getItem("chatUserId")
-    if (!userId) {
-      userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-      localStorage.setItem("chatUserId", userId)
-    }
-    return userId
+function generateUserId(): string {
+  if (typeof window === "undefined") return "guest"
+
+  let userId = localStorage.getItem("chatUserId")
+  if (!userId) {
+    userId = `user_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`
+    localStorage.setItem("chatUserId", userId)
   }
-  return "guest"
+  return userId
 }
 
 interface ChatsPanelProps {
@@ -62,14 +72,10 @@ export default function ChatsPanel({ className }: ChatsPanelProps) {
   const [editingMessage, setEditingMessage] = useState<ChatMessage | null>(null)
   const [editText, setEditText] = useState("")
 
-  // Use the edit hook when editing a message
-  const editDelete = editingMessage
-    ? useEditDelete(editingMessage.id || "", currentUserId)
-    : null
-
   const { messages, loading: messagesLoading } = useRealtimeChats()
   const addChatMessage = useAddChatMessage()
   const filteredMessages = useSearchMessages(messages, searchQuery)
+  const { editMessage } = useEditDelete(editingMessage?.id ?? "", currentUserId)
 
   const { typingUsers, updateTyping } = useTyping(
     currentUserId,
@@ -126,11 +132,11 @@ export default function ChatsPanel({ className }: ChatsPanelProps) {
   return (
     <div
       className={cn(
-        "flex h-[calc(100vh-12rem)] sm:h-[calc(100vh-14rem)] min-h-80 sm:min-h-96 flex-col overflow-hidden rounded-xl border border-border/50 bg-card shadow-sm",
+        "flex h-[calc(100vh-12rem)] min-h-80 flex-col overflow-hidden rounded-xl border border-border/50 bg-card shadow-sm sm:h-[calc(100vh-14rem)] sm:min-h-96",
         className
       )}
     >
-      <div className="flex items-center justify-between border-b border-border/50 bg-gradient-to-b from-muted/50 to-muted/20 px-2 sm:px-3 py-2">
+      <div className="flex items-center justify-between border-b border-border/50 bg-linear-to-b from-muted/50 to-muted/20 px-2 py-2 sm:px-3">
         <h2 className="text-xs font-semibold text-foreground">Chat</h2>
         <div className="relative">
           <Search className="absolute top-1/2 left-2.5 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
@@ -138,7 +144,7 @@ export default function ChatsPanel({ className }: ChatsPanelProps) {
             placeholder="Search..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-7 w-36 sm:w-48 border-input/60 bg-background pl-8 text-xs transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20"
+            className="h-7 w-36 border-input/60 bg-background pl-8 text-xs transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20 sm:w-48"
           />
         </div>
       </div>
@@ -182,7 +188,7 @@ export default function ChatsPanel({ className }: ChatsPanelProps) {
       )}
 
       {replyTo && (
-        <div className="flex items-center justify-between border-t border-border/50 bg-gradient-to-r from-muted/50 to-muted/30 px-3 py-1.5">
+        <div className="flex items-center justify-between border-t border-border/50 bg-linear-to-r from-muted/50 to-muted/30 px-3 py-1.5">
           <div className="flex items-center gap-1.5 text-xs">
             <Reply className="h-3 w-3" />
             <span className="text-muted-foreground">Reply to</span>
@@ -204,14 +210,14 @@ export default function ChatsPanel({ className }: ChatsPanelProps) {
 
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col sm:flex-row gap-2 sm:gap-3 border-t border-border/50 bg-gradient-to-b from-muted/30 to-muted/5 p-2 sm:p-3"
+        className="flex flex-col gap-2 border-t border-border/50 bg-linear-to-b from-muted/30 to-muted/5 p-2 sm:flex-row sm:gap-3 sm:p-3"
       >
         <div className="flex flex-1 gap-2">
           <Input
             placeholder="Name"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
-            className="h-8 w-20 sm:w-28 shrink-0 border-input/60 bg-background text-xs transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20"
+            className="h-8 w-20 shrink-0 border-input/60 bg-background text-xs transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20 sm:w-28"
             disabled={addChatMessage.isPending}
           />
           <div className="flex flex-1 gap-1.5">
@@ -260,14 +266,14 @@ export default function ChatsPanel({ className }: ChatsPanelProps) {
         </div>
         <div className="flex items-center justify-end gap-2">
           {addChatMessage.error && (
-            <p className="text-[10px] text-destructive flex-1 sm:flex-none">
+            <p className="flex-1 text-[10px] text-destructive sm:flex-none">
               {addChatMessage.error.message}
             </p>
           )}
           <Button
             type="submit"
             disabled={addChatMessage.isPending || !message.trim()}
-            className="h-8 sm:h-full gap-1 bg-primary px-3 text-xs font-medium text-primary-foreground transition-all duration-150 hover:bg-primary/90 active:scale-[0.98] disabled:opacity-50"
+            className="h-8 gap-1 bg-primary px-3 text-xs font-medium text-primary-foreground transition-all duration-150 hover:bg-primary/90 active:scale-[0.98] disabled:opacity-50 sm:h-full"
           >
             {addChatMessage.isPending ? (
               <Loader2 className="h-3 w-3 animate-spin" />
@@ -299,14 +305,14 @@ export default function ChatsPanel({ className }: ChatsPanelProps) {
               </Button>
               <Button
                 onClick={async () => {
-                  if (editingMessage && editDelete) {
-                    await editDelete.editMessage.mutateAsync(editText)
+                  if (editingMessage) {
+                    await editMessage.mutateAsync(editText)
                     setEditingMessage(null)
                   }
                 }}
-                disabled={!editText.trim() || editDelete?.editMessage.isPending}
+                disabled={!editText.trim() || editMessage.isPending}
               >
-                {editDelete?.editMessage.isPending ? (
+                {editMessage.isPending ? (
                   <>
                     <Loader2 className="mr-1 h-4 w-4 animate-spin" />
                     Saving...

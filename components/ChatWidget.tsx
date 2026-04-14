@@ -1,70 +1,68 @@
 "use client"
 
-import { useEffect, useRef, useState, useCallback } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
+import { usePathname } from "next/navigation"
 import { formatDistanceToNow } from "date-fns"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
-  MessageCircle,
-  X,
-  Minimize2,
-  Maximize2,
-  Smile,
-  Send,
   Loader2,
+  Maximize2,
+  MessageCircle,
+  Minimize2,
   MoreVertical,
-  Reply,
-  Trash2,
   Pencil,
+  Reply,
+  Send,
+  Smile,
+  Trash2,
+  X,
 } from "lucide-react"
-import { useAddChatMessage } from "@/features/chats/hooks/useAddChatMessage"
-import { useRealtimeChats } from "@/features/chats/hooks/useRealtimeChats"
-import { useTyping } from "@/features/chats/hooks/useTyping"
-import { useReactions } from "@/features/chats/hooks/useReactions"
-import { useEditDelete } from "@/features/chats/hooks/useEditDelete"
-import { editMessage } from "@/features/chats/services/edit-delete.service"
-import ChatsPanelSkeleton from "@/features/chats/components/ChatsPanelSkeleton"
+
 import type { ChatMessage } from "@/types"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { usePathname } from "next/navigation"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Input } from "@/components/ui/input"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Textarea } from "@/components/ui/textarea"
+import ChatsPanelSkeleton from "@/features/chats/components/ChatsPanelSkeleton"
+import { useAddChatMessage } from "@/features/chats/hooks/useAddChatMessage"
+import { useEditDelete } from "@/features/chats/hooks/useEditDelete"
+import { useRealtimeChats } from "@/features/chats/hooks/useRealtimeChats"
+import { useReactions } from "@/features/chats/hooks/useReactions"
+import { useTyping } from "@/features/chats/hooks/useTyping"
+import { editMessage } from "@/features/chats/services/edit-delete.service"
 
 const COMMON_EMOJIS = ["👍", "❤️", "😂", "🎉", "🔥", "👏", "😍", "🤔", "🤘"]
 
-const generateUserId = () => {
-  if (typeof window !== "undefined") {
-    let userId = localStorage.getItem("chatUserId")
-    if (!userId) {
-      userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-      localStorage.setItem("chatUserId", userId)
-    }
-    return userId
+function generateUserId(): string {
+  if (typeof window === "undefined") return "guest"
+
+  let userId = localStorage.getItem("chatUserId")
+  if (!userId) {
+    userId = `user_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`
+    localStorage.setItem("chatUserId", userId)
   }
-  return "guest"
+  return userId
 }
 
-const getStoredDisplayName = () => {
-  if (typeof window !== "undefined") {
-    return localStorage.getItem("chatDisplayName") || ""
-  }
-  return ""
+function getStoredDisplayName(): string {
+  if (typeof window === "undefined") return ""
+  return localStorage.getItem("chatDisplayName") ?? ""
 }
 
 export default function ChatWidget() {
@@ -79,7 +77,7 @@ export default function ChatWidget() {
   const { messages, loading: messagesLoading } = useRealtimeChats()
   const addChatMessage = useAddChatMessage()
 
-  const pathName = usePathname()
+  const pathname = usePathname()
 
   const { typingUsers, updateTyping } = useTyping(
     currentUserId,
@@ -143,182 +141,175 @@ export default function ChatWidget() {
   }
 
   return (
-    <>
+    <div
+      className={`fixed right-0 bottom-0 z-50 flex flex-col rounded-lg border border-border bg-card shadow-xl transition-all duration-200 ${
+        isMinimized ? "h-10 w-64" : "h-96 w-80 sm:w-96"
+      } ${pathname === "/" && "hidden"}`}
+    >
+      {/* Header */}
       <div
-        className={`fixed right-0 bottom-0 z-50 flex flex-col rounded-lg border border-border bg-card shadow-xl transition-all duration-200 ${
-          isMinimized ? "h-10 w-64" : "h-96 w-80 sm:w-96"
-        } ${pathName === "/" && "hidden"}`}
+        onClick={() => setIsMinimized(!isMinimized)}
+        className="flex cursor-pointer items-center justify-between rounded-t-lg border-b border-border bg-primary px-3 py-2"
       >
-        {/* Header */}
-        <div
-          onClick={() => setIsMinimized(!isMinimized)}
-          className="flex cursor-pointer items-center justify-between rounded-t-lg border-b border-border bg-primary px-3 py-2"
-        >
-          <div className="flex items-center gap-2">
-            <MessageCircle className="h-4 w-4 text-primary-foreground" />
-            <span className="text-sm font-semibold text-primary-foreground">
-              Chat
-            </span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 text-primary-foreground hover:bg-primary-foreground/20"
-            >
-              {isMinimized ? (
-                <Maximize2 className="h-3.5 w-3.5" />
-              ) : (
-                <Minimize2 className="h-3.5 w-3.5" />
-              )}
-            </Button>
-          </div>
+        <div className="flex items-center gap-2">
+          <MessageCircle className="h-4 w-4 text-primary-foreground" />
+          <span className="text-sm font-semibold text-primary-foreground">
+            Chat
+          </span>
         </div>
-
-        {!isMinimized && (
-          <>
-            {/* Messages */}
-            <div className="min-h-0 flex-1">
-              <ScrollArea className="h-full p-2">
-                <div className="space-y-2">
-                  {messagesLoading ? (
-                    <ChatsPanelSkeleton className="h-full border-0 shadow-none" />
-                  ) : messages.length === 0 ? (
-                    <p className="py-4 text-center text-xs text-muted-foreground">
-                      No messages yet. Say hello!
-                    </p>
-                  ) : (
-                    messages.map((item) => (
-                      <MessageItem
-                        key={item.id}
-                        message={item}
-                        currentUserId={currentUserId}
-                        displayName={displayName}
-                        getReplyMessage={getReplyMessage}
-                        onReply={() => setReplyTo(item)}
-                        onStartEdit={(msg) => {
-                          setEditingMessage(msg)
-                          setEditText(msg.message)
-                        }}
-                      />
-                    ))
-                  )}
-                  <div ref={messagesEndRef} />
-                </div>
-              </ScrollArea>
-            </div>
-
-            {/* Typing Indicator */}
-            {typingUsers.length > 0 && (
-              <div className="px-2 py-0.5 text-[10px] text-muted-foreground italic">
-                {formatTypingIndicator()}
-              </div>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-primary-foreground hover:bg-primary-foreground/20"
+          >
+            {isMinimized ? (
+              <Maximize2 className="h-3.5 w-3.5" />
+            ) : (
+              <Minimize2 className="h-3.5 w-3.5" />
             )}
+          </Button>
+        </div>
+      </div>
 
-            {/* Reply Preview */}
-            {replyTo && (
-              <div className="flex items-center justify-between border-t border-border bg-muted/50 px-2 py-1.5">
-                <div className="flex min-w-0 items-center gap-1.5 text-xs">
-                  <Reply className="h-3 w-3 shrink-0" />
-                  <span className="shrink-0 text-muted-foreground">
-                    Reply to
-                  </span>
-                  <span className="shrink-0 font-medium">
-                    {replyTo.displayName}
-                  </span>
-                  <span className="truncate text-muted-foreground">
-                    {replyTo.message}
-                  </span>
-                </div>
+      {!isMinimized && (
+        <>
+          {/* Messages */}
+          <div className="min-h-0 flex-1">
+            <ScrollArea className="h-full p-2">
+              <div className="space-y-2">
+                {messagesLoading ? (
+                  <ChatsPanelSkeleton className="h-full border-0 shadow-none" />
+                ) : messages.length === 0 ? (
+                  <p className="py-4 text-center text-xs text-muted-foreground">
+                    No messages yet. Say hello!
+                  </p>
+                ) : (
+                  messages.map((item) => (
+                    <MessageItem
+                      key={item.id}
+                      message={item}
+                      currentUserId={currentUserId}
+                      displayName={displayName}
+                      getReplyMessage={getReplyMessage}
+                      onReply={() => setReplyTo(item)}
+                      onStartEdit={(msg) => {
+                        setEditingMessage(msg)
+                        setEditText(msg.message)
+                      }}
+                    />
+                  ))
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+            </ScrollArea>
+          </div>
+
+          {/* Typing Indicator */}
+          {typingUsers.length > 0 && (
+            <div className="px-2 py-0.5 text-[10px] text-muted-foreground italic">
+              {formatTypingIndicator()}
+            </div>
+          )}
+
+          {/* Reply Preview */}
+          {replyTo && (
+            <div className="flex items-center justify-between border-t border-border bg-muted/50 px-2 py-1.5">
+              <div className="flex min-w-0 items-center gap-1.5 text-xs">
+                <Reply className="h-3 w-3 shrink-0" />
+                <span className="shrink-0 text-muted-foreground">Reply to</span>
+                <span className="shrink-0 font-medium">
+                  {replyTo.displayName}
+                </span>
+                <span className="truncate text-muted-foreground">
+                  {replyTo.message}
+                </span>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-5 w-5 shrink-0"
+                onClick={() => setReplyTo(null)}
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </div>
+          )}
+
+          {/* Input */}
+          <form onSubmit={handleSubmit} className="border-t border-border p-2">
+            <div className="flex gap-1.5">
+              <Input
+                placeholder="Name"
+                value={displayName}
+                onChange={(e) => handleDisplayNameChange(e.target.value)}
+                className="h-8 w-20 shrink-0 text-xs"
+                disabled={addChatMessage.isPending}
+              />
+              <div className="flex flex-1 gap-1">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 shrink-0"
+                    >
+                      <Smile className="h-4 w-4" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-2" align="end">
+                    <div className="grid grid-cols-8 gap-1">
+                      {COMMON_EMOJIS.map((emoji) => (
+                        <button
+                          key={emoji}
+                          type="button"
+                          onClick={() => setMessage((prev) => prev + emoji)}
+                          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded text-lg transition-colors hover:bg-muted"
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+                <Textarea
+                  ref={inputRef}
+                  placeholder="Type..."
+                  value={message}
+                  onChange={(e) => handleTyping(e.target.value)}
+                  disabled={addChatMessage.isPending}
+                  rows={1}
+                  className="min-h-8 flex-1 resize-none text-sm"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault()
+                      handleSubmit(e)
+                    }
+                  }}
+                />
                 <Button
-                  variant="ghost"
+                  type="submit"
+                  disabled={addChatMessage.isPending || !message.trim()}
                   size="icon"
-                  className="h-5 w-5 shrink-0"
-                  onClick={() => setReplyTo(null)}
+                  className="h-8 w-8 shrink-0"
                 >
-                  <X className="h-3 w-3" />
+                  {addChatMessage.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
+            </div>
+            {addChatMessage.error && (
+              <p className="mt-1 text-xs text-destructive">
+                {addChatMessage.error.message}
+              </p>
             )}
-
-            {/* Input */}
-            <form
-              onSubmit={handleSubmit}
-              className="border-t border-border p-2"
-            >
-              <div className="flex gap-1.5">
-                <Input
-                  placeholder="Name"
-                  value={displayName}
-                  onChange={(e) => handleDisplayNameChange(e.target.value)}
-                  className="h-8 w-20 shrink-0 text-xs"
-                  disabled={addChatMessage.isPending}
-                />
-                <div className="flex flex-1 gap-1">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 shrink-0"
-                      >
-                        <Smile className="h-4 w-4" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-2" align="end">
-                      <div className="grid grid-cols-8 gap-1">
-                        {COMMON_EMOJIS.map((emoji) => (
-                          <button
-                            key={emoji}
-                            type="button"
-                            onClick={() => setMessage((prev) => prev + emoji)}
-                            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded text-lg transition-colors hover:bg-muted"
-                          >
-                            {emoji}
-                          </button>
-                        ))}
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                  <Textarea
-                    ref={inputRef}
-                    placeholder="Type..."
-                    value={message}
-                    onChange={(e) => handleTyping(e.target.value)}
-                    disabled={addChatMessage.isPending}
-                    rows={1}
-                    className="min-h-8 flex-1 resize-none text-sm"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault()
-                        handleSubmit(e)
-                      }
-                    }}
-                  />
-                  <Button
-                    type="submit"
-                    disabled={addChatMessage.isPending || !message.trim()}
-                    size="icon"
-                    className="h-8 w-8 shrink-0"
-                  >
-                    {addChatMessage.isPending ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Send className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-              {addChatMessage.error && (
-                <p className="mt-1 text-xs text-destructive">
-                  {addChatMessage.error.message}
-                </p>
-              )}
-            </form>
-          </>
-        )}
-      </div>
+          </form>
+        </>
+      )}
 
       {/* Edit Dialog */}
       <Dialog
@@ -358,7 +349,7 @@ export default function ChatWidget() {
           </div>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   )
 }
 

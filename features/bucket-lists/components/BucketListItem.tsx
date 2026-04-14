@@ -1,21 +1,17 @@
+import { MapPin, MoreHorizontal, Wallet } from "lucide-react"
+
 import type { BucketList } from "@/types"
 import { cn } from "@/lib/utils"
-import DeleteBucketListButton from "./DeleteBucketListButton"
-import ToggleBucketListButton from "./ToggleBucketListButton"
-import UpdateBucketListButton from "./UpdateBucketListButton"
+import { Badge } from "@/components/ui/badge"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { Badge } from "@/components/ui/badge"
-import {
-  MoreHorizontal,
-  MapPin,
-  Wallet,
-  CheckCircle2,
-  Circle,
-} from "lucide-react"
+
+import DeleteBucketListButton from "./DeleteBucketListButton"
+import ToggleBucketListButton from "./ToggleBucketListButton"
+import UpdateBucketListButton from "./UpdateBucketListButton"
 
 interface BucketListItemProps {
   item: Partial<BucketList>
@@ -41,11 +37,11 @@ export default function BucketListItem({
   return (
     <div
       className={cn(
-        "group relative flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-sm transition-all duration-200",
+        "group relative flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-sm transition-all duration-300 ease-out",
         isSelectionMode ? "cursor-pointer" : "cursor-default",
         isSelected
-          ? "border-primary bg-primary/5 ring-1 ring-primary"
-          : "border-border/50 hover:border-primary/30 hover:bg-card/80 hover:shadow-md",
+          ? "border-primary/50 bg-primary/5 shadow-md ring-1 shadow-primary/10 ring-primary/30"
+          : "border-border/40 hover:-translate-y-0.5 hover:border-primary/20 hover:bg-card/90 hover:shadow-lg hover:shadow-primary/5",
         className
       )}
       onClick={handleItemClick}
@@ -82,7 +78,7 @@ export default function BucketListItem({
           <PopoverTrigger asChild>
             <button
               className={cn(
-                "cursor-pointer shrink-0 rounded-md p-1.5 transition-all duration-150",
+                "shrink-0 cursor-pointer rounded-md p-1.5 transition-all duration-150",
                 "hover:bg-accent hover:text-accent-foreground",
                 "focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none"
               )}

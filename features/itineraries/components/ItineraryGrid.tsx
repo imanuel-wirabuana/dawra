@@ -1,14 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import { useRealtimeItineraryItems } from "../hooks/useRealtimeItineraryItems"
-import { useGetBucketListItems } from "../hooks/useGetBucketListItems"
-import { useUpdateItineraryItem } from "../hooks/useUpdateItineraryItem"
-import { useToggleItineraryItem } from "../hooks/useToggleItineraryItem"
-import { useDeleteItineraryItem } from "../hooks/useDeleteItineraryItem"
-import GridTimeline from "@/features/itineraries/components/GridTimeline"
-import ItineraryForm from "./ItineraryForm"
-import { Plus, CalendarDays, Wallet, ListTodo } from "lucide-react"
+import { format, isSameDay, parseISO } from "date-fns"
+import { CalendarDays, ListTodo, Plus, Wallet } from "lucide-react"
+
+import type { Category, ItineraryItem } from "@/types"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Sheet,
   SheetContent,
@@ -16,12 +14,16 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
-import EditItineraryItemSheet from "./EditItineraryItemSheet"
-import type { ItineraryItem, Category } from "@/types"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { useItineraryStore } from "@/store/itineraryStore"
-import { isSameDay, parseISO, format } from "date-fns"
+import GridTimeline from "@/features/itineraries/components/GridTimeline"
+
+import { useDeleteItineraryItem } from "../hooks/useDeleteItineraryItem"
+import { useGetBucketListItems } from "../hooks/useGetBucketListItems"
+import { useRealtimeItineraryItems } from "../hooks/useRealtimeItineraryItems"
+import { useToggleItineraryItem } from "../hooks/useToggleItineraryItem"
+import { useUpdateItineraryItem } from "../hooks/useUpdateItineraryItem"
+import EditItineraryItemSheet from "./EditItineraryItemSheet"
+import ItineraryForm from "./ItineraryForm"
 
 export default function ItineraryGrid() {
   const itineraryItems = useRealtimeItineraryItems()
@@ -180,21 +182,21 @@ export default function ItineraryGrid() {
   return (
     <>
       <Card className="overflow-hidden border-border/60 shadow-lg shadow-black/5">
-        <CardHeader className="border-b border-border/50 bg-gradient-to-b from-muted/50 to-muted/20 px-3 py-3 sm:px-5 sm:py-4">
+        <CardHeader className="border-b border-border/50 bg-linear-to-b from-muted/50 to-muted/20 px-3 py-3 sm:px-5 sm:py-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2 sm:gap-3">
               <Sheet open={formOpen} onOpenChange={setFormOpen}>
                 <SheetTrigger asChild>
                   <Button
                     size="sm"
-                    className="h-8 sm:h-9 gap-1.5 bg-primary px-3 sm:px-4 font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:shadow-md hover:shadow-primary/20 active:scale-[0.98]"
+                    className="h-8 gap-1.5 bg-primary px-3 font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:shadow-md hover:shadow-primary/20 active:scale-[0.98] sm:h-9 sm:px-4"
                   >
                     <Plus className="h-4 w-4" />
                     <span className="hidden sm:inline">Add Item</span>
                     <span className="sm:hidden">Add</span>
                   </Button>
                 </SheetTrigger>
-                <SheetContent className="sm:max-w-md w-full">
+                <SheetContent className="w-full sm:max-w-md">
                   <SheetHeader>
                     <SheetTitle className="flex items-center gap-2 text-base">
                       <CalendarDays className="h-4 w-4 text-primary" />
@@ -208,7 +210,7 @@ export default function ItineraryGrid() {
               </Sheet>
             </div>
             <div className="flex items-center gap-2 sm:gap-4">
-              <div className="flex items-center gap-1.5 sm:gap-2 text-xs text-muted-foreground bg-muted/40 px-2 sm:px-3 py-1.5 rounded-full">
+              <div className="flex items-center gap-1.5 rounded-full bg-muted/40 px-2 py-1.5 text-xs text-muted-foreground sm:gap-2 sm:px-3">
                 <ListTodo className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                 <span className="font-medium">
                   {transformedItems.length}{" "}
@@ -216,10 +218,16 @@ export default function ItineraryGrid() {
                 </span>
               </div>
               {totalCost > 0 && (
-                <div className="flex items-center gap-1.5 sm:gap-2 rounded-full bg-gradient-to-r from-emerald-100 to-emerald-50 px-2 sm:px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:from-emerald-900/30 dark:to-emerald-900/20 dark:text-emerald-400 shadow-sm">
+                <div className="flex items-center gap-1.5 rounded-full bg-linear-to-r from-emerald-100 to-emerald-50 px-2 py-1.5 text-xs font-semibold text-emerald-700 shadow-sm sm:gap-2 sm:px-3 dark:from-emerald-900/30 dark:to-emerald-900/20 dark:text-emerald-400">
                   <Wallet className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                  <span className="hidden sm:inline">Rp {totalCost.toLocaleString("id-ID")}</span>
-                  <span className="sm:hidden">{totalCost >= 1000000 ? `${(totalCost / 1000000).toFixed(1)}M` : `${(totalCost / 1000).toFixed(0)}K`}</span>
+                  <span className="hidden sm:inline">
+                    Rp {totalCost.toLocaleString("id-ID")}
+                  </span>
+                  <span className="sm:hidden">
+                    {totalCost >= 1000000
+                      ? `${(totalCost / 1000000).toFixed(1)}M`
+                      : `${(totalCost / 1000).toFixed(0)}K`}
+                  </span>
                 </div>
               )}
             </div>

@@ -1,27 +1,29 @@
 "use client"
 
-import { useState, useRef, forwardRef, useImperativeHandle } from "react"
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
-import PhotoCard from "./PhotoCard"
-import PhotoViewModeSelector, {
-  type PhotoViewMode,
-} from "./PhotoViewModeSelector"
-import PhotoBulkDeleteButton, {
-  type PhotoBulkDeleteButtonRef,
-} from "./PhotoBulkDeleteButton"
-import { usePhotoSelection } from "../hooks/usePhotoSelection"
-import { useMovePhotos } from "../hooks/useMovePhotos"
-import { CheckSquare, X, ArrowLeft, Info, Folder, Filter } from "lucide-react"
+import { forwardRef, useImperativeHandle, useRef, useState } from "react"
+import { ArrowLeft, CheckSquare, Filter, Folder, Info, X } from "lucide-react"
 import { useHotkey } from "@tanstack/react-hotkeys"
+
+import type { Folder as FolderType, Photo } from "@/types"
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import type { Photo, Folder as FolderType } from "@/types"
+
+import { useMovePhotos } from "../hooks/useMovePhotos"
+import { usePhotoSelection } from "../hooks/usePhotoSelection"
 import MoveToFolderDialog from "./MoveToFolderDialog"
+import PhotoBulkDeleteButton, {
+  type PhotoBulkDeleteButtonRef,
+} from "./PhotoBulkDeleteButton"
+import PhotoCard from "./PhotoCard"
 import PhotoGalleryModal from "./PhotoGalleryModal"
+import PhotoViewModeSelector, {
+  type PhotoViewMode,
+} from "./PhotoViewModeSelector"
 
 interface PhotoGridProps {
   photos: Photo[]
@@ -236,7 +238,7 @@ const PhotoGrid = forwardRef<PhotoGridRef, PhotoGridProps>(
       <div className={className}>
         {/* Selection Mode Header */}
         {isSelectionMode ? (
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/50 bg-gradient-to-r from-primary/20 to-primary/5 p-3">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/50 bg-linear-to-r from-primary/20 to-primary/5 p-3">
             <div className="flex items-center gap-2">
               <CheckSquare className="h-4 w-4 text-primary" />
               <span className="text-sm font-medium text-primary">
@@ -311,7 +313,7 @@ const PhotoGrid = forwardRef<PhotoGridRef, PhotoGridProps>(
             </div>
           </div>
         ) : (
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border/50 bg-gradient-to-b from-card/70 to-card/40 p-2">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border/50 bg-linear-to-b from-card/70 to-card/40 p-2">
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"

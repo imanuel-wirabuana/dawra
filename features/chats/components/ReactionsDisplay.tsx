@@ -1,10 +1,12 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { EmojiPicker } from "./EmojiPicker"
 import { Plus } from "lucide-react"
+
+import { Button } from "@/components/ui/button"
 import type { Reaction } from "@/types"
+
 import { useReactions } from "../hooks/useReactions"
+import { EmojiPicker } from "./EmojiPicker"
 
 interface ReactionsDisplayProps {
   messageId: string
@@ -19,13 +21,16 @@ export function ReactionsDisplay({
 }: ReactionsDisplayProps) {
   const { addReaction, removeReaction } = useReactions(messageId)
 
-  const groupedReactions = reactions.reduce((acc, reaction) => {
-    if (!acc[reaction.emoji]) {
-      acc[reaction.emoji] = []
-    }
-    acc[reaction.emoji].push(reaction)
-    return acc
-  }, {} as Record<string, Reaction[]>)
+  const groupedReactions = reactions.reduce<Record<string, Reaction[]>>(
+    (acc, reaction) => {
+      if (!acc[reaction.emoji]) {
+        acc[reaction.emoji] = []
+      }
+      acc[reaction.emoji].push(reaction)
+      return acc
+    },
+    {}
+  )
 
   const handleReactionClick = (emoji: string) => {
     const hasReacted = groupedReactions[emoji]?.some(
@@ -44,7 +49,7 @@ export function ReactionsDisplay({
   }
 
   return (
-    <div className="flex items-center gap-1 mt-1 flex-wrap">
+    <div className="mt-1 flex flex-wrap items-center gap-1">
       {Object.entries(groupedReactions).map(([emoji, emojiReactions]) => {
         const hasUserReacted = emojiReactions.some(
           (r) => r.userId === currentUserId
@@ -54,7 +59,7 @@ export function ReactionsDisplay({
             key={emoji}
             variant={hasUserReacted ? "secondary" : "ghost"}
             size="sm"
-            className="h-6 px-2 text-xs rounded-full"
+            className="h-6 rounded-full px-2 text-xs"
             onClick={() => handleReactionClick(emoji)}
             title={emojiReactions.map((r) => r.displayName).join(", ")}
           >
@@ -67,7 +72,7 @@ export function ReactionsDisplay({
         <Button
           variant="ghost"
           size="sm"
-          className="h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+          className="h-6 w-6 rounded-full opacity-0 transition-opacity group-hover:opacity-100"
         >
           <Plus className="h-3 w-3" />
         </Button>

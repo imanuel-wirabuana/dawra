@@ -1,4 +1,10 @@
-import { Geist, Geist_Mono, Figtree, Pacifico, Parisienne } from "next/font/google"
+import {
+  Geist,
+  Geist_Mono,
+  Figtree,
+  Pacifico,
+  Parisienne,
+} from "next/font/google"
 import type { Metadata } from "next"
 
 import "./globals.css"
@@ -56,21 +62,33 @@ export default function RootLayout({
         parisienne.variable
       )}
     >
-      <body>
+      <body className="min-h-screen bg-background">
         <Providers>
-          <TooltipProvider>
+          <TooltipProvider delayDuration={200}>
             <ThemeProvider>
-              {/* <Navbar className="sticky top-0 z-50" /> */}
-              <header className="container mx-auto px-4 py-3 sm:px-6 lg:px-8 border-b-4 border-muted border-dashed">
-                <div className="flex flex-row items-center justify-between">
+              {/* Modern Glassmorphism Header */}
+              <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/70 backdrop-blur-2xl transition-all duration-300">
+                <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
                   <Brand size="md" />
-                  <DynamicBreadcrumb />
+                  <div className="flex items-center gap-4">
+                    <DynamicBreadcrumb />
+                  </div>
                 </div>
               </header>
-              {children}
+
+              {/* Main Content with refined spacing */}
+              <main className="relative flex-1">{children}</main>
+
+              {/* Elegant Footer */}
               <Footer />
+
+              {/* Floating Navigation */}
               <FloatingNav />
+
+              {/* Chat Widget */}
               <ChatWidget />
+
+              {/* Toast Notifications */}
               <Toaster position="top-center" richColors />
             </ThemeProvider>
           </TooltipProvider>
