@@ -1,5 +1,3 @@
-import { drive } from "@/lib/gdrive/gdrive"
-import { Readable } from "stream"
 import { db } from "@/lib/firebase/client"
 import {
   collection,
@@ -15,61 +13,27 @@ import type { Photo } from "@/types"
 const COLLECTION_NAME = "photos"
 
 /**
- * POST handler for uploading a new photo
- * @param {Request} request - The incoming request object with form data
- * @returns {Promise<Response>} JSON response with uploaded photo data
+ * POST handler for saving photo metadata (file upload now happens client-side)
+ * @param {Request} request - The incoming request object with photo metadata
+ * @returns {Promise<Response>} JSON response with saved photo data
  */
 export const POST = async (request: Request) => {
   try {
-    const formData = await request.formData()
-    const file = formData.get("file") as File
-    const folderId = formData.get("folderId") as string | undefined
+    const body = await request.json()
+    const { id, url, realFileName, extension, size, folderId } = body
 
-    if (!file) {
-      return Response.json(apiError("No file provided"), { status: 400 })
+    if (!id || !url) {
+      return Response.json(apiError("Missing required photo metadata"), { status: 400 })
     }
-
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
-    const now = new Date()
-    const date = now.toISOString().split("T")[0].replace(/-/g, "")
-    const time = now.toTimeString().split(" ")[0].replace(/:/g, "")
-    const extension = file.name.split(".").pop()
-    const fileName = `dawra${date}${time}.${extension}`
-
-    // Upload to Google Drive
-    const res = await drive.files.create({
-      requestBody: {
-        name: fileName,
-        parents: [process.env.NEXT_PUBLIC_GDRIVE_FOLDER_ID!],
-      },
-      media: {
-        mimeType: file.type,
-        body: Readable.from(buffer),
-      },
-      fields: "id,webViewLink",
-    })
-
-    const fileId = res.data.id!
-    const webViewLink = res.data.webViewLink!
-
-    // Make file public
-    await drive.permissions.create({
-      fileId,
-      requestBody: {
-        role: "reader",
-        type: "anyone",
-      },
-    })
 
     // Create Photo object
     const photo = {
-      id: fileId,
-      url: webViewLink,
-      name: fileName,
-      realFileName: file.name,
+      id,
+      url,
+      name: realFileName,
+      realFileName,
       extension: extension || "",
-      size: file.size,
+      size: size || 0,
       folderId: folderId || null,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
@@ -85,7 +49,7 @@ export const POST = async (request: Request) => {
     )
   } catch (error) {
     console.error(error)
-    return Response.json(apiError("Failed to upload photo"), { status: 500 })
+    return Response.json(apiError("Failed to save photo metadata"), { status: 500 })
   }
 }
 

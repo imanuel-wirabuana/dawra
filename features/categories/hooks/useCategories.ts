@@ -4,6 +4,7 @@ import {
   addCategory,
   deleteCategory,
 } from "../services/category.service"
+import { addActivity } from "@/features/activities/services/add.service"
 import type { Category } from "@/types"
 import { toast } from "sonner"
 
@@ -23,6 +24,20 @@ export function useCategories() {
         const result = await addCategory(category)
         if (result.success) {
           toast.success("Category created", { id: toastId })
+
+          // Log activity (non-blocking)
+          addActivity({
+            type: "category.create",
+            entity: "category",
+            entityId: result.id || "",
+            message: `Created category: ${category.name}`,
+            metadata: {
+              categoryName: category.name,
+              categoryColor: category.color,
+            },
+          }).catch(() => {
+            // Ignore errors - activities are non-blocking
+          })
         } else {
           toast.error(result.error || "Failed to create category", {
             id: toastId,
@@ -49,6 +64,17 @@ export function useCategories() {
         const result = await deleteCategory(id)
         if (result.success) {
           toast.success("Category deleted", { id: toastId })
+
+          // Log activity (non-blocking)
+          addActivity({
+            type: "category.delete",
+            entity: "category",
+            entityId: id,
+            message: "Deleted a category",
+            metadata: {},
+          }).catch(() => {
+            // Ignore errors - activities are non-blocking
+          })
         } else {
           toast.error(result.error || "Failed to delete category", {
             id: toastId,

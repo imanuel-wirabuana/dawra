@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { deleteItineraryItem } from "../services/delete.service"
+import { addActivity } from "@/features/activities/services/add.service"
 import { toast } from "sonner"
 
 export function useDeleteItineraryItem() {
@@ -14,6 +15,17 @@ export function useDeleteItineraryItem() {
         const result = await deleteItineraryItem(id)
         if (result.success) {
           toast.success("Itinerary item deleted", { id: toastId })
+
+          // Log activity (non-blocking)
+          addActivity({
+            type: "itinerary.delete",
+            entity: "itinerary",
+            entityId: id,
+            message: "Deleted itinerary",
+            metadata: {},
+          }).catch(() => {
+            // Ignore errors - activities are non-blocking
+          })
         } else {
           toast.error(result.error || "Failed to delete item", { id: toastId })
         }

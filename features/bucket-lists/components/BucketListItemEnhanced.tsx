@@ -197,6 +197,7 @@ export default function BucketListItemEnhanced({
                 <ToggleBucketListButton
                   itemId={item.id}
                   completed={item.completed}
+                  title={item.title}
                 />
               </motion.div>
             )}

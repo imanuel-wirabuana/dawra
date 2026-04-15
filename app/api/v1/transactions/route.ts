@@ -55,23 +55,25 @@ export const GET = async (request: Request) => {
 /**
  * POST handler for adding a new transaction
  * @param {Request} request - The incoming request object
- * @returns {Promise<Response>} JSON response indicating success or failure
+ * @returns {Promise<Response>} JSON response with created transaction ID
  */
 export const POST = async (request: Request) => {
   const body = await request.json()
   try {
-    await addDoc(collection(db, COLLECTION_NAME), {
+    const docRef = await addDoc(collection(db, COLLECTION_NAME), {
       ...body,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     })
+    return Response.json(
+      apiSuccess({ id: docRef.id }, "Transaction added successfully"),
+      {
+        status: 201,
+      }
+    )
   } catch {
     return Response.json(apiError("Failed to add transaction"), {
       status: 500,
     })
   }
-
-  return Response.json(apiSuccess(null, "Transaction added successfully"), {
-    status: 201,
-  })
 }

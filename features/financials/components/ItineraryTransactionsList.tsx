@@ -130,6 +130,19 @@ export function ItineraryTransactionsList({
 
   return (
     <div className="divide-y divide-border/50">
+      {hasChanges && (
+        <div className="flex justify-end bg-muted/30 px-4 py-3">
+          <Button
+            onClick={handleSave}
+            disabled={isSaving}
+            size="sm"
+            className="gap-1.5"
+          >
+            <Save className="h-4 w-4" />
+            {isSaving ? "Saving..." : "Save Changes"}
+          </Button>
+        </div>
+      )}
       {pendingItems.map((item) => {
         const existingTransaction = existingTransactionMap[item.id]
         // Include transaction ID in key to force re-mount when transaction changes

@@ -6,12 +6,14 @@ import { useToggleBucketList } from "../hooks/useToggleBucketList"
 interface ToggleBucketListButtonProps {
   itemId: string | undefined
   completed: boolean | undefined
+  title?: string
   className?: string
 }
 
 export default function ToggleBucketListButton({
   itemId,
   completed,
+  title,
   className,
 }: ToggleBucketListButtonProps) {
   const toggleMutation = useToggleBucketList()
@@ -19,7 +21,7 @@ export default function ToggleBucketListButton({
   const handleToggle = (e: React.MouseEvent) => {
     e.stopPropagation()
     if (itemId) {
-      toggleMutation.mutate({ id: itemId, completed: !completed })
+      toggleMutation.mutate({ id: itemId, completed: !completed, title })
     }
   }
 

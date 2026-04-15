@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { updateBucketList } from "../services/update.service"
+import { addActivity } from "@/features/activities/services/add.service"
 import type { Category } from "@/types"
 import { toast } from "sonner"
 
@@ -34,6 +35,20 @@ export function useUpdateBucketList() {
         })
         if (result.success) {
           toast.success("Item updated successfully", { id: toastId })
+
+          // Log activity (non-blocking)
+          addActivity({
+            type: "bucket.update",
+            entity: "bucket-list",
+            entityId: id,
+            message: `Updated bucket list: ${title}`,
+            metadata: {
+              cost,
+              location,
+            },
+          }).catch(() => {
+            // Ignore errors - activities are non-blocking
+          })
         } else {
           toast.error(result.error || "Failed to update item", { id: toastId })
         }

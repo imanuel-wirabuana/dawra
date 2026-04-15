@@ -6,7 +6,7 @@ import { Plus, ListTodo, Wallet, CalendarIcon } from "lucide-react"
 
 import type { Transaction } from "@/types"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Card, CardHeader } from "@/components/ui/card"
 import {
   Sheet,
   SheetContent,
@@ -140,11 +140,6 @@ export default function FinancialsGrid() {
       console.error(error)
     }
   }
-
-  // Custom transactions only
-  const customTransactions = useMemo(() => {
-    return transactions.filter((t) => !t.itineraryItemId)
-  }, [transactions])
 
   return (
     <div className="space-y-6">

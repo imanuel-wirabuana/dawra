@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { addItineraryItem } from "../services/add.service"
+import { addActivity } from "@/features/activities/services/add.service"
 import type { ItineraryItem } from "@/types"
 import { toast } from "sonner"
 
@@ -13,6 +14,26 @@ export function useAddItineraryItem() {
         const result = await addItineraryItem(item)
         if (result.success) {
           toast.success("Itinerary item added", { id: toastId })
+
+          // Log activity (non-blocking)
+          const title =
+            item.itemType === "bucket-list"
+              ? item.bucketList
+              : item.customItem?.title || "New itinerary"
+          addActivity({
+            type: "itinerary.create",
+            entity: "itinerary",
+            entityId: result.id || "",
+            message: `Created itinerary: ${title}`,
+            metadata: {
+              date: item.date,
+              start: item.start,
+              end: item.end,
+              itemType: item.itemType,
+            },
+          }).catch(() => {
+            // Ignore errors - activities are non-blocking
+          })
         } else {
           toast.error(result.error || "Failed to add item", { id: toastId })
         }

@@ -309,3 +309,58 @@ type Transaction = {
   type: "income" | "expense"
   itineraryItemId?: string
 }
+
+// ============================================================================
+// ACTIVITIES
+// ============================================================================
+
+/**
+ * Activity type for tracking user actions across the app
+ * Activities are append-only, non-blocking, and user-facing history
+ */
+type ActivityType =
+  | "transaction.view"
+  | "transaction.create"
+  | "transaction.update"
+  | "transaction.delete"
+  | "itinerary.view"
+  | "itinerary.create"
+  | "itinerary.update"
+  | "itinerary.complete"
+  | "itinerary.delete"
+  | "bucket.view"
+  | "bucket.create"
+  | "bucket.update"
+  | "bucket.complete"
+  | "bucket.delete"
+  | "category.create"
+  | "category.delete"
+  | "chat.view"
+  | "chat.create"
+  | "chat.update"
+  | "chat.delete"
+  | "folder.create"
+  | "folder.update"
+  | "folder.delete"
+  | "photo.create"
+  | "photo.update"
+  | "photo.delete"
+
+type ActivityEntity = "transaction" | "itinerary" | "bucket-list" | "category" | "chat" | "photo" | "folder"
+
+type Activity = {
+  /** Unique identifier (Firebase document ID) */
+  id?: string
+  /** Action type (namespaced) */
+  type: ActivityType
+  /** Entity type */
+  entity: ActivityEntity
+  /** Reference ID of the affected entity */
+  entityId: string
+  /** Human-readable message */
+  message: string
+  /** Structured data */
+  metadata: Record<string, unknown>
+  /** Firebase timestamp */
+  createdAt?: Timestamp
+}

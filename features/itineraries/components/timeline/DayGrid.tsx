@@ -63,7 +63,7 @@ export default function DayGrid({
         className="sticky left-0 z-20 shrink-0 border-r bg-background"
         style={{ width: SIDEBAR_WIDTH }}
       >
-        <div className="h-8 border-b bg-muted/30" />
+        <div className="h-10 border-b bg-muted/30" />
         <div style={{ height: totalHeight }}>
           {hours.map((hour) => (
             <div
@@ -71,7 +71,7 @@ export default function DayGrid({
               className="relative border-b border-muted-foreground/20"
               style={{ height: HOUR_HEIGHT }}
             >
-              <span className="absolute -top-2 right-2 text-xs text-muted-foreground">
+              <span className="absolute right-2 text-xs text-muted-foreground">
                 {hour}:00
               </span>
             </div>

@@ -53,6 +53,7 @@ export default function BucketListItem({
             <ToggleBucketListButton
               itemId={item.id}
               completed={item.completed}
+              title={item.title}
               className="shrink-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100"
             />
           )}

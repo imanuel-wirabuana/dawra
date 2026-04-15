@@ -60,7 +60,7 @@ export default function MonthGrid({
   }
 
   return (
-    <div className={cn("flex h-full flex-col border bg-background rounded-lg overflow-hidden", className)}>
+    <div className={cn("flex h-fit flex-col border bg-background rounded-lg overflow-hidden", className)}>
       {/* Week day headers */}
       <div className="grid grid-cols-7 border-b bg-muted/40">
         {weekDayNames.map((name) => (
@@ -76,7 +76,7 @@ export default function MonthGrid({
       {/* Calendar grid */}
       <div className="flex-1 overflow-auto">
         {weeks.map((week, weekIndex) => (
-          <div key={weekIndex} className="grid grid-cols-7 border-b last:border-b-0 min-h-[80px]">
+          <div key={weekIndex} className="grid grid-cols-7 border-b last:border-b-0 min-h-[125px]">
             {week.map((day) => {
               const dayItems = getItemsForDay(day)
               const isCurrentMonth = day.getMonth() === safeSelectedDate.getMonth()

@@ -2,10 +2,9 @@
 
 import { useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { ChevronLeft, ChevronRight, X, Download } from "lucide-react"
 import type { Photo } from "@/types"
-import Image from "next/image"
 
 interface PhotoGalleryModalProps {
   photos: Photo[]
@@ -79,11 +78,14 @@ export default function PhotoGalleryModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
         showCloseButton={false}
-        className="h-auto max-h-[95vh] w-auto max-w-[95vw] overflow-hidden border-none bg-black/95 p-0"
+        className="h-auto max-h-[95vh] w-[95vw] !max-w-[95vw] border-none bg-black/95 p-0"
       >
         <DialogTitle className="sr-only">
           {currentPhoto.realFileName || "Photo viewer"}
         </DialogTitle>
+        <DialogDescription className="sr-only">
+          View and navigate through photos in the gallery
+        </DialogDescription>
 
         {/* Close button */}
         <Button
@@ -106,7 +108,7 @@ export default function PhotoGalleryModal({
         </Button>
 
         {/* Main image container */}
-        <div className="relative flex h-[85vh] w-full items-center justify-center">
+        <div className="relative flex h-[85vh] w-full items-center justify-center px-20">
           {/* Previous button */}
           <Button
             variant="ghost"
@@ -118,10 +120,12 @@ export default function PhotoGalleryModal({
           </Button>
 
           {/* Image */}
-          <Image
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
             src={`https://lh3.googleusercontent.com/d/${currentPhoto.id}=s0`}
             alt={currentPhoto.realFileName || "Photo"}
             className="max-h-full max-w-full object-contain"
+            loading="eager"
           />
 
           {/* Next button */}

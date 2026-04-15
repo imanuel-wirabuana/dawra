@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { updateItineraryItem } from "../services/update.service"
+import { addActivity } from "@/features/activities/services/add.service"
 import type { ItineraryItem } from "@/types"
 import { toast } from "sonner"
 
@@ -19,6 +20,21 @@ export function useUpdateItineraryItem() {
         const result = await updateItineraryItem(id, updates)
         if (result.success) {
           toast.success("Item updated successfully", { id: toastId })
+
+          // Log activity (non-blocking)
+          addActivity({
+            type: "itinerary.update",
+            entity: "itinerary",
+            entityId: id,
+            message: "Updated itinerary schedule",
+            metadata: {
+              date: updates.date,
+              start: updates.start,
+              end: updates.end,
+            },
+          }).catch(() => {
+            // Ignore errors - activities are non-blocking
+          })
         } else {
           toast.error(result.error || "Failed to update item", { id: toastId })
           throw new Error(result.error || "Failed to update item")

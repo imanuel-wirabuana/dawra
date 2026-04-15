@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { deletePhoto } from "../services/delete.service"
+import { addActivity } from "@/features/activities/services/add.service"
 import { toast } from "sonner"
 
 export function useDeletePhoto() {
@@ -11,6 +12,17 @@ export function useDeletePhoto() {
       try {
         await deletePhoto(photoId)
         toast.success("Photo deleted", { id: toastId })
+
+        // Log activity (non-blocking)
+        addActivity({
+          type: "photo.delete",
+          entity: "photo",
+          entityId: photoId,
+          message: "Deleted photo",
+          metadata: {},
+        }).catch(() => {
+          // Ignore errors - activities are non-blocking
+        })
       } catch (error) {
         const message =
           error instanceof Error ? error.message : "Failed to delete photo"

@@ -18,6 +18,7 @@ import {
 import { cn } from "@/lib/utils"
 import { useNavStore } from "@/store/navStore"
 import { ThemeToggle } from "./ThemeToggle"
+import { ActivitiesPopover } from "@/features/activities/components/ActivitiesPopover"
 
 interface NavItem {
   href: string
@@ -30,6 +31,9 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/bucket-lists", label: "Bucket Lists", icon: Target },
   { href: "/itineraries", label: "Itineraries", icon: Calendar },
   { href: "/financials", label: "Financials", icon: Wallet },
+]
+
+const NAV_ITEMS_OTHER: NavItem[] = [
   { href: "/photos", label: "Photos", icon: Camera },
   { href: "/chats", label: "Chats", icon: MessageCircle },
 ]
@@ -56,7 +60,7 @@ export default function FloatingNav() {
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ delay: 0.5, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2"
+      className="fixed bottom-2 left-1/2 z-50 -translate-x-1/2"
     >
       <motion.div
         layout
@@ -96,11 +100,11 @@ function MinimizedNav({ activeItem, onToggle }: MinimizedNavProps) {
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
       transition={{ duration: 0.2 }}
-      className="flex items-center gap-1"
+      className="flex items-center gap-1 space-x-1"
     >
       <Link
         href={activeItem.href}
-        className="group relative flex items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/80 p-2.5 text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-300 hover:scale-105 hover:shadow-primary/35 active:scale-95"
+        className="group relative flex items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/80 p-2.5 text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-300 hover:shadow-primary/35 active:scale-95"
         aria-label={activeItem.label}
       >
         <ActiveIcon className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
@@ -109,6 +113,10 @@ function MinimizedNav({ activeItem, onToggle }: MinimizedNavProps) {
           <span className="relative inline-flex h-2 w-2 rounded-full bg-primary"></span>
         </span>
       </Link>
+      <div className="[&_button]:h-8 [&_button]:w-8 [&_button]:rounded-full [&_button]:border-0 [&_button]:bg-transparent [&_button]:p-0">
+        <ActivitiesPopover />
+      </div>
+      
       <div className="[&_button]:h-8 [&_button]:w-8 [&_button]:rounded-full [&_button]:border-0 [&_button]:bg-transparent [&_button]:p-0">
         <ThemeToggle />
       </div>
@@ -137,7 +145,7 @@ function ExpandedNav({ isActive, onToggle }: ExpandedNavProps) {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -10 }}
       transition={{ duration: 0.2 }}
-      className="flex items-center gap-0.5"
+      className="flex items-center gap-0.5 space-x-1"
     >
       {NAV_ITEMS.map((item, i) => (
         <motion.div
@@ -150,9 +158,24 @@ function ExpandedNav({ isActive, onToggle }: ExpandedNavProps) {
         </motion.div>
       ))}
       <div className="mx-1.5 h-5 w-px bg-border/50" />
+      {NAV_ITEMS_OTHER.map((item, i) => (
+        <motion.div
+          key={item.href}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: i * 0.05, duration: 0.2 }}
+        >
+          <NavLink item={item} isActive={isActive(item.href)} />
+        </motion.div>
+      ))}
+      <div className="mx-1.5 h-5 w-px bg-border/50" />
+      <div className="[&_button]:h-8 [&_button]:w-8 [&_button]:rounded-full [&_button]:border-0 [&_button]:bg-transparent [&_button]:p-0">
+        <ActivitiesPopover />
+      </div>
       <div className="[&_button]:h-8 [&_button]:w-8 [&_button]:rounded-full [&_button]:border-0 [&_button]:bg-transparent [&_button]:p-0">
         <ThemeToggle />
       </div>
+
       <motion.button
         onClick={onToggle}
         whileHover={{ scale: 1.05 }}

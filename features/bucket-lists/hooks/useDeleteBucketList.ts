@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { deleteBucketListItem } from "../services/delete.service"
+import { addActivity } from "@/features/activities/services/add.service"
 import { toast } from "sonner"
 
 export function useDeleteBucketList() {
@@ -12,6 +13,17 @@ export function useDeleteBucketList() {
         const result = await deleteBucketListItem(id)
         if (result.success) {
           toast.success("Item deleted successfully", { id: toastId })
+
+          // Log activity (non-blocking)
+          addActivity({
+            type: "bucket.delete",
+            entity: "bucket-list",
+            entityId: id,
+            message: "Deleted bucket list",
+            metadata: {},
+          }).catch(() => {
+            // Ignore errors - activities are non-blocking
+          })
         } else {
           toast.error(result.error || "Failed to delete item", { id: toastId })
         }
