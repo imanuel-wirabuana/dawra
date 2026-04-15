@@ -12,6 +12,7 @@ import {
   ChevronUp,
   ChevronDown,
   type LucideIcon,
+  Wallet,
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -28,6 +29,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "Home", icon: Home },
   { href: "/bucket-lists", label: "Bucket Lists", icon: Target },
   { href: "/itineraries", label: "Itineraries", icon: Calendar },
+  { href: "/financials", label: "Financials", icon: Wallet },
   { href: "/photos", label: "Photos", icon: Camera },
   { href: "/chats", label: "Chats", icon: MessageCircle },
 ]

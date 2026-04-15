@@ -143,7 +143,7 @@ export default function ChatWidget() {
   return (
     <div
       className={`fixed right-0 bottom-0 z-50 flex flex-col rounded-lg border border-border bg-card shadow-xl transition-all duration-200 ${
-        isMinimized ? "h-10 w-64" : "h-96 w-80 sm:w-96"
+        isMinimized ? "h-10 w-77" : "h-96 w-77"
       } ${pathname === "/" && "hidden"}`}
     >
       {/* Header */}

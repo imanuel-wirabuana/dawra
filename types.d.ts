@@ -300,3 +300,12 @@ type TypingStatus = {
   timestamp: Timestamp
 }
 
+type Transaction = {
+  id: string
+  title: string
+  description?: string
+  amount: number
+  date: string
+  type: "income" | "expense"
+  itineraryItemId?: string
+}

@@ -85,12 +85,12 @@ export default function Page() {
   }
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-        <div className="flex w-full sm:w-auto sm:max-w-xs items-center gap-2 sm:gap-3">
+    <div className="container mx-auto w-full">
+      <div className="mb-4 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center sm:gap-4">
+        <div className="flex w-full items-center gap-2 sm:w-auto sm:max-w-xs sm:gap-3">
           <Label
             htmlFor="limit"
-            className="text-xs sm:text-sm whitespace-nowrap text-muted-foreground"
+            className="text-xs whitespace-nowrap text-muted-foreground sm:text-sm"
           >
             Limit: {photoLimit}
           </Label>
@@ -107,7 +107,7 @@ export default function Page() {
           <Dialog>
             <DialogTrigger asChild>
               <Button variant="outline" size="sm" className="h-8 sm:h-9">
-                <Settings2 className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <Settings2 className="mr-1.5 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4" />
                 <span className="hidden sm:inline">Settings</span>
               </Button>
             </DialogTrigger>
@@ -150,11 +150,16 @@ export default function Page() {
           </Dialog>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" disabled={screenshotLoading} className="h-8 sm:h-9">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={screenshotLoading}
+                className="h-8 sm:h-9"
+              >
                 {screenshotLoading ? (
-                  <Loader2 className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin" />
+                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin sm:mr-2 sm:h-4 sm:w-4" />
                 ) : (
-                  <Camera className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <Camera className="mr-1.5 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4" />
                 )}
                 <span className="hidden sm:inline">Screenshot (</span>
                 {qualityOptions.find((o) => o.ratio === pixelRatio)?.label ||

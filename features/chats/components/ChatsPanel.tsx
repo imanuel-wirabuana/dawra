@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { formatDistanceToNow } from "date-fns"
 import {
+  ChevronDown,
   Loader2,
   MoreVertical,
   Pencil,
@@ -83,11 +84,37 @@ export default function ChatsPanel({ className }: ChatsPanelProps) {
   )
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const scrollAreaRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
+  const [showScrollButton, setShowScrollButton] = useState(false)
+
+  const scrollToBottom = useCallback(() => {
+    const scrollArea = scrollAreaRef.current?.querySelector(
+      "[data-radix-scroll-area-viewport]"
+    ) as HTMLElement | null
+    if (scrollArea) {
+      scrollArea.scrollTo({ top: scrollArea.scrollHeight, behavior: "smooth" })
+    }
+  }, [])
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [filteredMessages, typingUsers])
+    const scrollArea = scrollAreaRef.current?.querySelector(
+      "[data-radix-scroll-area-viewport]"
+    )
+    if (!scrollArea) return
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } =
+        scrollArea as HTMLElement
+      const isNearBottom = scrollHeight - scrollTop - clientHeight < 100
+      setShowScrollButton(!isNearBottom)
+    }
+
+    scrollArea.addEventListener("scroll", handleScroll)
+    handleScroll()
+
+    return () => scrollArea.removeEventListener("scroll", handleScroll)
+  }, [])
 
   const handleTyping = useCallback(
     (value: string) => {
@@ -149,8 +176,8 @@ export default function ChatsPanel({ className }: ChatsPanelProps) {
         </div>
       </div>
 
-      <div className="min-h-0 flex-1">
-        <ScrollArea className="h-full flex-1 p-3">
+      <div className="relative min-h-0 flex-1">
+        <ScrollArea ref={scrollAreaRef} className="h-full flex-1 p-3">
           <div className="space-y-2">
             {messagesLoading ? (
               <ChatsPanelSkeleton className="h-full border-0 shadow-none" />
@@ -179,6 +206,16 @@ export default function ChatsPanel({ className }: ChatsPanelProps) {
             <div ref={messagesEndRef} />
           </div>
         </ScrollArea>
+        {showScrollButton && (
+          <Button
+            variant="secondary"
+            size="icon"
+            className="absolute right-4 bottom-4 h-8 w-8 rounded-full shadow-md"
+            onClick={scrollToBottom}
+          >
+            <ChevronDown className="h-4 w-4" />
+          </Button>
+        )}
       </div>
 
       {typingUsers.length > 0 && (

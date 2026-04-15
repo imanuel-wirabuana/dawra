@@ -60,14 +60,17 @@ export default function RootLayout({
           <TooltipProvider delayDuration={200}>
             <ThemeProvider>
               {/* Modern Glassmorphism Header */}
-              <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/70 backdrop-blur-2xl transition-all duration-300">
-                <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
+              <header className="w-full border-b border-border/40 bg-background/70 backdrop-blur-2xl transition-all duration-300">
+                <div className="container mx-auto flex h-16 items-center justify-between px-4">
                   <Brand size="md" />
                   <div className="flex items-center gap-4">
                     <DynamicBreadcrumb />
                   </div>
                 </div>
               </header>
+
+              {/* Separator */}
+              <div className="w-full border-t-4 border-dashed border-border" />
 
               {/* Main Content with refined spacing */}
               <main className="relative flex-1">{children}</main>

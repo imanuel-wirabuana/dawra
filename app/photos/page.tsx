@@ -51,7 +51,7 @@ export default function PhotoWall() {
   }
 
   return (
-    <div className="w-full px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+    <div className="w-full">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
