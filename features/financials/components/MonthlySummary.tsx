@@ -1,7 +1,7 @@
 "use client"
 
 import { Card, CardContent } from "@/components/ui/card"
-import { ArrowDownLeft, ArrowUpRight, Scale } from "lucide-react"
+import { TrendingDown, TrendingUp, Wallet } from "lucide-react"
 import { formatCurrency } from "../utils/formatCurrency"
 import { cn } from "@/lib/utils"
 
@@ -18,42 +18,37 @@ export function MonthlySummary({
 }: MonthlySummaryProps) {
   const items = [
     {
-      label: "Total Income",
+      label: "Income",
       value: income,
-      icon: ArrowDownLeft,
-      color: "emerald",
-      bgClass:
-        "from-emerald-50 to-emerald-100/50 dark:from-emerald-900/20 dark:to-emerald-900/10",
+      icon: TrendingUp,
+      bgClass: "from-emerald-500/10 to-emerald-500/5",
+      iconBgClass: "bg-emerald-500/20",
       textClass: "text-emerald-600 dark:text-emerald-400",
-      iconClass: "text-emerald-600 dark:text-emerald-400",
+      iconClass: "text-emerald-600",
     },
     {
-      label: "Total Expense",
+      label: "Expenses",
       value: expense,
-      icon: ArrowUpRight,
-      color: "rose",
-      bgClass:
-        "from-rose-50 to-rose-100/50 dark:from-rose-900/20 dark:to-rose-900/10",
+      icon: TrendingDown,
+      bgClass: "from-rose-500/10 to-rose-500/5",
+      iconBgClass: "bg-rose-500/20",
       textClass: "text-rose-600 dark:text-rose-400",
-      iconClass: "text-rose-600 dark:text-rose-400",
+      iconClass: "text-rose-600",
     },
     {
-      label: "Remaining",
+      label: "Balance",
       value: remaining,
-      icon: Scale,
-      color: remaining >= 0 ? "emerald" : "rose",
+      icon: Wallet,
       bgClass:
         remaining >= 0
-          ? "from-emerald-50 to-emerald-100/50 dark:from-emerald-900/20 dark:to-emerald-900/10"
-          : "from-rose-50 to-rose-100/50 dark:from-rose-900/20 dark:to-rose-900/10",
+          ? "from-blue-500/10 to-blue-500/5"
+          : "from-rose-500/10 to-rose-500/5",
+      iconBgClass: remaining >= 0 ? "bg-blue-500/20" : "bg-rose-500/20",
       textClass:
         remaining >= 0
-          ? "text-emerald-600 dark:text-emerald-400"
+          ? "text-blue-600 dark:text-blue-400"
           : "text-rose-600 dark:text-rose-400",
-      iconClass:
-        remaining >= 0
-          ? "text-emerald-600 dark:text-emerald-400"
-          : "text-rose-600 dark:text-rose-400",
+      iconClass: remaining >= 0 ? "text-blue-600" : "text-rose-600",
     },
   ]
 
@@ -64,18 +59,28 @@ export function MonthlySummary({
           key={item.label}
           className="overflow-hidden border-border/60 shadow-sm"
         >
-          <CardContent className={cn("bg-linear-to-br p-4", item.bgClass)}>
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-background/60 shadow-sm">
-                <item.icon className={cn("size-5", item.iconClass)} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs font-medium text-muted-foreground">
+          <CardContent className={cn("bg-linear-to-br p-5", item.bgClass)}>
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
                   {item.label}
                 </p>
-                <p className={cn("truncate text-lg font-bold", item.textClass)}>
+                <p
+                  className={cn(
+                    "mt-1 text-2xl font-bold tracking-tight",
+                    item.textClass
+                  )}
+                >
                   {formatCurrency(item.value)}
                 </p>
+              </div>
+              <div
+                className={cn(
+                  "flex h-10 w-10 items-center justify-center rounded-xl",
+                  item.iconBgClass
+                )}
+              >
+                <item.icon className={cn("h-5 w-5", item.iconClass)} />
               </div>
             </div>
           </CardContent>

@@ -84,6 +84,11 @@ function generateUserId(): string {
   return userId
 }
 
+function getStoredDisplayName(): string {
+  if (typeof window === "undefined") return ""
+  return localStorage.getItem("chatDisplayName") ?? ""
+}
+
 interface ChatsPanelEnhancedProps {
   className?: string
 }
@@ -123,7 +128,7 @@ export default function ChatsPanelEnhanced({
   className,
 }: ChatsPanelEnhancedProps) {
   const [currentUserId] = useState(generateUserId)
-  const [displayName, setDisplayName] = useState("")
+  const [displayName, setDisplayName] = useState(getStoredDisplayName)
   const [message, setMessage] = useState("")
   const [searchQuery, setSearchQuery] = useState("")
   const [replyTo, setReplyTo] = useState<ChatMessage | null>(null)
@@ -167,6 +172,13 @@ export default function ChatsPanelEnhanced({
     },
     [updateTyping]
   )
+
+  const handleDisplayNameChange = (value: string) => {
+    setDisplayName(value)
+    if (typeof window !== "undefined") {
+      localStorage.setItem("chatDisplayName", value)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -362,7 +374,7 @@ export default function ChatsPanelEnhanced({
           <Input
             placeholder="Name"
             value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
+            onChange={(e) => handleDisplayNameChange(e.target.value)}
             className="h-9 w-24 shrink-0 border-input/60 bg-background/80 text-xs transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20 sm:w-32"
             disabled={addChatMessage.isPending}
           />

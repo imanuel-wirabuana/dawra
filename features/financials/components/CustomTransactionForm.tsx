@@ -51,79 +51,84 @@ export function CustomTransactionForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="title" className="text-sm">
-            Title
-          </Label>
-          <Input
-            id="title"
-            placeholder="e.g., Parking, Gift, Salary"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-            className="h-9"
-          />
+    <form onSubmit={handleSubmit} className="space-y-5">
+      <div className="space-y-4">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="title" className="text-sm font-medium">
+              Title
+            </Label>
+            <Input
+              id="title"
+              placeholder="e.g., Parking, Gift, Salary"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+              className="h-10"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="amount" className="text-sm font-medium">
+              Amount (IDR)
+            </Label>
+            <Input
+              id="amount"
+              type="text"
+              inputMode="numeric"
+              placeholder="0"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              required
+              className="h-10"
+            />
+          </div>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="amount" className="text-sm">
-            Amount
-          </Label>
-          <Input
-            id="amount"
-            type="text"
-            inputMode="numeric"
-            placeholder="0"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            required
-            className="h-9"
-          />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="type" className="text-sm font-medium">
+              Type
+            </Label>
+            <Select
+              value={type}
+              onValueChange={(value) => setType(value as "income" | "expense")}
+            >
+              <SelectTrigger id="type" className="h-10">
+                <SelectValue placeholder="Select type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="expense">Expense</SelectItem>
+                <SelectItem value="income">Income</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description" className="text-sm font-medium">
+              Description{" "}
+              <span className="text-muted-foreground">(Optional)</span>
+            </Label>
+            <Input
+              id="description"
+              placeholder="Additional details..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="h-10"
+            />
+          </div>
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="type" className="text-sm">
-            Type
-          </Label>
-          <Select
-            value={type}
-            onValueChange={(value) => setType(value as "income" | "expense")}
-          >
-            <SelectTrigger id="type" className="h-9">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="expense">Expense</SelectItem>
-              <SelectItem value="income">Income</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="description" className="text-sm">
-            Description (Optional)
-          </Label>
-          <Input
-            id="description"
-            placeholder="Additional details..."
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="h-9"
-          />
-        </div>
+      <div className="flex justify-end pt-2">
+        <Button
+          type="submit"
+          disabled={isAdding}
+          className="bg-primary font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:shadow-md hover:shadow-primary/20 active:scale-[0.98]"
+        >
+          {isAdding ? "Adding..." : "Add Transaction"}
+        </Button>
       </div>
-
-      <Button
-        type="submit"
-        disabled={isAdding}
-        className="w-full bg-primary font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:shadow-md hover:shadow-primary/20 active:scale-[0.98] sm:w-auto"
-      >
-        {isAdding ? "Adding..." : "Add Transaction"}
-      </Button>
     </form>
   )
 }

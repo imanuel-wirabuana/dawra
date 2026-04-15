@@ -34,6 +34,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { MonthPicker } from "@/components/ui/monthpicker"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 
 export default function FinancialsGrid() {
   // State
@@ -154,30 +155,29 @@ export default function FinancialsGrid() {
         remaining={monthlyIncome - monthlyExpense}
       />
 
-      {/* Main Itinerary Transactions Card */}
+      {/* Main Content - Tabs Layout */}
       <Card className="overflow-hidden border-border/60 shadow-lg shadow-black/5">
-        <CardHeader className="border-b border-border/50 bg-linear-to-b from-muted/50 to-muted/20 px-3 py-3 sm:px-5 sm:py-4">
+        <CardHeader className="border-b border-border/50 bg-linear-to-b from-muted/50 to-muted/20 px-4 py-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-2 sm:gap-3">
-              {/* <MonthPicker value={selectedMonth} onChange={setSelectedMonth} /> */}
+            <div className="flex items-center gap-3">
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
-                    variant={"outline"}
+                    variant="outline"
                     className={cn(
-                      "justify-start text-left font-normal",
+                      "justify-start gap-2 border-border/50 bg-background/80 px-3 text-left font-normal transition-all duration-200 hover:border-primary/40 hover:bg-primary/5 hover:shadow-sm",
                       !selectedMonth && "text-muted-foreground"
                     )}
                   >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    <CalendarIcon className="h-4 w-4" />
                     {selectedMonth ? (
-                      format(selectedMonth, "MMM yyyy")
+                      format(selectedMonth, "MMMM yyyy")
                     ) : (
                       <span>Pick a month</span>
                     )}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
+                <PopoverContent className="w-auto p-0" align="start">
                   <MonthPicker
                     onMonthSelect={setSelectedMonth}
                     selectedMonth={selectedMonth}
@@ -186,62 +186,22 @@ export default function FinancialsGrid() {
               </Popover>
             </div>
 
-            <div className="flex items-center gap-2 sm:gap-4">
-              <div className="flex items-center gap-1.5 rounded-full bg-muted/40 px-2 py-1.5 text-xs text-muted-foreground sm:gap-2 sm:px-3">
-                <ListTodo className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                <span className="font-medium">
-                  {monthItineraryItems.length}{" "}
-                  {monthItineraryItems.length === 1 ? "item" : "items"}
-                </span>
-              </div>
-              {monthlyExpense > 0 && (
-                <div className="flex items-center gap-1.5 rounded-full bg-linear-to-r from-rose-100 to-rose-50 px-2 py-1.5 text-xs font-semibold text-rose-700 shadow-sm sm:gap-2 sm:px-3 dark:from-rose-900/30 dark:to-rose-900/20 dark:text-rose-400">
-                  <Wallet className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                  <span className="hidden sm:inline">
-                    Rp {monthlyExpense.toLocaleString("id-ID")}
-                  </span>
-                  <span className="sm:hidden">
-                    {monthlyExpense >= 1000000
-                      ? `${(monthlyExpense / 1000000).toFixed(1)}M`
-                      : `${(monthlyExpense / 1000).toFixed(0)}K`}
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          <ItineraryTransactionsList
-            itineraryItems={monthItineraryItems}
-            bucketLists={bucketLists ?? []}
-            existingTransactions={transactions}
-            onSave={handleSaveItineraryTransactions}
-            isSaving={isAdding || isUpdating}
-          />
-        </CardContent>
-      </Card>
-
-      {/* Custom Transaction Form Card */}
-      <Card className="overflow-hidden border-border/60 shadow-sm">
-        <CardHeader className="border-b border-border/50 bg-linear-to-b from-muted/50 to-muted/20 px-3 py-3 sm:px-5 sm:py-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2">
               <Sheet open={formOpen} onOpenChange={setFormOpen}>
                 <SheetTrigger asChild>
                   <Button
                     size="sm"
-                    className="h-8 gap-1.5 bg-primary px-3 font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:shadow-md hover:shadow-primary/20 active:scale-[0.98] sm:h-9 sm:px-4"
+                    className="h-8 gap-1.5 bg-primary px-3 font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:shadow-md hover:shadow-primary/20 active:scale-[0.98]"
                   >
                     <Plus className="h-4 w-4" />
-                    <span className="hidden sm:inline">Add Transaction</span>
-                    <span className="sm:hidden">Add</span>
+                    Add
                   </Button>
                 </SheetTrigger>
                 <SheetContent className="w-full sm:max-w-md">
                   <SheetHeader>
                     <SheetTitle className="flex items-center gap-2 text-base">
                       <Wallet className="h-4 w-4 text-primary" />
-                      Add Custom Transaction
+                      Add Transaction
                     </SheetTitle>
                   </SheetHeader>
                   <div className="px-4 py-4">
@@ -254,24 +214,54 @@ export default function FinancialsGrid() {
                 </SheetContent>
               </Sheet>
             </div>
-            <div className="flex items-center gap-1.5 rounded-full bg-muted/40 px-2 py-1.5 text-xs text-muted-foreground sm:gap-2 sm:px-3">
-              <ListTodo className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-              <span className="font-medium">
-                {customTransactions.length}{" "}
-                {customTransactions.length === 1
-                  ? "transaction"
-                  : "transactions"}
-              </span>
-            </div>
           </div>
         </CardHeader>
-        <CardContent className="p-0">
-          <CustomTransactionsList
-            transactions={transactions}
-            onDelete={handleDeleteTransaction}
-            isDeleting={isDeleting}
-          />
-        </CardContent>
+
+        <Tabs defaultValue="itinerary" className="w-full">
+          <div className="border-b border-border/50 px-4 py-2">
+            <TabsList variant="line" className="w-full sm:w-auto">
+              <TabsTrigger value="itinerary" className="gap-2">
+                <ListTodo className="h-3.5 w-3.5" />
+                Pending
+                <span className="ml-1 rounded-full bg-muted px-1.5 py-0 text-[10px] font-medium">
+                  {
+                    monthItineraryItems.filter(
+                      (item) =>
+                        !transactions.find((t) => t.itineraryItemId === item.id)
+                    ).length
+                  }
+                </span>
+              </TabsTrigger>
+              <TabsTrigger value="transactions" className="gap-2">
+                <Wallet className="h-3.5 w-3.5" />
+                Transactions
+                <span className="ml-1 rounded-full bg-muted px-1.5 py-0 text-[10px] font-medium">
+                  {transactions.length}
+                </span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
+
+          <TabsContent value="itinerary" className="m-0">
+            <ItineraryTransactionsList
+              itineraryItems={monthItineraryItems}
+              bucketLists={bucketLists ?? []}
+              existingTransactions={transactions}
+              onSave={handleSaveItineraryTransactions}
+              isSaving={isAdding || isUpdating}
+            />
+          </TabsContent>
+
+          <TabsContent value="transactions" className="m-0">
+            <CustomTransactionsList
+              transactions={transactions}
+              onDelete={handleDeleteTransaction}
+              isDeleting={isDeleting}
+              bucketLists={bucketLists ?? []}
+              itineraryItems={itineraryItems ?? []}
+            />
+          </TabsContent>
+        </Tabs>
       </Card>
     </div>
   )

@@ -1,11 +1,17 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import type { ItineraryItem, BucketList, Transaction } from "@/types"
 import { formatCurrency } from "../utils/formatCurrency"
-import { Banknote } from "lucide-react"
+import { Banknote, MoreVertical, Pencil, Trash2 } from "lucide-react"
 
 interface ItineraryTransactionItemProps {
   item: ItineraryItem
@@ -44,9 +50,12 @@ export function ItineraryTransactionItem({
   const [inputValue, setInputValue] = useState<string>(
     existingTransaction?.amount.toString() ?? ""
   )
+  const [isEditing, setIsEditing] = useState(!existingTransaction)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const title = getTitle(item, bucketListMap)
   const plannedCost = getPlannedCost(item, bucketListMap)
+  const hasActualCost = existingTransaction && existingTransaction.amount > 0
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
@@ -58,38 +67,88 @@ export function ItineraryTransactionItem({
     onAmountChange(item.id, amount)
   }
 
+  const handleEdit = () => {
+    setIsEditing(true)
+    setTimeout(() => inputRef.current?.focus(), 0)
+  }
+
+  const handleClear = () => {
+    setInputValue("")
+    onAmountChange(item.id, null)
+    setIsEditing(true)
+  }
+
   return (
-    <div className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/30">
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted/50">
-        <Banknote className="h-4 w-4 text-muted-foreground" />
+    <div className="group flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/30">
+      {/* Icon with rose background (expenses) */}
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-rose-500/10">
+        <Banknote className="h-4 w-4 text-rose-600" />
       </div>
 
+      {/* Title and details */}
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium">{title}</p>
         <p className="text-xs text-muted-foreground">
           {item.date} · {item.start} - {item.end}
+          {plannedCost !== undefined && plannedCost > 0 && (
+            <span className="hidden sm:inline">
+              {" "}
+              · Planned: {formatCurrency(plannedCost)}
+            </span>
+          )}
         </p>
       </div>
 
-      {plannedCost !== undefined && plannedCost > 0 && (
-        <div className="hidden shrink-0 text-xs text-muted-foreground sm:block">
-          Planned: {formatCurrency(plannedCost)}
-        </div>
-      )}
+      {/* Amount section */}
+      <div className="flex shrink-0 items-center gap-1">
+        {isEditing ? (
+          <Input
+            ref={inputRef}
+            type="text"
+            inputMode="numeric"
+            placeholder="0"
+            value={inputValue}
+            onChange={handleChange}
+            onBlur={() => {
+              if (inputValue && parseInt(inputValue) > 0) {
+                setIsEditing(false)
+              }
+            }}
+            className="h-9 w-28 text-right text-sm sm:w-32"
+          />
+        ) : (
+          <span className="text-sm font-semibold text-rose-600">
+            -{formatCurrency(parseInt(inputValue) || 0)}
+          </span>
+        )}
 
-      <div className="w-28 shrink-0 sm:w-32">
-        <Label htmlFor={`amount-${item.id}`} className="sr-only">
-          Actual Cost
-        </Label>
-        <Input
-          id={`amount-${item.id}`}
-          type="text"
-          inputMode="numeric"
-          placeholder="0"
-          value={inputValue}
-          onChange={handleChange}
-          className="h-8 text-right text-sm"
-        />
+        {/* Dropdown menu */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-7 opacity-0 transition-opacity group-hover:opacity-100"
+            >
+              <MoreVertical className="size-3.5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={handleEdit} className="text-xs">
+              <Pencil className="mr-2 size-3.5" />
+              Edit Amount
+            </DropdownMenuItem>
+            {hasActualCost && (
+              <DropdownMenuItem
+                onClick={handleClear}
+                className="text-xs text-destructive"
+              >
+                <Trash2 className="mr-2 size-3.5" />
+                Clear
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   )

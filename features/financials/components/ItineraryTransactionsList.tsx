@@ -4,7 +4,7 @@ import { useMemo, useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import type { ItineraryItem, BucketList, Transaction } from "@/types"
 import { ItineraryTransactionItem } from "./ItineraryTransactionItem"
-import { Save } from "lucide-react"
+import { Save, CalendarX2 } from "lucide-react"
 
 interface ItineraryTransactionsListProps {
   itineraryItems: ItineraryItem[]
@@ -53,6 +53,11 @@ export function ItineraryTransactionsList({
     )
   }, [existingTransactions])
 
+  // Filter to only show pending items (those without saved transactions)
+  const pendingItems = useMemo(() => {
+    return itineraryItems.filter((item) => !existingTransactionMap[item.id])
+  }, [itineraryItems, existingTransactionMap])
+
   // Track changed amounts
   const [changedAmounts, setChangedAmounts] = useState<
     Record<string, number | null>
@@ -72,7 +77,7 @@ export function ItineraryTransactionsList({
     const transactionsToSave = Object.entries(changedAmounts)
       .filter(([, amount]) => amount !== null && amount > 0)
       .map(([itemId, amount]) => {
-        const item = itineraryItems.find((i) => i.id === itemId)
+        const item = pendingItems.find((i) => i.id === itemId)
         if (!item) return null
 
         // Get title
@@ -107,11 +112,17 @@ export function ItineraryTransactionsList({
     (amount) => amount !== null && amount > 0
   )
 
-  if (itineraryItems.length === 0) {
+  if (pendingItems.length === 0) {
     return (
-      <div className="px-4 py-8 text-center">
-        <p className="text-muted-foreground">
-          No itinerary items for this month
+      <div className="flex flex-col items-center justify-center px-4 py-12 text-center">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10">
+          <CalendarX2 className="h-6 w-6 text-emerald-600" />
+        </div>
+        <p className="mt-3 text-sm font-medium text-muted-foreground">
+          All caught up!
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          All itinerary items for this month have been tracked
         </p>
       </div>
     )
@@ -119,7 +130,7 @@ export function ItineraryTransactionsList({
 
   return (
     <div className="divide-y divide-border/50">
-      {itineraryItems.map((item) => {
+      {pendingItems.map((item) => {
         const existingTransaction = existingTransactionMap[item.id]
         // Include transaction ID in key to force re-mount when transaction changes
         const key = `${item.id}-${existingTransaction?.id ?? "new"}`
