@@ -11,6 +11,7 @@ import {
   Calendar,
   Camera,
   MessageCircle,
+  Wallet,
   type LucideIcon,
 } from "lucide-react"
 
@@ -31,6 +32,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "Home", icon: Home },
   { href: "/bucket-lists", label: "Bucket Lists", icon: Target },
   { href: "/itineraries", label: "Itineraries", icon: Calendar },
+  { href: "/financials", label: "Financials", icon: Wallet },
   { href: "/photos", label: "Photos", icon: Camera },
   { href: "/chats", label: "Chats", icon: MessageCircle },
 ]
